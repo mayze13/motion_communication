@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minds in Motion — Recruitment Flyer (A5)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- QR code generated entirely in-browser — no server or paid API needed -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+          integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSqExmqkuwB9pCgGF5XGKQ0lmFHNRm/j/P8Q=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <style>
+    /* ─── Base ──────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', Arial, Helvetica, sans-serif;
+      background: #d8cfe8;      /* visible only on screen — hides on print */
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 32px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── A5 card ────────────────────────────────────────────────────────
+       148mm × 210mm — rendered at 96 dpi for screen preview.
+       Print CSS below enforces exact A5 page size.
+       ─────────────────────────────────────────────────────────────────── */
+    .flyer {
+      width: 148mm;
+      min-height: 210mm;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 48px rgba(54,26,84,0.28), 0 2px 8px rgba(54,26,84,0.12);
+    }
+
+    /* ─── Header bar ────────────────────────────────────────────────────── */
+    .flyer-header {
+      background: #361a54;
+      padding: 9mm 10mm 7mm;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .ucl-logo {
+      /* Replace with: <img src="ucl-logo-white.png" alt="UCL" style="height:11mm;"> */
+      width: 24mm; height: 11mm;
+      border: 1.5px dashed rgba(255,255,255,0.35);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.45);
+      font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .header-right {
+      text-align: right;
+      color: rgba(255,255,255,0.75);
+      font-size: 7pt; line-height: 1.45; font-weight: 500;
+    }
+
+    /* ─── Study image strip ─────────────────────────────────────────────── */
+    .flyer-image {
+      /* Replace with: <img src="study-photo.jpg" alt=""
+             style="width:100%;height:38mm;object-fit:cover;display:block;"> */
+      width: 100%; height: 38mm;
+      background: linear-gradient(135deg, #1e0d36 0%, #4c2872 100%);
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.28);
+      font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase;
+      border-bottom: 2.5px solid #361a54;
+    }
+
+    /* ─── Body ──────────────────────────────────────────────────────────── */
+    .flyer-body {
+      flex: 1;
+      padding: 7mm 10mm 5mm;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .flyer-eyebrow {
+      font-size: 6.5pt; font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: #9278b2; margin-bottom: 4mm;
+    }
+
+    .flyer-title {
+      font-size: 30pt; font-weight: 700;
+      color: #361a54; letter-spacing: -0.025em; line-height: 1.0;
+      margin-bottom: 4.5mm;
+    }
+
+    .flyer-hook {
+      font-size: 9pt; color: #2e2040; line-height: 1.52;
+      font-style: italic;
+      border-left: 2.5px solid #361a54;
+      padding-left: 3mm; margin-bottom: 5mm;
+    }
+
+    .flyer-bullets {
+      list-style: none; margin-bottom: 4.5mm; flex-shrink: 0;
+    }
+    .flyer-bullets li {
+      font-size: 8pt; color: #3a2f52;
+      padding: 1.2mm 0;
+      display: flex; align-items: flex-start; gap: 2mm;
+      line-height: 1.42; border-top: 0.5pt solid #e4daf0;
+    }
+    .flyer-bullets li:first-child { border-top: none; padding-top: 0; }
+    .flyer-bullets li::before {
+      content: '▸'; color: #361a54;
+      font-size: 6.5pt; margin-top: 1.5px; flex-shrink: 0;
+    }
+
+    /* Legacy callout */
+    .legacy-note {
+      font-size: 7.5pt; color: #4e3b70;
+      background: #ede7f7;
+      border-radius: 4px;
+      padding: 2.5mm 3mm; margin-bottom: 5mm;
+      line-height: 1.45; flex-shrink: 0;
+    }
+
+    /* ─── QR + short link CTA block ─────────────────────────────────────── */
+    .cta-block {
+      display: flex; align-items: center; gap: 5mm;
+      background: #361a54;
+      border-radius: 6px;
+      padding: 5mm 5.5mm;
+      margin-top: auto;   /* push to bottom of available space */
+    }
+
+    /* qrcode.js renders a canvas or img inside this div */
+    #qrcode canvas,
+    #qrcode img {
+      display: block;
+      border-radius: 4px;
+      /* White border so QR is legible against the purple background */
+      padding: 4px;
+      background: #fff;
+    }
+
+    .link-block { flex: 1; min-width: 0; }
+    .cta-label {
+      font-size: 6.5pt; color: rgba(255,255,255,0.6);
+      text-transform: uppercase; letter-spacing: 0.1em;
+      margin-bottom: 2mm;
+    }
+    /* ──────────────────────────────────────────────────────────────────────
+       SHORT LINK OPTIONS — pick one and create it at bitly.com:
+         1. bit.ly/mindsinmotion  ← primary recommendation (clear, memorable)
+         2. bit.ly/mimucl         ← shorter; study initials + UCL
+         3. bit.ly/uclmotion      ← good alternative if others are taken
+       Update the text below AND the QR code URL in the <script> at the bottom.
+       ────────────────────────────────────────────────────────────────────── */
+    .short-link {
+      font-size: 14pt; font-weight: 700;
+      color: #fff; letter-spacing: -0.01em; line-height: 1.05;
+      margin-bottom: 2.5mm;
+      /* Prevent long URL wrapping awkwardly */
+      overflow-wrap: anywhere;
+    }
+    .link-sub {
+      font-size: 6pt; color: rgba(255,255,255,0.5); line-height: 1.5;
+    }
+
+    /* ─── Footer ────────────────────────────────────────────────────────── */
+    .flyer-footer {
+      background: #f0ebf8;
+      border-top: 0.5pt solid #ddd4ed;
+      padding: 2.5mm 10mm;
+      display: flex; align-items: center; justify-content: space-between; gap: 4mm;
+    }
+    .footer-text { font-size: 6pt; color: #6b5080; line-height: 1.5; }
+    .footer-ucl {
+      width: 14mm; height: 7mm;
+      border: 1px dashed #b09dc8; border-radius: 2px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .footer-ucl span { font-size: 5pt; color: #9278b2; letter-spacing: 0.08em; }
+
+
+    /* ════════════════════════════════════════════════════════════════════════
+       PRINT STYLES
+       Open this file in Chrome/Firefox → File → Print (or Ctrl+P)
+       Set Paper size: A5, Margins: None, enable "Background graphics"
+       Then save as PDF or send to printer.
+       ════════════════════════════════════════════════════════════════════════ */
+    @media print {
+      @page {
+        size: A5 portrait;
+        margin: 0;
+      }
+
+      body {
+        background: none;
+        display: block;
+        padding: 0; margin: 0;
+        min-height: 0;
+      }
+
+      .flyer {
+        width: 148mm; min-height: 210mm;
+        box-shadow: none;
+        page-break-inside: avoid;
+      }
+
+      /* Force background colours to print */
+      .flyer-header,
+      .flyer-image,
+      .cta-block,
+      .legacy-note,
+      .flyer-footer {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="flyer" role="main">
+
+  <!-- Header -->
+  <div class="flyer-header">
+    <div class="ucl-logo" aria-label="UCL logo placeholder">UCL Logo</div>
+    <div class="header-right">
+      University College London<br>
+      Experimental Psychology &amp; Bartlett
+    </div>
+  </div>
+
+  <!-- Study image strip -->
+  <!-- To use a real photo, replace the div below with:
+       <img src="study-photo.jpg" alt="Participants in the UCL PEARL laboratory"
+            style="width:100%;height:38mm;object-fit:cover;display:block;
+                   border-bottom:2.5px solid #361a54;"> -->
+  <div class="flyer-image" aria-hidden="true">
+    [ Study image — replace with photograph ]
+  </div>
+
+  <!-- Body -->
+  <div class="flyer-body">
+
+    <p class="flyer-eyebrow">UCL Research Study &nbsp;·&nbsp; September 2026</p>
+
+    <h1 class="flyer-title">Minds<br>in Motion</h1>
+
+    <p class="flyer-hook">
+      How does the space around you shape the way you think, move, and feel?
+      Join a UCL experiment at the frontier of neuroarchitecture.
+    </p>
+
+    <ul class="flyer-bullets" aria-label="Study highlights">
+      <li>Navigate a specially designed architectural environment at UCL PEARL</li>
+      <li>Wear lightweight biosensors recording movement and physiological responses</li>
+      <li>No experience required — all adults aged 18+ are welcome to apply</li>
+    </ul>
+
+    <div class="legacy-note" role="note">
+      ✦ &nbsp;A follow-up to <strong>100 Minds in Motion</strong> —
+      as featured by <strong>MIT</strong> and <strong>UCL News</strong> (September 2024)
+    </div>
+
+    <!-- QR code + short link -->
+    <div class="cta-block" aria-label="Sign up">
+      <!--
+        QR code is generated by qrcode.js — see the <script> at the bottom of this file.
+        To update the URL: change the 'text' value in the script.
+      -->
+      <div id="qrcode" aria-hidden="true"></div>
+      <div class="link-block">
+        <p class="cta-label">Scan to sign up — or visit:</p>
+        <!--
+          Update this text to match your chosen bit.ly link.
+          Options (pick one, create it at bitly.com):
+            bit.ly/mindsinmotion   ← recommended
+            bit.ly/mimucl
+            bit.ly/uclmotion
+        -->
+        <p class="short-link">bit.ly/mindsinmotion</p>
+        <p class="link-sub">
+          Led by Prof. Hugo Spiers &amp; Dr Fiona Zisch<br>
+          UCL Experimental Psychology · UCL Bartlett
+        </p>
+      </div>
+    </div>
+
+  </div><!-- /.flyer-body -->
+
+  <!-- Footer -->
+  <div class="flyer-footer">
+    <div class="footer-text">
+      Questions? &nbsp;[study email address]<br>
+      Ethics ref: [INSERT UCL ETHICS REF]
+    </div>
+    <!-- Replace with <img src="ucl-logo.png" alt="UCL" style="height:7mm;"> -->
+    <div class="footer-ucl" aria-label="UCL logo">
+      <span>UCL</span>
+    </div>
+  </div>
+
+</div><!-- /.flyer -->
+
+
+<script>
+  // ═══════════════════════════════════════════════════════════════════════════
+  // QR CODE CONFIGURATION
+  //
+  // Change the 'text' value to your live website URL once the site is deployed.
+  //
+  // RECOMMENDED WORKFLOW:
+  //   1. Deploy the website (see README.md for Netlify instructions)
+  //   2. Note your site's URL (e.g. https://your-site.netlify.app)
+  //   3. Go to bitly.com and create a short link pointing to that URL
+  //      Suggested short link: bit.ly/mindsinmotion
+  //   4. Update the 'text' value below to: 'https://bit.ly/mindsinmotion'
+  //      (or your chosen short link)
+  //   5. Also update the .short-link <p> text above to match
+  //   6. Print the flyer
+  // ═══════════════════════════════════════════════════════════════════════════
+  new QRCode(document.getElementById('qrcode'), {
+    text: 'https://bit.ly/mindsinmotion',   // ← REPLACE with your live URL
+    width: 92,
+    height: 92,
+    colorDark: '#361a54',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M     // M = medium error correction
+  });
+</script>
+
+</body>
+</html>
