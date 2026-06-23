@@ -44,12 +44,14 @@
       padding: 7mm 10mm 6mm;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
+      gap: 4mm;
     }
     .header-right {
       text-align: right;
       color: rgba(255,255,255,0.75);
       font-size: 7pt; line-height: 1.45; font-weight: 500;
+      margin-left: auto;
     }
 
     /* ─── Study image strip ─────────────────────────────────────────────── */
@@ -86,10 +88,12 @@
     }
 
     .flyer-hook {
-      font-size: 8.5pt; color: #2e2040; line-height: 1.52;
-      font-style: italic;
-      border-left: 2.5px solid #361a54;
-      padding-left: 3mm; margin-bottom: 4mm;
+      font-size: 9pt; font-weight: 700; color: #361a54; line-height: 1.4;
+      margin-bottom: 2.5mm;
+    }
+    .flyer-desc {
+      font-size: 8pt; color: #2e2040; line-height: 1.52;
+      margin-bottom: 4mm;
     }
 
     /* Researchers */
@@ -230,18 +234,20 @@
 
     <h1 class="flyer-title">Minds<br>in Motion</h1>
 
-    <p class="flyer-hook">
-      What does space do to the mind? Walk through a specially designed
-      environment at one of Europe's most advanced research labs and help us find out.
+    <p class="flyer-hook">Join the Minds in Motion study</p>
+    <p class="flyer-desc">
+      What does space do to the mind? Help UCL researchers find out inside
+      a unique 40,000 m² state-of-the-art research facility.
     </p>
 
     <div class="flyer-researchers">
-      Led by <strong>Prof. Hugo Spiers</strong> (UCL Experimental Psychology)
-      and <strong>Dr Fiona Zisch</strong> (UCL Bartlett School of Architecture)
+      Led by <strong>Prof. Hugo Spiers</strong> (UCL Experimental Psychology),
+      <strong>Dr Fiona Zisch</strong> (UCL Bartlett School of Architecture)
+      and <strong>James Moultrie</strong> (PhD student, UCL)
     </div>
 
     <ul class="flyer-bullets" aria-label="Study highlights">
-      <li>Explore purpose-built architectural spaces at UCL PEARL, Dagenham. District line, Dagenham Heathway station.</li>
+      <li>Explore purpose-built spaces inside UCL PEARL, a unique 40,000 m² state-of-the-art research facility</li>
       <li>Wear EEG headsets, eye trackers, and biosensors, all fitted by the research team</li>
       <li>One hour in total. No specialist knowledge needed. All adults aged 18 and over welcome.</li>
       <li>Your data contributes directly to how hospitals, schools, and offices will be designed</li>
@@ -255,15 +261,15 @@
 
     <!-- QR code + short link -->
     <div class="cta-block" aria-label="Sign up">
-      <div id="qrcode" aria-hidden="true"></div>
       <div class="link-block">
-        <p class="cta-label">Scan to register or visit:</p>
+        <p class="cta-label">Register or scan to sign up:</p>
         <p class="short-link">bit.ly/motionucl</p>
         <p class="link-sub">
           Free to take part &nbsp;·&nbsp; September 2026<br>
-          UCL PEARL, Dagenham (District line)
+          UCL PEARL, Dagenham, East London
         </p>
       </div>
+      <div id="qrcode" aria-hidden="true"></div>
     </div>
 
   </div><!-- /.flyer-body -->
@@ -271,7 +277,7 @@
   <!-- Footer -->
   <div class="flyer-footer">
     <div class="footer-text">
-      Questions? &nbsp;[study email address]<br>
+      Questions? &nbsp;james.moultrie.25@ucl.ac.uk<br>
       Ethics approval: UCL Research Ethics Committee
     </div>
     <img src="../assets/UCL_Logo,_plain_background.svg" alt="UCL"
