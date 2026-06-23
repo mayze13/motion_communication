@@ -130,28 +130,16 @@
     }
 
     /* ─── QR + short link CTA block ─────────────────────────────────────── */
+    .cta-wrapper {
+      position: relative;
+      margin-top: auto;
+    }
     .cta-block {
-      display: flex; align-items: center; gap: 5mm;
       background: #361a54;
       border-radius: 6px;
       padding: 5mm 5.5mm;
-      margin-top: auto;
+      padding-right: 32mm; /* leave room for the QR box */
     }
-
-    #qrcode {
-      flex-shrink: 0;
-      position: relative;
-      z-index: 1;
-    }
-    #qrcode canvas,
-    #qrcode img {
-      display: block;
-      border-radius: 4px;
-      padding: 4px;
-      background: #fff;
-    }
-
-    .link-block { flex: 1; min-width: 0; }
     .cta-label {
       font-size: 6.5pt; color: rgba(255,255,255,0.6);
       text-transform: uppercase; letter-spacing: 0.1em;
@@ -166,6 +154,21 @@
     .link-sub {
       font-size: 6pt; color: rgba(255,255,255,0.55); line-height: 1.5;
     }
+
+    /* QR box floats in front of the purple block */
+    .qr-box {
+      position: absolute;
+      top: 50%;
+      right: 4mm;
+      transform: translateY(-50%);
+      background: #fff;
+      border-radius: 5px;
+      padding: 3px;
+      line-height: 0;
+      z-index: 10;
+    }
+    #qrcode canvas,
+    #qrcode img { display: block; }
 
     /* ─── Footer ────────────────────────────────────────────────────────── */
     .flyer-footer {
@@ -266,8 +269,8 @@
     </div>
 
     <!-- QR code + short link -->
-    <div class="cta-block" aria-label="Sign up">
-      <div class="link-block">
+    <div class="cta-wrapper">
+      <div class="cta-block" aria-label="Sign up">
         <p class="cta-label">Register or scan to sign up:</p>
         <p class="short-link">bit.ly/motionucl</p>
         <p class="link-sub">
@@ -275,7 +278,9 @@
           UCL PEARL, Dagenham, East London
         </p>
       </div>
-      <div id="qrcode" aria-hidden="true"></div>
+      <div class="qr-box" aria-hidden="true">
+        <div id="qrcode"></div>
+      </div>
     </div>
 
   </div><!-- /.flyer-body -->
