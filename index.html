@@ -151,7 +151,7 @@
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field.full { grid-column: 1 / -1; }
 
-    label.field-label { font-size: 12.5px; font-weight: 600; color: var(--purple); }
+    .field-label { font-size: 12.5px; font-weight: 600; color: var(--purple); }
     .req { color: #c0376a; margin-left: 1px; }
 
     input[type="text"], input[type="email"], input[type="number"] {
@@ -426,16 +426,12 @@
           </span>
           <div class="radio-group">
             <div class="radio-option">
-              <input type="radio" id="sexMale" name="sex" value="Male" required>
-              <label for="sexMale">Male</label>
-            </div>
-            <div class="radio-option">
-              <input type="radio" id="sexFemale" name="sex" value="Female">
+              <input type="radio" id="sexFemale" name="sex" value="Female" required>
               <label for="sexFemale">Female</label>
             </div>
             <div class="radio-option">
-              <input type="radio" id="sexNonBinary" name="sex" value="Non-binary">
-              <label for="sexNonBinary">Non-binary</label>
+              <input type="radio" id="sexMale" name="sex" value="Male">
+              <label for="sexMale">Male</label>
             </div>
             <div class="radio-option">
               <input type="radio" id="sexPreferNot" name="sex" value="Prefer not to say">
@@ -799,14 +795,19 @@
     try {
       const res = await fetch(POWER_AUTOMATE_URL, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
         redirect: 'follow'
-        // No Content-Type header: sends as text/plain (simple CORS request, no preflight).
-        // Power Automate returns Access-Control-Allow-Origin: * so the response can be read.
       });
 
       let data;
       try { data = await res.json(); } catch { data = { result: 'success' }; }
+
+      if (data.error === 'email_duplicate') {
+        showError('That email address has already been used to sign up to the study.');
+        setLoading(false);
+        return;
+      }
 
       if (data.result === 'success') {
         form.style.display = 'none';
