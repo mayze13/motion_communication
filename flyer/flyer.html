@@ -138,6 +138,11 @@
       margin-top: auto;
     }
 
+    #qrcode {
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
     #qrcode canvas,
     #qrcode img {
       display: block;
@@ -214,7 +219,8 @@
   <!-- Header -->
   <div class="flyer-header">
     <img src="../assets/UCL_Logo,_plain_background.svg" alt="UCL"
-         style="height:11mm;" onerror="this.style.display='none'">
+         style="height:11mm; width:24mm; object-fit:contain; object-position:left center; display:block; flex-shrink:0;"
+         onerror="this.style.display='none'">
     <div class="header-right">
       University College London<br>
       Experimental Psychology &amp; Bartlett
@@ -247,7 +253,7 @@
     </div>
 
     <ul class="flyer-bullets" aria-label="Study highlights">
-      <li>Explore purpose-built spaces inside UCL PEARL, a unique 40,000 m² state-of-the-art research facility</li>
+      <li>Explore purpose-built architectural spaces at UCL PEARL in Dagenham, East London</li>
       <li>Wear EEG headsets, eye trackers, and biosensors, all fitted by the research team</li>
       <li>One hour in total. No specialist knowledge needed. All adults aged 18 and over welcome.</li>
       <li>Your data contributes directly to how hospitals, schools, and offices will be designed</li>
