@@ -38,7 +38,7 @@
     /* ─── Header bar ────────────────────────────────────────────────────── */
     .flyer-header {
       background: #361a54;
-      padding: 7mm 10mm 6mm;
+      padding: 4.5mm 10mm 4mm;
       display: flex;
       align-items: center;
       justify-content: flex-start;
@@ -67,7 +67,7 @@
     /* ─── Body ──────────────────────────────────────────────────────────── */
     .flyer-body {
       flex: 1;
-      padding: 6mm 10mm 5mm;
+      padding: 5mm 10mm 4mm;
       display: flex;
       flex-direction: column;
     }
@@ -75,39 +75,39 @@
     .flyer-eyebrow {
       font-size: 6.5pt; font-weight: 700;
       letter-spacing: 0.15em; text-transform: uppercase;
-      color: #9278b2; margin-bottom: 3mm;
+      color: #9278b2; margin-bottom: 2.5mm;
     }
 
     .flyer-title {
-      font-size: 28pt; font-weight: 700;
+      font-size: 23pt; font-weight: 700;
       color: #361a54; letter-spacing: -0.025em; line-height: 1.0;
-      margin-bottom: 3.5mm;
+      margin-bottom: 3mm;
     }
 
     .flyer-hook {
       font-size: 9pt; font-weight: 700; color: #361a54; line-height: 1.4;
-      margin-bottom: 2.5mm;
+      margin-bottom: 2mm;
     }
     .flyer-desc {
       font-size: 8pt; color: #2e2040; line-height: 1.52;
-      margin-bottom: 4mm;
+      margin-bottom: 2mm;
     }
 
     /* Researchers */
     .flyer-researchers {
       font-size: 7.5pt; color: #3a2f52;
-      line-height: 1.5; margin-bottom: 4mm;
-      padding-bottom: 3.5mm;
+      line-height: 1.5; margin-bottom: 3mm;
+      padding-bottom: 3mm;
       border-bottom: 0.5pt solid #e4daf0;
     }
     .flyer-researchers strong { color: #361a54; }
 
     .flyer-bullets {
-      list-style: none; margin-bottom: 4mm; flex-shrink: 0;
+      list-style: none; margin-bottom: 3mm; flex-shrink: 0;
     }
     .flyer-bullets li {
       font-size: 8pt; color: #3a2f52;
-      padding: 1.3mm 0;
+      padding: 1mm 0;
       display: flex; align-items: flex-start; gap: 2mm;
       line-height: 1.42; border-top: 0.5pt solid #e4daf0;
     }
@@ -122,34 +122,34 @@
       font-size: 7.5pt; color: #4e3b70;
       background: #ede7f7;
       border-radius: 4px;
-      padding: 2.5mm 3mm; margin-bottom: 4.5mm;
+      padding: 2mm 3mm; margin-bottom: 2mm;
       line-height: 1.45; flex-shrink: 0;
     }
 
     /* ─── QR + short link CTA block ─────────────────────────────────────── */
     .cta-wrapper {
-      position: relative;
       margin-top: auto;
     }
     .cta-block {
+      position: relative;
       background: #361a54;
       border-radius: 6px;
-      padding: 5mm 5.5mm;
+      padding: 7mm 5.5mm 6mm;
       padding-right: 32mm; /* leave room for the QR box */
     }
-    .cta-label {
-      font-size: 6.5pt; color: rgba(255,255,255,0.6);
-      text-transform: uppercase; letter-spacing: 0.1em;
-      margin-bottom: 2mm;
+    .cta-prompt {
+      font-size: 16pt; font-weight: 700; color: #361a54;
+      display: flex; align-items: center; gap: 3mm;
+      margin-bottom: 1mm;
     }
     .short-link {
-      font-size: 13pt; font-weight: 700;
+      font-size: 14pt; font-weight: 700;
       color: #fff; letter-spacing: -0.01em; line-height: 1.05;
       margin-bottom: 2.5mm;
       overflow-wrap: anywhere;
     }
     .link-sub {
-      font-size: 6pt; color: rgba(255,255,255,0.55); line-height: 1.5;
+      font-size: 8pt; color: rgba(255,255,255,0.55); line-height: 1.5;
     }
 
     /* QR box floats in front of the purple block */
@@ -174,7 +174,7 @@
       padding: 2.5mm 10mm;
       display: flex; align-items: center; justify-content: space-between; gap: 4mm;
     }
-    .footer-text { font-size: 6pt; color: #6b5080; line-height: 1.5; }
+    .footer-text { font-size: 8pt; color: #6b5080; line-height: 1.5; }
 
 
     /* ════════════════════════════════════════════════════════════════════════
@@ -196,9 +196,11 @@
       }
 
       .flyer {
-        width: 148mm; min-height: 210mm;
+        width: 148mm; height: 210mm;
         box-shadow: none;
+        overflow: hidden;
         page-break-inside: avoid;
+        break-inside: avoid;
       }
 
       .flyer-header,
@@ -218,12 +220,15 @@
 
   <!-- Header -->
   <div class="flyer-header">
-    <img src="../assets/UCL_Logo,_plain_background.svg" alt="UCL"
-         style="height:11mm; width:24mm; object-fit:contain; object-position:left center; display:block; flex-shrink:0;"
-         onerror="this.style.display='none'">
+    <div style="background:#fff; padding:2px 5px; border-radius:3px; display:inline-flex; align-items:center; flex-shrink:0;">
+      <img src="../assets/UCL_Logo,_plain_background.svg" alt="UCL"
+           style="height:9mm; width:20mm; object-fit:contain; object-position:left center; display:block;"
+           onerror="this.style.display='none'">
+    </div>
     <div class="header-right">
       University College London<br>
-      Experimental Psychology &amp; Bartlett
+      Experimental Psychology <br> 
+      Bartlett School of Architecture
     </div>
   </div>
 
@@ -267,16 +272,22 @@
 
     <!-- QR code + short link -->
     <div class="cta-wrapper">
+      <p class="cta-prompt">
+        Read more and sign up here
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <polyline points="2,8 18,8 18,22" stroke="#361a54" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="12,17 18,23 24,17" stroke="#361a54" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </p>
       <div class="cta-block" aria-label="Sign up">
-        <p class="cta-label">Read more and sign up here:</p>
         <p class="short-link">bit.ly/motionucl</p>
         <p class="link-sub">
           Free to take part &nbsp;·&nbsp; September 2026<br>
           UCL PEARL, Dagenham, East London
         </p>
-      </div>
-      <div class="qr-box" aria-hidden="true">
-        <img src="../assets/QR_code.svg" alt="" width="92" height="92">
+        <div class="qr-box" aria-hidden="true">
+          <img src="../assets/QR_code.svg" alt="" width="92" height="92">
+        </div>
       </div>
     </div>
 
