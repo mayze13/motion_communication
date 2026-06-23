@@ -52,14 +52,9 @@
     /* ── Hero ───────────────────────────────────────────────────────────── */
     .hero { background: var(--purple); color: #fff; }
     .hero-image {
-      /* Replace this div with:
-         <img src="../assets/images/banner.jpg" alt="Participants at UCL PEARL"
-              style="width:100%;height:200px;object-fit:cover;display:block;"> */
-      width: 100%; height: 200px;
+      width: 100%; height: 260px;
       background: linear-gradient(160deg, #1e0d36, #4c2872);
-      display: flex; align-items: center; justify-content: center;
-      color: rgba(255,255,255,0.2);
-      font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+      overflow: hidden;
     }
     .hero-body {
       padding: 26px 20px 30px;
@@ -71,6 +66,10 @@
       margin-bottom: 10px;
     }
     .hero-tagline { font-size: 1rem; color: rgba(255,255,255,0.78); line-height: 1.55; }
+    .hero-eyebrow {
+      font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: rgba(255,255,255,0.55); margin-bottom: 8px; font-weight: 700;
+    }
 
     /* ── Tab bar ────────────────────────────────────────────────────────── */
     .tabs {
@@ -114,6 +113,31 @@
       content: '\2713'; color: var(--purple);
       font-size: 13px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
     }
+
+    /* ── Legacy callout ─────────────────────────────────────────────────── */
+    .legacy-callout {
+      background: var(--light);
+      border-left: 3px solid var(--purple);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 16px;
+      margin: 0 0 24px;
+    }
+    .legacy-callout__label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+    }
+    .legacy-callout__text { font-size: 0.88rem; color: #3a2f52; line-height: 1.6; }
+
+    /* ── Objection FAQ ──────────────────────────────────────────────────── */
+    .objections { margin: 0 0 28px; }
+    .objections__heading {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+    }
+    .objection { padding: 10px 0; border-top: 1px solid var(--border); }
+    .objection__q { font-size: 0.88rem; font-weight: 700; color: var(--purple); margin-bottom: 4px; }
+    .objection__a { font-size: 0.88rem; color: #3a2f52; line-height: 1.6; }
+    .objection__a a { color: var(--purple); }
 
     /* ── Form ───────────────────────────────────────────────────────────── */
     .form-label-row {
@@ -262,6 +286,7 @@
     }
     .person-name { font-size: 14px; font-weight: 700; color: var(--purple); margin-bottom: 2px; }
     .person-role { font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+    .person-bio { font-size: 11.5px; color: var(--muted); line-height: 1.5; margin-top: 3px; }
 
     /* ── Footer ─────────────────────────────────────────────────────────── */
     .site-footer {
@@ -284,10 +309,15 @@
 
 <!-- ── Hero ────────────────────────────────────────────────────────────── -->
 <section class="hero">
-  <div class="hero-image" aria-hidden="true">Study image: replace with photo</div>
+  <div class="hero-image" aria-hidden="true">
+    <img src="../assets/images/hero-deep.svg"
+         alt="Participants wearing biosensors at UCL PEARL"
+         style="width:100%;height:260px;object-fit:cover;display:block;">
+  </div>
   <div class="hero-body">
+    <p class="hero-eyebrow">UCL Research Study · September 2026</p>
     <h1>Minds<br>in Motion</h1>
-    <p class="hero-tagline">How does space shape the mind? Be part of the science. September 2026, UCL PEARL.</p>
+    <p class="hero-tagline">One hour at Europe's most advanced human behaviour lab.<br>Help us understand how buildings shape the way people think.</p>
   </div>
 </section>
 
@@ -324,12 +354,49 @@
       </ul>
     </div>
 
+    <!-- Legacy callout -->
+    <div class="legacy-callout">
+      <p class="legacy-callout__label">100 Minds in Motion · September 2024</p>
+      <p class="legacy-callout__text">
+        In the first study, over <strong>100 participants</strong> from industry,
+        academia, and the general public explored architectural spaces at UCL PEARL
+        while wearing EEG headsets, eye trackers, and full-body motion capture.
+        The experiment was covered by
+        <a href="https://www.technologyreview.com/2024/09/13/1103935/neuroscientists-architects-enormous-laboratory-make-buildings-better/" target="_blank" rel="noopener">MIT Technology Review</a>,
+        <a href="https://www.ucl.ac.uk/news/2024/sep/large-scale-experiment-brings-real-world-lab-design-better-spaces" target="_blank" rel="noopener">UCL News</a>, and
+        <a href="https://www.research.autodesk.com/blog/designing-for-experience-architecture-neuroscience-movement/" target="_blank" rel="noopener">Autodesk Research</a>.
+        Minds in Motion continues that research.
+      </p>
+    </div>
+
+    <!-- Objection-handling FAQ -->
+    <div class="objections">
+      <h3 class="objections__heading">Common questions</h3>
+      <div class="objection">
+        <p class="objection__q">Where is UCL PEARL?</p>
+        <p class="objection__a">PEARL is in Dagenham, East London, right beside Dagenham Heathway
+        station on the District line. Full travel info is sent with your booking confirmation.</p>
+      </div>
+      <div class="objection">
+        <p class="objection__q">Will I be compensated?</p>
+        <p class="objection__a">Compensation details will be confirmed with your booking.
+        Participation is entirely voluntary and you can withdraw at any time.</p>
+      </div>
+    </div>
+
     <!-- Success state -->
     <div class="success-card" id="successCard" role="status" aria-live="polite">
       <div class="success-tick" aria-hidden="true">&#10003;</div>
-      <h3 id="successHeading">You're registered.</h3>
-      <p>We'll be in touch before September 2026.<br>
-         Questions? Email <a href="mailto:[study-email]">[study email]</a>.</p>
+      <h3 id="successHeading">You're in.</h3>
+      <p>
+        We'll email you as soon as the September 2026 session schedule is confirmed.
+        You'll be first to book your slot.
+      </p>
+      <p style="margin-top:12px;">
+        In the meantime, explore
+        <a href="#" class="tab-link" data-tab="panel-about">the science behind the study</a>
+        or meet <a href="#" class="tab-link" data-tab="panel-people">the research team</a>.
+      </p>
     </div>
 
     <!-- Form -->
@@ -400,10 +467,10 @@
 
         <div class="field full">
           <label class="field-label" for="institution">
-            Institution <span class="req" aria-hidden="true">*</span>
+            Organisation / University <span class="req" aria-hidden="true">*</span>
           </label>
           <input type="text" id="institution" name="institution" required
-                 placeholder="e.g. UCL, NHS, Independent">
+                 placeholder="e.g. Autodesk, Google, UCL, NHS, self-employed">
         </div>
 
       </div><!-- /.form-grid -->
@@ -415,13 +482,15 @@
         <span class="spinner" aria-hidden="true"></span>
       </button>
 
-      <p class="consent-note">
-        Your data will be held securely on UCL servers and used solely for participant
-        recruitment.
-        <a href="https://www.ucl.ac.uk/legal-services/privacy/ucl-general-privacy-notice"
-           target="_blank" rel="noopener">Privacy policy</a>.
-      </p>
     </form>
+
+    <div class="objection" style="margin-top:20px;">
+      <p class="objection__q">What happens to my data?</p>
+      <p class="objection__a">Personal data is held on UCL servers and used solely for
+      participant recruitment. Study data is anonymised before analysis. Full details in
+      the <a href="https://www.ucl.ac.uk/legal-services/privacy/ucl-general-privacy-notice"
+      target="_blank" rel="noopener">UCL Privacy Notice</a>.</p>
+    </div>
 
   </div>
 </div>
@@ -563,10 +632,9 @@
         </p>
         <p>
           The study received coverage from
-          <!-- Replace [MIT-ARTICLE-URL] with the actual MIT article URL -->
-          <a href="[MIT-ARTICLE-URL]" target="_blank" rel="noopener">MIT</a> and
-          <!-- Replace [UCL-NEWS-URL] with the actual UCL News article URL -->
-          <a href="[UCL-NEWS-URL]" target="_blank" rel="noopener">UCL News</a>.
+          <a href="https://www.technologyreview.com/2024/09/13/1103935/neuroscientists-architects-enormous-laboratory-make-buildings-better/" target="_blank" rel="noopener">MIT Technology Review</a>,
+          <a href="https://www.ucl.ac.uk/news/2024/sep/large-scale-experiment-brings-real-world-lab-design-better-spaces" target="_blank" rel="noopener">UCL News</a>, and
+          <a href="https://www.research.autodesk.com/blog/designing-for-experience-architecture-neuroscience-movement/" target="_blank" rel="noopener">Autodesk Research</a>.
           Minds in Motion continues and expands this research programme.
         </p>
       </div>
@@ -593,6 +661,7 @@
         <div>
           <p class="person-name">Prof. Hugo Spiers</p>
           <p class="person-role">UCL Experimental Psychology</p>
+          <p class="person-bio">Spatial cognition and navigation. PI of Sea Hero Quest (4 million participants).</p>
         </div>
       </div>
 
@@ -605,6 +674,7 @@
         <div>
           <p class="person-name">Dr Fiona Zisch</p>
           <p class="person-role">UCL Bartlett School of Architecture</p>
+          <p class="person-bio">Neuroarchitecture and embodied spatial experience. Co-creator of 100 Minds in Motion.</p>
         </div>
       </div>
 
@@ -617,6 +687,7 @@
         <div>
           <p class="person-name">Prof. Sean Hanna</p>
           <p class="person-role">UCL Bartlett School of Architecture</p>
+          <p class="person-bio">Computational approaches to architectural design and space syntax.</p>
         </div>
       </div>
 
@@ -628,7 +699,8 @@
         </div>
         <div>
           <p class="person-name">Daniel Tang</p>
-          <p class="person-role">UCL Research Team</p>
+          <p class="person-role">UCL Bartlett School of Architecture</p>
+          <p class="person-bio">Research and data, Minds in Motion.</p>
         </div>
       </div>
 
@@ -640,7 +712,8 @@
         </div>
         <div>
           <p class="person-name">James Moultrie</p>
-          <p class="person-role">Minds in Motion</p>
+          <p class="person-role">UCL Experimental Psychology</p>
+          <p class="person-bio">Research and data, Minds in Motion.</p>
         </div>
       </div>
 
@@ -653,8 +726,7 @@
 <footer class="site-footer">
   <p>
     <strong style="color:rgba(255,255,255,0.85);">Minds in Motion</strong> is a UCL research study.<br>
-    Ethics ref: [INSERT REF] &nbsp;|&nbsp;
-    <a href="mailto:[study-email]">[study email]</a>
+    Ethics approval: UCL Research Ethics Committee
   </p>
 </footer>
 
@@ -677,6 +749,20 @@
       btn.classList.add('active');
       btn.setAttribute('aria-selected', 'true');
       document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ── Tab links in success card ─────────────────────────────────────────────
+  document.querySelectorAll('.tab-link').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = a.dataset.tab;
+      tabBtns.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+      tabPanels.forEach(p => p.classList.remove('active'));
+      const btn = document.querySelector(`[data-tab="${target}"]`);
+      btn.classList.add('active'); btn.setAttribute('aria-selected', 'true');
+      document.getElementById(target).classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   });
 
@@ -728,7 +814,7 @@
 
       if (data.result === 'success') {
         form.style.display = 'none';
-        document.getElementById('successHeading').textContent = 'Thanks, ' + firstName + '.';
+        document.getElementById('successHeading').textContent = 'You\'re in, ' + firstName + '.';
         successCard.style.display = 'block';
       } else {
         throw new Error(data.message || 'Server error.');
