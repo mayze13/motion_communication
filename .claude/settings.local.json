@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(gh repo *)",
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "Bash(gh auth *)",
+      "Bash(google-chrome --headless --disable-gpu --no-sandbox --disable-dev-shm-usage --virtual-time-budget=15000 --enable-logging=stderr --v=0 --dump-dom 'file://__TRACKED_VAR__/test-page.html#happy')",
+      "Bash(google-chrome --headless --disable-gpu --no-sandbox --disable-dev-shm-usage --virtual-time-budget=15000 --dump-dom 'file://__TRACKED_VAR__/test-page.html#happy')",
+      "Bash(python3 -)",
+      "Bash(cat)",
+      "Bash(chmod +x run.sh)",
+      "Bash(node build-test.js)",
+      "Bash(node driver.js)",
+      "Bash(node shot.js)"
+    ]
+  }
+}
