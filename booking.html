@@ -3,798 +3,1294 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Minds in Motion: a UCL neuroarchitecture study at UCL PEARL, September 2026. Register your interest to take part.">
-  <title>Minds in Motion: Register | UCL Research Study</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Book your session for Minds in Motion, a UCL research study at UCL PEARL, September 2026.">
+  <title>Book your session | Minds in Motion</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --purple:   #361a54;
-      --white:    #fafafa;
-      --text:     #1a1228;
-      --muted:    #6b5c88;
-      --border:   #d8cfe8;
-      --light:    #f5f1fa;
-      --header-h: 58px;
+      --purple:    #361a54;
+      --purple-600:#4a2570;
+      --purple-300:#8f6fc0;
+      --accent:    #7c4dbe;
+      --ink:       #16101f;
+      --body:      #4a4058;
+      --muted:     #7d6f95;
+      --line:      #e7e0f0;
+      --line-soft: #f1ecf7;
+      --surface:   #ffffff;
+      --bg:        #faf8fc;
+      --tint:      #f5f1fa;
+      --ok-bg:     #e9f5ec; --ok-fg:   #2c6b3f;
+      --warn-bg:   #fdf1e3; --warn-fg: #8a5220;
+      --err-bg:    #fdecea; --err-br:  #f3bdb8; --err-fg: #8e1c12;
+      --r:         14px;
+      --shadow:    0 1px 2px rgba(22,16,31,.04), 0 8px 24px -12px rgba(54,26,84,.18);
+      --rail-w:    272px;
+      --head-h:    60px;
+      --ease:      cubic-bezier(.22,.8,.3,1);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { font-size: 16px; }
+    html { font-size: 16px; -webkit-text-size-adjust: 100%; }
     body {
       font-family: 'DM Sans', Arial, Helvetica, sans-serif;
-      background: var(--white);
-      color: var(--text);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
+      background: var(--bg); color: var(--ink);
+      line-height: 1.6; -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
+    ::selection { background: var(--purple); color: #fff; }
 
     /* ── Header ─────────────────────────────────────────────────────────── */
     .site-header {
-      background: var(--purple);
-      height: var(--header-h);
-      padding: 0 20px;
+      height: var(--head-h);
       display: flex; align-items: center; justify-content: space-between;
-      position: sticky; top: 0; z-index: 100;
+      padding: 0 24px;
+      background: rgba(250,248,252,.86);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+      position: sticky; top: 0; z-index: 60;
     }
+    .brand { display: flex; align-items: center; gap: 12px; }
     .logo-placeholder {
-      width: 68px; height: 32px;
-      border: 1.5px dashed rgba(255,255,255,0.3); border-radius: 4px;
+      width: 54px; height: 26px; border: 1.5px dashed var(--line);
+      border-radius: 6px; display: flex; align-items: center; justify-content: center;
+      color: var(--muted); font-size: 9px; letter-spacing: .1em;
+    }
+    .brand-name {
+      font-size: 13px; font-weight: 600; color: var(--purple);
+      letter-spacing: -.01em;
+    }
+    .head-note { font-size: 12px; color: var(--muted); }
+
+    /* ── Shell ──────────────────────────────────────────────────────────── */
+    .shell { display: flex; align-items: flex-start; }
+
+    /* ── Left rail ──────────────────────────────────────────────────────── */
+    .rail {
+      width: var(--rail-w); flex: 0 0 var(--rail-w);
+      position: sticky; top: var(--head-h);
+      height: calc(100vh - var(--head-h));
+      padding: 40px 28px;
+      border-right: 1px solid var(--line);
+    }
+    .rail-title {
+      font-size: 10.5px; font-weight: 700; letter-spacing: .16em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 24px;
+    }
+    .rail-steps { position: relative; }
+    .rail-track, .rail-fill {
+      position: absolute; left: 15px; width: 2px; border-radius: 2px;
+    }
+    .rail-track { top: 20px; bottom: 20px; background: var(--line); }
+    .rail-fill {
+      top: 20px; height: 0;
+      background: linear-gradient(180deg, var(--purple), var(--accent));
+      transition: height .55s var(--ease);
+    }
+    .rail-step {
+      position: relative; z-index: 1;
+      display: flex; align-items: center; gap: 14px;
+      padding: 11px 0;
+    }
+    .rail-dot {
+      width: 32px; height: 32px; flex: 0 0 32px; border-radius: 50%;
+      background: var(--bg); border: 1.5px solid var(--line);
       display: flex; align-items: center; justify-content: center;
-      color: rgba(255,255,255,0.4);
-      font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+      font-size: 12.5px; font-weight: 700; color: var(--muted);
+      transition: all .35s var(--ease);
     }
-    .header-name { color: rgba(255,255,255,0.7); font-size: 12px; font-weight: 500; }
-
-    /* ── Hero ───────────────────────────────────────────────────────────── */
-    .hero { background: var(--purple); color: #fff; }
-    .hero-image {
-      width: 100%; height: 260px;
-      background: linear-gradient(160deg, #1e0d36, #4c2872);
-      overflow: hidden;
+    .rail-label {
+      font-size: 14px; font-weight: 500; color: var(--muted);
+      transition: color .35s var(--ease); letter-spacing: -.005em;
     }
-    .hero-body {
-      padding: 26px 20px 30px;
-      max-width: 560px; margin: 0 auto;
-    }
-    .hero h1 {
-      font-size: clamp(2.5rem, 9vw, 3.2rem);
-      font-weight: 700; line-height: 1.03; letter-spacing: -0.025em;
-      margin-bottom: 10px;
-    }
-    .hero-tagline { font-size: 1rem; color: rgba(255,255,255,0.78); line-height: 1.55; }
-    .hero-eyebrow {
-      font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase;
-      color: rgba(255,255,255,0.55); margin-bottom: 8px; font-weight: 700;
-    }
-
-    /* ── Tab bar ────────────────────────────────────────────────────────── */
-    .tabs {
-      background: #fff; border-bottom: 1.5px solid var(--border);
-      display: flex;
-      position: sticky; top: var(--header-h); z-index: 90;
-    }
-    .tab-btn {
-      flex: 1; min-height: 48px; padding: 0 8px;
-      background: none; border: none;
-      font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--muted);
-      cursor: pointer;
-      border-bottom: 2.5px solid transparent; margin-bottom: -1.5px;
-      transition: color 0.15s, border-color 0.15s; white-space: nowrap;
-    }
-    .tab-btn.active { color: var(--purple); border-bottom-color: var(--purple); }
-    .tab-btn:focus-visible { outline: 2px solid var(--purple); outline-offset: -2px; }
-
-    /* ── Tab panels ─────────────────────────────────────────────────────── */
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
-    .tab-inner { max-width: 560px; margin: 0 auto; padding: 28px 20px 40px; }
-
-    /* ── Sign Up tab ────────────────────────────────────────────────────── */
-    .signup-pitch { margin-bottom: 28px; }
-    .pitch-heading {
-      font-size: 1.2rem; font-weight: 700; color: var(--purple); margin-bottom: 12px;
-    }
-    .pitch-text {
-      font-size: 0.95rem; color: #3a2f52; line-height: 1.7; margin-bottom: 14px;
-      text-align: justify; hyphens: auto; -webkit-hyphens: auto;
-    }
-    .pitch-bullets { list-style: none; margin-top: 4px; }
-    .pitch-bullets li {
-      display: flex; align-items: flex-start; gap: 9px;
-      font-size: 0.9rem; color: #3a2f52; line-height: 1.5;
-      padding: 8px 0; border-top: 1px solid var(--border);
-    }
-    .pitch-bullets li:first-child { border-top: none; padding-top: 0; }
-    .pitch-bullets li::before {
-      content: '\2713'; color: var(--purple);
-      font-size: 13px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
-    }
-
-    /* ── Legacy callout ─────────────────────────────────────────────────── */
-    .legacy-callout {
-      background: var(--light);
-      border-left: 3px solid var(--purple);
-      border-radius: 0 8px 8px 0;
-      padding: 14px 16px;
-      margin: 0 0 24px;
-    }
-    .legacy-callout__label {
-      font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
-    }
-    .legacy-callout__text { font-size: 0.88rem; color: #3a2f52; line-height: 1.6; }
-
-    /* ── Objection FAQ ──────────────────────────────────────────────────── */
-    .objections { margin: 0 0 28px; }
-    .objections__heading {
-      font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
-    }
-    .objection { padding: 10px 0; border-top: 1px solid var(--border); }
-    .objection__q { font-size: 0.88rem; font-weight: 700; color: var(--purple); margin-bottom: 4px; }
-    .objection__a { font-size: 0.88rem; color: #3a2f52; line-height: 1.6; }
-    .objection__a a { color: var(--purple); }
-
-    /* ── Form ───────────────────────────────────────────────────────────── */
-    .form-label-row {
-      display: flex; align-items: baseline; justify-content: space-between;
-      margin-bottom: 16px;
-    }
-    .form-heading { font-size: 1.1rem; font-weight: 700; color: var(--purple); }
-    .required-note { font-size: 11px; color: var(--muted); }
-
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    @media (max-width: 380px) { .form-grid { grid-template-columns: 1fr; } }
-
-    .field { display: flex; flex-direction: column; gap: 5px; }
-    .field.full { grid-column: 1 / -1; }
-
-    .field-label { font-size: 12.5px; font-weight: 600; color: var(--purple); }
-    .req { color: #c0376a; margin-left: 1px; }
-
-    input[type="text"], input[type="email"], input[type="number"] {
-      width: 100%; padding: 11px 13px;
-      border: 1.5px solid var(--border); border-radius: 8px;
-      font-family: inherit; font-size: 16px;
-      color: var(--text); background: #fff;
-      transition: border-color 0.15s, box-shadow 0.15s;
-      -webkit-appearance: none; appearance: none;
-    }
-    input:focus {
-      outline: none; border-color: var(--purple);
-      box-shadow: 0 0 0 3px rgba(54,26,84,0.11);
-    }
-
-    /* Radio pills */
-    .radio-group { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 2px; }
-    .radio-option input[type="radio"] {
-      position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;
-    }
-    .radio-option label {
-      padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 20px;
-      cursor: pointer; font-size: 13.5px; font-weight: 500; color: #4e3b70;
-      transition: all 0.12s; user-select: none;
-      display: inline-flex; align-items: center; min-height: 38px;
-    }
-    .radio-option input:checked + label {
+    .rail-step.done .rail-dot {
       background: var(--purple); border-color: var(--purple); color: #fff;
     }
-    .radio-option label:hover { border-color: var(--purple); }
-
-    /* Submit button */
-    .btn-submit {
-      display: flex; align-items: center; justify-content: center; gap: 10px;
-      width: 100%; padding: 15px;
-      background: var(--purple); color: #fff;
-      border: none; border-radius: 8px;
-      font-family: inherit; font-size: 16px; font-weight: 700;
-      cursor: pointer; margin-top: 10px; transition: background 0.15s; min-height: 52px;
+    .rail-step.done .rail-label { color: var(--body); }
+    .rail-step.current .rail-dot {
+      background: var(--purple); border-color: var(--purple); color: #fff;
+      box-shadow: 0 0 0 5px rgba(124,77,190,.14);
     }
-    .btn-submit:hover:not(:disabled) { background: #4a2570; }
-    .btn-submit:disabled { background: #9c8ab5; cursor: not-allowed; }
+    .rail-step.current .rail-label { color: var(--purple); font-weight: 700; }
+
+    /* Mobile progress bar (hidden on desktop) */
+    .rail-mobile { display: none; }
+
+    /* ── Content column ─────────────────────────────────────────────────── */
+    .content { flex: 1 1 auto; min-width: 0; padding: 56px 32px 96px; }
+    .col { max-width: 620px; margin: 0 auto; }
+
+    .step { display: none; }
+    .step.active { display: block; }
+
+    .eyebrow {
+      font-size: 10.5px; font-weight: 700; letter-spacing: .16em;
+      text-transform: uppercase; color: var(--purple-300); margin-bottom: 14px;
+    }
+    h1 {
+      font-size: clamp(2.1rem, 5.2vw, 2.9rem); font-weight: 700;
+      line-height: 1.05; letter-spacing: -.035em; color: var(--ink);
+      margin-bottom: 14px;
+    }
+    h1:focus { outline: none; }
+    h2 {
+      font-size: clamp(1.6rem, 4vw, 2rem); font-weight: 700;
+      line-height: 1.15; letter-spacing: -.03em; margin-bottom: 10px;
+    }
+    h2:focus { outline: none; }
+    .lede { font-size: 1.02rem; color: var(--body); line-height: 1.65; }
+    .note { font-size: .875rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── Fact list ──────────────────────────────────────────────────────── */
+    .facts { list-style: none; margin: 32px 0; }
+    .facts li {
+      display: flex; align-items: baseline; gap: 14px;
+      padding: 15px 2px; border-top: 1px solid var(--line-soft);
+      font-size: .97rem; color: var(--body);
+    }
+    .facts li:last-child { border-bottom: 1px solid var(--line-soft); }
+    .facts b { color: var(--ink); font-weight: 600; }
+    .facts .k {
+      flex: 0 0 96px; font-size: 11px; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--purple-300);
+    }
+
+    .pull {
+      margin: 32px 0; padding: 20px 22px;
+      background: var(--tint); border-radius: var(--r);
+      font-size: .95rem; color: var(--body); line-height: 1.6;
+    }
+    .pull b { color: var(--purple); font-weight: 700; }
+
+    /* ── Fields ─────────────────────────────────────────────────────────── */
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 480px) { .grid2 { grid-template-columns: 1fr; } }
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field.full { grid-column: 1 / -1; }
+    .field-label { font-size: 12.5px; font-weight: 600; color: var(--purple); letter-spacing: .01em; }
+    .req { color: #c0376a; }
+
+    input[type="text"], input[type="email"], input[type="number"], textarea {
+      width: 100%; padding: 13px 15px;
+      border: 1.5px solid var(--line); border-radius: 11px;
+      font-family: inherit; font-size: 16px; color: var(--ink);
+      background: var(--surface);
+      transition: border-color .18s, box-shadow .18s;
+      -webkit-appearance: none; appearance: none;
+    }
+    textarea { min-height: 104px; resize: vertical; line-height: 1.55; }
+    input:focus, textarea:focus {
+      outline: none; border-color: var(--purple);
+      box-shadow: 0 0 0 4px rgba(124,77,190,.13);
+    }
+    ::placeholder { color: #b7abc8; }
+
+    .label-row {
+      display: flex; align-items: baseline; justify-content: space-between;
+      gap: 12px; margin-bottom: 14px;
+    }
+    .label-row h3 { font-size: 1.02rem; font-weight: 700; color: var(--ink); letter-spacing: -.015em; }
+
+    /* ── Choice pills ───────────────────────────────────────────────────── */
+    .choices { display: flex; flex-wrap: wrap; gap: 8px; }
+    .choice { position: relative; }
+    .choice input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+    .choice label {
+      display: inline-flex; align-items: center; min-height: 40px;
+      padding: 9px 16px; border: 1.5px solid var(--line); border-radius: 999px;
+      background: var(--surface); cursor: pointer; user-select: none;
+      font-size: 14px; font-weight: 500; color: var(--body);
+      transition: all .16s var(--ease);
+    }
+    .choice label:hover { border-color: var(--purple-300); }
+    .choice input:checked + label {
+      background: var(--purple); border-color: var(--purple); color: #fff;
+    }
+    .choice input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .choice input:disabled + label { opacity: .5; cursor: not-allowed; }
+
+    /* ── Slot cards ─────────────────────────────────────────────────────── */
+    .day { margin-bottom: 22px; }
+    .day-label {
+      font-size: 10.5px; font-weight: 700; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--purple-300); margin-bottom: 10px;
+    }
+    .slots { display: flex; flex-direction: column; gap: 9px; }
+    .slot { position: relative; }
+    .slot input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+    .slot label {
+      display: flex; align-items: center; justify-content: space-between; gap: 14px;
+      min-height: 62px; padding: 15px 18px;
+      background: var(--surface); border: 1.5px solid var(--line);
+      border-radius: var(--r); cursor: pointer; user-select: none;
+      transition: transform .18s var(--ease), border-color .18s, box-shadow .18s, background .18s;
+    }
+    .slot label:hover { border-color: var(--purple-300); transform: translateY(-2px); box-shadow: var(--shadow); }
+    .slot input:checked + label {
+      background: var(--purple); border-color: var(--purple);
+      box-shadow: 0 8px 24px -10px rgba(54,26,84,.5);
+    }
+    .slot input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .slot-time { font-size: 1.05rem; font-weight: 700; color: var(--ink); letter-spacing: -.02em; }
+    .slot input:checked + label .slot-time { color: #fff; }
+    .badge {
+      font-size: 10.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+      padding: 5px 11px; border-radius: 999px; white-space: nowrap;
+    }
+    .badge.available { background: var(--ok-bg);   color: var(--ok-fg); }
+    .badge.filling   { background: var(--warn-bg); color: var(--warn-fg); }
+    .badge.full      { background: var(--line-soft); color: var(--muted); }
+    .slot input:checked + label .badge { background: rgba(255,255,255,.2); color: #fff; }
+    .slot input:disabled + label {
+      background: var(--line-soft); cursor: not-allowed; border-color: var(--line-soft);
+    }
+    .slot input:disabled + label:hover { transform: none; box-shadow: none; border-color: var(--line-soft); }
+    .slot input:disabled + label .slot-time { color: var(--muted); }
+
+    /* ── Buttons ────────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      min-height: 54px; padding: 15px 26px; width: 100%;
+      border: none; border-radius: 12px; cursor: pointer;
+      font-family: inherit; font-size: 15.5px; font-weight: 700; letter-spacing: -.01em;
+      background: linear-gradient(135deg, var(--purple), var(--purple-600));
+      color: #fff; box-shadow: 0 8px 22px -12px rgba(54,26,84,.75);
+      transition: transform .18s var(--ease), box-shadow .18s, filter .18s;
+    }
+    .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 14px 30px -14px rgba(54,26,84,.85); }
+    .btn:active:not(:disabled) { transform: translateY(0); }
+    .btn:disabled { background: #c4b8d6; box-shadow: none; cursor: not-allowed; }
+    .btn.ghost {
+      background: transparent; color: var(--purple);
+      border: 1.5px solid var(--line); box-shadow: none;
+    }
+    .btn.ghost:hover:not(:disabled) { border-color: var(--purple); background: var(--tint); transform: none; }
+    .btn-row { display: flex; gap: 10px; margin-top: 26px; }
+    .btn-row .btn.ghost { flex: 0 0 34%; }
+    .btn-row .btn { flex: 1; }
+    .arrow { transition: transform .2s var(--ease); }
+    .btn:hover:not(:disabled) .arrow { transform: translateX(3px); }
 
     .spinner {
-      display: none; width: 16px; height: 16px;
-      border: 2px solid rgba(255,255,255,0.35);
-      border-top-color: #fff; border-radius: 50%;
-      animation: spin 0.65s linear infinite; flex-shrink: 0;
+      display: none; width: 16px; height: 16px; flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,.35); border-top-color: #fff;
+      border-radius: 50%; animation: spin .65s linear infinite;
     }
-    .btn-submit.loading .spinner { display: block; }
+    .btn.loading .spinner { display: block; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .form-error {
-      display: none;
-      background: #fdecea; border: 1px solid #f3bdb8; border-radius: 8px;
-      padding: 11px 14px; color: #8e1c12; font-size: 14px; line-height: 1.5;
-      margin-top: 12px;
+    /* ── Messaging ──────────────────────────────────────────────────────── */
+    .error {
+      display: none; margin-top: 14px; padding: 13px 16px;
+      background: var(--err-bg); border: 1px solid var(--err-br);
+      border-radius: 11px; color: var(--err-fg); font-size: 14px; line-height: 1.5;
     }
-    .consent-note {
-      font-size: 11.5px; color: #917faa; margin-top: 14px; line-height: 1.55;
+    .notice {
+      display: none; margin-bottom: 20px; padding: 15px 18px;
+      background: var(--tint); border-left: 3px solid var(--purple);
+      border-radius: 0 11px 11px 0; font-size: .9rem; color: var(--body); line-height: 1.6;
     }
-    .consent-note a { color: #5c3e8a; }
+    .state { display: none; text-align: center; padding: 34px 0; }
+    .state p { font-size: .93rem; color: var(--muted); }
+    .state .btn { max-width: 220px; margin: 16px auto 0; }
 
-    /* Success */
-    .success-card { display: none; text-align: center; padding: 40px 0; }
-    .success-tick {
-      width: 58px; height: 58px; background: var(--purple); border-radius: 50%;
+    /* ── Questionnaire ──────────────────────────────────────────────────── */
+    .progress { margin: 26px 0 30px; }
+    .progress-meta {
+      display: flex; align-items: baseline; justify-content: space-between;
+      font-size: 11.5px; color: var(--muted); margin-bottom: 9px;
+    }
+    .progress-meta b { font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--purple-300); }
+    .track { height: 5px; background: var(--line-soft); border-radius: 999px; overflow: hidden; }
+    .fill {
+      height: 100%; width: 0; border-radius: 999px;
+      background: linear-gradient(90deg, var(--purple), var(--accent));
+      transition: width .45s var(--ease);
+    }
+
+    .q { padding: 22px 0; border-top: 1px solid var(--line-soft); }
+    .q:first-child { border-top: none; padding-top: 2px; }
+    .q fieldset { border: none; }
+    .q legend, .q .q-label {
+      display: block; font-size: 1rem; font-weight: 600; color: var(--ink);
+      line-height: 1.45; margin-bottom: 13px; letter-spacing: -.01em;
+    }
+    .q-sect {
+      font-size: 10.5px; font-weight: 700; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--purple-300); margin-bottom: 8px;
+    }
+    .q-hint { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+
+    /* Consent checkboxes */
+    .consent { display: flex; align-items: flex-start; gap: 13px; cursor: pointer; }
+    .consent input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .consent .box {
+      flex: 0 0 22px; width: 22px; height: 22px; margin-top: 1px;
+      border: 1.5px solid var(--line); border-radius: 7px; background: var(--surface);
       display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 18px; font-size: 24px; color: #fff;
+      color: transparent; font-size: 13px; font-weight: 700;
+      transition: all .18s var(--ease);
     }
-    .success-card h3 { font-size: 1.35rem; font-weight: 700; color: var(--purple); margin-bottom: 10px; }
-    .success-card p { font-size: 0.93rem; color: #3a2f52; line-height: 1.65; }
-    .success-card a { color: #4a2570; }
+    .consent input:checked + .box { background: var(--purple); border-color: var(--purple); color: #fff; }
+    .consent input:focus-visible + .box { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .consent .txt { font-size: .93rem; color: var(--body); line-height: 1.55; font-weight: 400; }
+    .consent .txt a { color: var(--purple); }
 
-    /* ── About tab: accordion ───────────────────────────────────────────── */
-    .about-intro { font-size: 0.88rem; color: var(--muted); margin-bottom: 18px; font-style: italic; }
-
-    .accord { border-bottom: 1px solid var(--border); }
-    .accord:first-of-type { border-top: 1px solid var(--border); }
-
-    .accord-summary {
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      padding: 15px 0; cursor: pointer;
-      font-size: 15px; font-weight: 600; color: var(--purple);
-      list-style: none; user-select: none; min-height: 52px;
+    /* ── Summary card ───────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--r); padding: 6px 20px; box-shadow: var(--shadow);
+      margin-bottom: 24px;
     }
-    .accord-summary::-webkit-details-marker { display: none; }
-    .accord-summary::marker { display: none; }
+    .row {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+      padding: 15px 0; border-top: 1px solid var(--line-soft);
+    }
+    .row:first-child { border-top: none; }
+    .row .k { font-size: 12px; color: var(--muted); flex-shrink: 0; }
+    .row .v { font-size: .97rem; font-weight: 600; color: var(--ink); text-align: right; word-break: break-word; }
 
-    .accord-chevron {
-      font-size: 18px; color: var(--muted); flex-shrink: 0;
-      transition: transform 0.2s ease; display: inline-block; line-height: 1;
-    }
-    details[open] .accord-chevron { transform: rotate(90deg); }
-
-    .accord-body { padding: 0 0 18px; }
-    .accord-body p {
-      font-size: 0.93rem; color: #3a2f52; line-height: 1.72; margin-bottom: 12px;
-      text-align: justify; hyphens: auto; -webkit-hyphens: auto;
-    }
-    .accord-body p:last-child { margin-bottom: 0; }
-    .accord-body a { color: var(--purple); text-decoration: underline; text-underline-offset: 2px; }
-    .accord-body ul { list-style: none; margin: 10px 0 0; }
-    .accord-body li {
-      display: flex; align-items: flex-start; gap: 9px;
-      font-size: 0.9rem; color: #3a2f52; line-height: 1.5;
-      padding: 7px 0; border-top: 1px solid var(--border);
-    }
-    .accord-body li:first-child { border-top: none; padding-top: 0; }
-    .accord-body li::before { content: '›'; color: var(--purple); font-size: 14px; flex-shrink: 0; margin-top: 1px; }
-
-    /* ── People tab ─────────────────────────────────────────────────────── */
-    .people-list { display: flex; flex-direction: column; gap: 12px; }
-    .person-card {
-      display: flex; align-items: center; gap: 14px;
-      background: #fff; border: 1px solid var(--border); border-radius: 10px;
-      padding: 14px 16px;
-    }
-    .avatar {
-      width: 48px; height: 48px; border-radius: 50%;
-      background: var(--purple);
+    /* ── Success ────────────────────────────────────────────────────────── */
+    .done { text-align: center; padding: 32px 0; }
+    .tick {
+      width: 68px; height: 68px; margin: 0 auto 22px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--accent));
       display: flex; align-items: center; justify-content: center;
-      color: rgba(255,255,255,0.88); font-size: 14px; font-weight: 700;
-      flex-shrink: 0; letter-spacing: 0.02em;
-      position: relative; overflow: hidden;
+      color: #fff; font-size: 28px;
+      box-shadow: 0 14px 34px -14px rgba(54,26,84,.7);
+      animation: pop .5s var(--ease) both;
     }
-    .avatar-photo {
-      position: absolute; inset: 0; width: 100%; height: 100%;
-      object-fit: cover; border-radius: 50%;
+    @keyframes pop { from { transform: scale(.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .done-slot {
+      display: inline-block; margin: 18px 0 6px; padding: 14px 24px;
+      background: var(--tint); border-radius: 12px;
+      font-size: 1.05rem; font-weight: 700; color: var(--purple); letter-spacing: -.02em;
     }
-    .person-name { font-size: 14px; font-weight: 700; color: var(--purple); margin-bottom: 2px; }
-    .person-role { font-size: 12.5px; color: var(--muted); line-height: 1.4; }
-    .person-bio { font-size: 11.5px; color: var(--muted); line-height: 1.5; margin-top: 3px; }
 
-    /* ── Footer ─────────────────────────────────────────────────────────── */
-    .site-footer {
-      background: var(--purple); color: rgba(255,255,255,0.55);
-      padding: 24px 20px; text-align: center; font-size: 12px; line-height: 1.7;
+    /* ── Motion ─────────────────────────────────────────────────────────── */
+    .reveal { opacity: 0; transform: translateY(16px); }
+    .reveal.in {
+      opacity: 1; transform: none;
+      transition: opacity .6s var(--ease), transform .6s var(--ease);
     }
-    .site-footer a { color: rgba(255,255,255,0.75); }
+    .step.active > .col { animation: stepIn .45s var(--ease) both; }
+    @keyframes stepIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .001ms !important; animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important; scroll-behavior: auto !important;
+      }
+      .reveal { opacity: 1 !important; transform: none !important; }
+      .btn:hover:not(:disabled), .slot label:hover { transform: none; }
+    }
+
+    /* ── Responsive: rail becomes a top bar ─────────────────────────────── */
+    @media (max-width: 900px) {
+      .shell { display: block; }
+      .rail {
+        width: auto; flex: none; height: auto;
+        position: sticky; top: var(--head-h); z-index: 50;
+        padding: 0; border-right: none; border-bottom: 1px solid var(--line);
+        background: rgba(250,248,252,.92);
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      }
+      .rail-title, .rail-steps { display: none; }
+      .rail-mobile { display: block; }
+      .rm-row {
+        display: flex; align-items: baseline; justify-content: space-between;
+        gap: 12px; padding: 13px 20px 11px;
+      }
+      .rm-name { font-size: 14px; font-weight: 700; color: var(--purple); letter-spacing: -.01em; }
+      .rm-count { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+      .rm-track { height: 3px; background: var(--line-soft); }
+      .rm-fill {
+        height: 100%; width: 0;
+        background: linear-gradient(90deg, var(--purple), var(--accent));
+        transition: width .55s var(--ease);
+      }
+      .content { padding: 36px 20px 80px; }
+    }
+    @media (max-width: 560px) {
+      .facts .k { flex-basis: 78px; font-size: 10px; }
+      .btn-row { flex-direction: column-reverse; }
+      .btn-row .btn.ghost { flex: 1; }
+    }
   </style>
 </head>
 <body>
 
-<!-- ── Header ──────────────────────────────────────────────────────────── -->
 <header class="site-header">
-  <img src="assets/UCL_Logo,_plain_background.svg" alt="UCL" style="height:32px;"
-       onerror="this.outerHTML='<div class=&quot;logo-placeholder&quot;>UCL</div>'">
-  <span class="header-name">University College London</span>
+  <div class="brand">
+    <img src="assets/UCL_Logo,_plain_background.svg" alt="UCL" style="height:26px;"
+         onerror="this.outerHTML='<div class=&quot;logo-placeholder&quot;>UCL</div>'">
+    <span class="brand-name">Minds in Motion</span>
+  </div>
+  <span class="head-note">September 2026</span>
 </header>
 
+<div class="shell">
 
-<!-- ── Hero ────────────────────────────────────────────────────────────── -->
-<section class="hero">
-  <div class="hero-image" aria-hidden="true">
-    <picture>
-      <source media="(max-width: 767px)" srcset="assets/images/mobile_art.svg">
-      <img src="assets/images/hero-deep.svg"
-           alt="Participants wearing biosensors at UCL PEARL"
-           style="width:100%;height:260px;object-fit:cover;display:block;">
-    </picture>
-  </div>
-  <div class="hero-body">
-    <p class="hero-eyebrow">UCL Research Study · September 2026</p>
-    <h1>Minds in Motion</h1>
-    <p class="hero-tagline">One hour at UCL PEARL, one of Europe's most advanced human behaviour lab.<br>Help us understand how buildings shape the way people think.</p>
-  </div>
-</section>
-
-
-<!-- ── Tab bar ─────────────────────────────────────────────────────────── -->
-<nav class="tabs" role="tablist" aria-label="Page sections">
-  <button class="tab-btn active" role="tab" aria-selected="true"
-          aria-controls="panel-signup" data-tab="panel-signup">Sign Up</button>
-  <button class="tab-btn" role="tab" aria-selected="false"
-          aria-controls="panel-about" data-tab="panel-about">About the project</button>
-  <button class="tab-btn" role="tab" aria-selected="false"
-          aria-controls="panel-people" data-tab="panel-people">People</button>
-</nav>
-
-
-<!-- ════════════════════════════════════════════════════════════════════════
-     TAB: Sign Up
-     ════════════════════════════════════════════════════════════════════════ -->
-<div class="tab-panel active" id="panel-signup" role="tabpanel" aria-label="Sign up">
-  <div class="tab-inner">
-
-    <div class="signup-pitch">
-      <h2 class="pitch-heading">Join the next chapter</h2>
-      <p class="pitch-text">
-        Minds in Motion is a <strong>one-hour</strong> research session at
-        <strong>UCL PEARL</strong>, one of Europe's most advanced human behaviour labs.
-        The <strong>September 2026</strong> schedule is still being confirmed.
-        Sign up now and you will be first to know when bookings open.
-      </p>
-      <ul class="pitch-bullets">
-        <li>First access when September bookings open</li>
-        <li>A one-hour hands-on session at one of Europe's most advanced research labs</li>
-        <li>Your participation helps advance how the world's buildings are designed</li>
-      </ul>
-    </div>
-
-    <!-- Legacy callout -->
-    <div class="legacy-callout">
-      <p class="legacy-callout__label">100 Minds in Motion · September 2024</p>
-      <p class="legacy-callout__text">
-        In the first study, <strong>100 participants</strong> from industry,
-        academia, and the general public explored architectural spaces at UCL PEARL
-        while wearing EEG headsets, eye trackers, and motion trackers.
-        The experiment was covered by
-        <a href="https://www.technologyreview.com/2024/09/13/1103935/neuroscientists-architects-enormous-laboratory-make-buildings-better/" target="_blank" rel="noopener">MIT Technology Review</a>,
-        <a href="https://www.ucl.ac.uk/news/2024/sep/large-scale-experiment-brings-real-world-lab-design-better-spaces" target="_blank" rel="noopener">UCL News</a>, and
-        <a href="https://www.research.autodesk.com/blog/designing-for-experience-architecture-neuroscience-movement/" target="_blank" rel="noopener">Autodesk Research</a>.
-        This new Minds in Motion study continues that research.
-      </p>
-    </div>
-
-    <!-- Objection-handling FAQ -->
-    <div class="objections">
-      <h3 class="objections__heading">Common questions</h3>
-      <div class="objection">
-        <p class="objection__q">Where is UCL PEARL?</p>
-        <p class="objection__a">PEARL is in Dagenham, East London, right beside Dagenham Heathway
-        station on the District line. Full travel info will be sent with your booking confirmation.</p>
+  <!-- ── Left rail / mobile progress ──────────────────────────────────── -->
+  <nav class="rail" aria-label="Progress">
+    <p class="rail-title">Your booking</p>
+    <div class="rail-steps">
+      <span class="rail-track" aria-hidden="true"></span>
+      <span class="rail-fill" id="railFill" aria-hidden="true"></span>
+      <div class="rail-step current" id="rail-1">
+        <span class="rail-dot">1</span><span class="rail-label">The study</span>
       </div>
-      <div class="objection">
-        <p class="objection__q">Will I be compensated?</p>
-        <p class="objection__a">Compensation details will be confirmed over the coming weeks.
-        Participation is entirely voluntary and you can withdraw at any time.</p>
+      <div class="rail-step" id="rail-2">
+        <span class="rail-dot">2</span><span class="rail-label">Pick a time</span>
+      </div>
+      <div class="rail-step" id="rail-3">
+        <span class="rail-dot">3</span><span class="rail-label">About you</span>
+      </div>
+      <div class="rail-step" id="rail-4">
+        <span class="rail-dot">4</span><span class="rail-label">Confirm</span>
       </div>
     </div>
 
-    <!-- Success state -->
-    <div class="success-card" id="successCard" role="status" aria-live="polite">
-      <div class="success-tick" aria-hidden="true">&#10003;</div>
-      <h3 id="successHeading">You're in.</h3>
-      <p>
-        We'll email you as soon as the September 2026 session schedule is confirmed.
-        You'll be first to book your slot.
-      </p>
-      <p style="margin-top:12px;">
-        In the meantime, explore
-        <a href="#" class="tab-link" data-tab="panel-about">the science behind the study</a>
-        or meet <a href="#" class="tab-link" data-tab="panel-people">the research team</a>.
-      </p>
-    </div>
-
-    <!-- Form -->
-    <form id="signupForm" novalidate aria-label="Participant signup form">
-      <div class="form-label-row">
-        <h2 class="form-heading">Your details</h2>
-        <span class="required-note">* all fields required</span>
+    <div class="rail-mobile">
+      <div class="rm-row">
+        <span class="rm-name" id="rmName">The study</span>
+        <span class="rm-count" id="rmCount">Step 1 of 4</span>
       </div>
-      <div class="form-grid">
+      <div class="rm-track"><div class="rm-fill" id="rmFill"></div></div>
+    </div>
+  </nav>
 
-        <div class="field">
-          <label class="field-label" for="firstName">
-            First name <span class="req" aria-hidden="true">*</span>
-          </label>
-          <input type="text" id="firstName" name="firstName"
-                 autocomplete="given-name" required placeholder="Alex">
+  <main class="content">
+
+    <!-- ══ 1 — The study ═══════════════════════════════════════════════ -->
+    <section class="step active" id="step-info">
+      <div class="col">
+        <p class="eyebrow reveal">UCL Research Study</p>
+        <h1 class="reveal" id="head-info" tabindex="-1">Minds in&nbsp;Motion</h1>
+        <p class="lede reveal">
+          A study at UCL PEARL, led by Professor Hugo Spiers and Dr Fiona Zisch,
+          University College London.
+        </p>
+
+        <ul class="facts">
+          <li class="reveal"><span class="k">When</span><span>15&ndash;17 September 2026<br><b>2 hours</b>, a single visit</span></li>
+          <li class="reveal"><span class="k">Where</span><span>UCL PEARL, Dagenham<br>District line to Dagenham&nbsp;Heathway</span></li>
+          <li class="reveal"><span class="k">Thank you</span><span><b>&pound;60</b> for your time</span></li>
+          <li class="reveal"><span class="k">Kit</span><span>No EEG or head-worn sensors in this session</span></li>
+        </ul>
+
+        <div class="pull reveal">
+          <b>Places are limited and held for one person.</b>
+          Please book only if you are confident you can attend.
         </div>
 
-        <div class="field">
-          <label class="field-label" for="lastName">
-            Last name <span class="req" aria-hidden="true">*</span>
-          </label>
-          <input type="text" id="lastName" name="lastName"
-                 autocomplete="family-name" required placeholder="Patel">
-        </div>
+        <button type="button" class="btn reveal" id="startBtn">
+          <span class="btn-label">Choose a time</span>
+          <span class="arrow" aria-hidden="true">&rarr;</span>
+        </button>
+      </div>
+    </section>
 
-        <div class="field full" role="group" aria-labelledby="sex-label">
-          <span class="field-label" id="sex-label">
-            Sex <span class="req" aria-hidden="true">*</span>
-          </span>
-          <div class="radio-group">
-            <div class="radio-option">
-              <input type="radio" id="sexFemale" name="sex" value="Female" required>
-              <label for="sexFemale">Female</label>
-            </div>
-            <div class="radio-option">
-              <input type="radio" id="sexMale" name="sex" value="Male">
-              <label for="sexMale">Male</label>
-            </div>
-            <div class="radio-option">
-              <input type="radio" id="sexPreferNot" name="sex" value="Prefer not to say">
-              <label for="sexPreferNot">Prefer not to say</label>
-            </div>
+    <!-- ══ 2 — Pick a time ═════════════════════════════════════════════ -->
+    <section class="step" id="step-slot">
+      <div class="col">
+        <h2 id="head-slot" tabindex="-1">Pick a time</h2>
+        <p class="lede">All times London.</p>
+
+        <div class="label-row" style="margin-top:34px;">
+          <h3>Your details</h3>
+          <span class="note">Required</span>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label class="field-label" for="firstName">First name <span class="req">*</span></label>
+            <input type="text" id="firstName" autocomplete="given-name" placeholder="Alex">
+          </div>
+          <div class="field">
+            <label class="field-label" for="lastName">Last name <span class="req">*</span></label>
+            <input type="text" id="lastName" autocomplete="family-name" placeholder="Patel">
+          </div>
+          <div class="field full">
+            <label class="field-label" for="email">Email <span class="req">*</span></label>
+            <input type="email" id="email" autocomplete="email" inputmode="email" placeholder="you@example.com">
           </div>
         </div>
 
-        <div class="field">
-          <label class="field-label" for="age">
-            Age <span class="req" aria-hidden="true">*</span>
-          </label>
-          <input type="number" id="age" name="age"
-                 min="18" max="120" required
-                 placeholder="34" inputmode="numeric">
+        <div class="label-row" style="margin-top:34px;">
+          <h3>Sessions</h3>
         </div>
 
-        <div class="field">
-          <label class="field-label" for="email">
-            Email <span class="req" aria-hidden="true">*</span>
-          </label>
-          <input type="email" id="email" name="email"
-                 autocomplete="email" required
-                 placeholder="you@example.com" inputmode="email">
+        <div class="notice" id="slotNotice" role="status" aria-live="polite"></div>
+
+        <div class="state" id="slotsLoading"><p>Loading available times&hellip;</p></div>
+        <div class="state" id="slotsError">
+          <p>We couldn't load the available times.</p>
+          <button type="button" class="btn ghost" id="slotsRetryBtn">Try again</button>
         </div>
 
-        <div class="field full">
-          <label class="field-label" for="institution">
-            Organisation / University <span class="req" aria-hidden="true">*</span>
-          </label>
-          <input type="text" id="institution" name="institution" required
-                 placeholder="e.g. Autodesk, Google, UCL, NHS, self-employed">
+        <div id="slotsContainer"></div>
+
+        <div class="error" id="detailsError" role="alert" aria-live="assertive"></div>
+
+        <div class="btn-row">
+          <button type="button" class="btn ghost" id="infoBackBtn">Back</button>
+          <button type="button" class="btn" id="detailsContinueBtn">
+            <span class="btn-label">Continue</span>
+            <span class="spinner" aria-hidden="true"></span>
+          </button>
+        </div>
+        <p class="note" style="margin-top:14px;">
+          Your place is not held until you finish the next step.
+        </p>
+      </div>
+    </section>
+
+    <!-- ══ 3 — About you ═══════════════════════════════════════════════ -->
+    <section class="step" id="step-questions">
+      <div class="col">
+        <h2 id="head-questions" tabindex="-1">About you</h2>
+        <p class="lede">
+          A short questionnaire, around 15 minutes. It must be complete before
+          your place can be confirmed.
+        </p>
+
+        <div class="progress">
+          <div class="progress-meta">
+            <b id="qPageLabel">Page 1 of 1</b>
+            <span id="qCountLabel">0 of 0 answered</span>
+          </div>
+          <div class="track"><div class="fill" id="qProgressFill"></div></div>
         </div>
 
-      </div><!-- /.form-grid -->
+        <form id="questionForm" novalidate><div id="questionsContainer"></div></form>
 
-      <div class="form-error" id="formError" role="alert"></div>
+        <div class="error" id="questionError" role="alert" aria-live="assertive"></div>
 
-      <button type="submit" class="btn-submit" id="submitBtn">
-        <span class="btn-label">Register my interest</span>
-        <span class="spinner" aria-hidden="true"></span>
-      </button>
+        <div class="btn-row">
+          <button type="button" class="btn ghost" id="qBackBtn">Back</button>
+          <button type="button" class="btn" id="qNextBtn"><span class="btn-label">Next</span></button>
+        </div>
+      </div>
+    </section>
 
-    </form>
+    <!-- ══ 4 — Confirm ═════════════════════════════════════════════════ -->
+    <section class="step" id="step-review">
+      <div class="col">
+        <h2 id="head-review" tabindex="-1">Confirm</h2>
+        <p class="lede">Your place is held from the moment you confirm.</p>
 
-    <div class="objection" style="margin-top:20px;">
-      <p class="objection__q">What happens to my data?</p>
-      <p class="objection__a">Personal data is held on UCL servers and used solely for
-      participant recruitment. Study data is anonymised before analysis. Full details in
-      the <a href="https://www.ucl.ac.uk/legal-services/privacy/ucl-general-privacy-notice"
-      target="_blank" rel="noopener">UCL Privacy Notice</a>.</p>
-    </div>
+        <div class="notice" id="reviewNotice" role="status" aria-live="polite"></div>
 
-  </div>
+        <div class="card" style="margin-top:26px;">
+          <div class="row"><span class="k">Session</span><span class="v" id="reviewSlot">&mdash;</span></div>
+          <div class="row"><span class="k">Name</span><span class="v" id="reviewName">&mdash;</span></div>
+          <div class="row"><span class="k">Email</span><span class="v" id="reviewEmail">&mdash;</span></div>
+          <div class="row"><span class="k">Questionnaire</span><span class="v" id="reviewAnswers">&mdash;</span></div>
+        </div>
+
+        <label class="consent" for="commitCheck">
+          <input type="checkbox" id="commitCheck">
+          <span class="box" aria-hidden="true">&#10003;</span>
+          <span class="txt">
+            I can attend this session, and I will let the team know as early as
+            possible if that changes.
+          </span>
+        </label>
+
+        <div class="error" id="reviewError" role="alert" aria-live="assertive"></div>
+
+        <div class="btn-row">
+          <button type="button" class="btn ghost" id="reviewBackBtn">Back</button>
+          <button type="button" class="btn" id="confirmBtn" disabled>
+            <span class="btn-label">Confirm my place</span>
+            <span class="spinner" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ Success ═════════════════════════════════════════════════════ -->
+    <section class="step" id="step-success">
+      <div class="col">
+        <div class="done" role="status" aria-live="polite">
+          <div class="tick" aria-hidden="true">&#10003;</div>
+          <h2 id="successHeading" tabindex="-1">You're booked.</h2>
+          <div class="done-slot" id="successSlot">&mdash;</div>
+          <p class="lede" style="margin-top:16px;">
+            A confirmation email with travel details is on its way.
+          </p>
+          <p class="note" style="margin-top:12px;">
+            If you can no longer make it, email us as early as you can so we can
+            offer your place to someone else.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
 </div>
-
-
-<!-- ════════════════════════════════════════════════════════════════════════
-     TAB: About the project
-     ════════════════════════════════════════════════════════════════════════ -->
-<div class="tab-panel" id="panel-about" role="tabpanel" aria-label="About the project">
-  <div class="tab-inner">
-    <p class="about-intro">Everything you need to know. Tap to expand.</p>
-
-    <details class="accord">
-      <summary class="accord-summary">
-        What is Minds in Motion?
-        <span class="accord-chevron" aria-hidden="true">›</span>
-      </summary>
-      <div class="accord-body">
-        <p>
-          Minds in Motion is a scientific study at University College London investigating
-          how the built environment shapes the way people think, move, and feel. It is a
-          follow-up to
-          <!-- Replace [100-MIM-URL] with the actual study page or UCL News URL -->
-          <a href="[100-MIM-URL]" target="_blank" rel="noopener">100 Minds in Motion</a>,
-          a landmark experiment that took place at <strong>UCL PEARL</strong> in
-          <strong>September 2024</strong>.
-        </p>
-        <p>
-          The study is led by <strong>Professor Hugo Spiers</strong> (UCL Experimental
-          Psychology) and <strong>Dr Fiona Zisch</strong> (UCL Bartlett School of
-          Architecture). It takes place in <strong>September 2026</strong>. We are now
-          in our recruitment phase and will share the full schedule with all registered
-          participants as soon as it is confirmed.
-        </p>
-      </div>
-    </details>
-
-    <details class="accord">
-      <summary class="accord-summary">
-        What will I actually do?
-        <span class="accord-chevron" aria-hidden="true">›</span>
-      </summary>
-      <div class="accord-body">
-        <p>
-          You will visit <strong>UCL PEARL</strong>, a unique research facility in Dagenham,
-          East London, and be guided through a specially configured architectural space.
-          You might wear a set of lightweight, non-invasive <strong>biosensors</strong> that
-          capture things like movement, EEG, and gaze. The sensors
-          are comfortable to wear and are fitted by a member of the research team before
-          you begin.
-        </p>
-        <p>
-          No special knowledge, skills, or fitness level is needed. A researcher will brief
-          you fully before you start, and you are free to stop at any point. The whole
-          session lasts roughly <strong>one hour</strong> in total, including setup and debrief.
-        </p>
-      </div>
-    </details>
-
-    <details class="accord">
-      <summary class="accord-summary">
-        When and where?
-        <span class="accord-chevron" aria-hidden="true">›</span>
-      </summary>
-      <div class="accord-body">
-        <p>
-          The study takes place in <strong>September 2026</strong> at
-          <strong>UCL PEARL</strong> (Person-Environment-Activity Research Laboratory)
-          in Dagenham, East London. Exact dates and session times are being confirmed
-          and will be shared with all registered participants as soon as they are set.
-        </p>
-        <p>
-          UCL PEARL is accessible by public transport. Full travel and access information
-          will be included with your booking confirmation. If you have specific requirements,
-          please flag them when we get in touch.
-        </p>
-      </div>
-    </details>
-
-    <details class="accord">
-      <summary class="accord-summary">
-        Who can take part?
-        <span class="accord-chevron" aria-hidden="true">›</span>
-      </summary>
-      <div class="accord-body">
-        <p>
-          The study is open to all adults aged <strong>18 and over</strong>. We actively
-          encourage applications from people across all backgrounds and experiences.
-        </p>
-        <p>
-          You do not need any scientific background or specialist knowledge. 
-        </p>
-        <p> 
-          Participation is entirely voluntary. You may withdraw at any time, before or during the study,
-          without giving a reason and without any consequence.
-        </p>
-      </div>
-    </details>
-
-    <details class="accord">
-      <summary class="accord-summary">
-        Why does this research matter?
-        <span class="accord-chevron" aria-hidden="true">›</span>
-      </summary>
-      <div class="accord-body">
-        <p>
-          Most of us spend more than <strong>90%</strong> of our lives inside buildings,
-          yet we know surprisingly little about how the spaces around us affect the way we
-          think, feel, and behave. <strong>Neuroarchitecture</strong> sits at the intersection
-          of architecture and neuroscience, using cutting-edge measurement tools to ask
-          questions that neither field could answer alone.
-        </p>
-        <p>
-          The findings have direct real-world applications. Understanding how spatial design
-          influences stress, attention, and navigation can change how we design
-          <strong>hospitals</strong>, <strong>schools</strong>, <strong>stations</strong>,
-          and other public buildings. By taking part, you contribute evidence that will shape the
-          environments of millions of people.
-        </p>
-      </div>
-    </details>
-
-    <details class="accord">
-      <summary class="accord-summary">
-        What was 100 Minds in Motion?
-        <span class="accord-chevron" aria-hidden="true">›</span>
-      </summary>
-      <div class="accord-body">
-        <p>
-          In <strong>September 2024</strong>, over <strong>100 participants</strong> from a
-          wide range of backgrounds took part in an experiment at <strong>UCL PEARL</strong>.
-          Using moveable architectural partitions, overhead cameras,
-          and wearable <strong>biosensors</strong> (including <strong>EEG</strong> headsets,
-          and <strong>eye trackers</strong>), researchers studied how different spatial
-          configurations affect the way people move, navigate, and respond physiologically
-          across <strong>4,000 m&#178;</strong> of controllable lab space.
-        </p>
-        <p>
-          The study received coverage from
-          <a href="https://www.technologyreview.com/2024/09/13/1103935/neuroscientists-architects-enormous-laboratory-make-buildings-better/" target="_blank" rel="noopener">MIT Technology Review</a>,
-          <a href="https://www.ucl.ac.uk/news/2024/sep/large-scale-experiment-brings-real-world-lab-design-better-spaces" target="_blank" rel="noopener">UCL News</a>, and
-          <a href="https://www.research.autodesk.com/blog/designing-for-experience-architecture-neuroscience-movement/" target="_blank" rel="noopener">Autodesk Research</a>.
-          Minds in Motion continues and expands this research programme.
-        </p>
-      </div>
-    </details>
-
-  </div>
-</div>
-
-
-<!-- ════════════════════════════════════════════════════════════════════════
-     TAB: People
-     ════════════════════════════════════════════════════════════════════════ -->
-<div class="tab-panel" id="panel-people" role="tabpanel" aria-label="Research team">
-  <div class="tab-inner">
-    <div class="people-list">
-
-      <div class="person-card">
-        <div class="avatar" aria-hidden="true">
-          <img src="assets/images/people/hugo-spiers.jpeg" alt=""
-               class="avatar-photo" style="filter:grayscale(100%)" onerror="this.remove()">
-          HS
-        </div>
-        <div>
-          <p class="person-name">Prof. Hugo Spiers</p>
-          <p class="person-role">UCL Experimental Psychology</p>
-          <p class="person-bio">Spatial cognition and navigation. PI of Sea Hero Quest (4 million participants).</p>
-        </div>
-      </div>
-
-      <div class="person-card">
-        <div class="avatar" aria-hidden="true">
-          <img src="assets/images/people/fiona-zisch.jpg" alt=""
-               class="avatar-photo" onerror="this.remove()">
-          FZ
-        </div>
-        <div>
-          <p class="person-name">Dr Fiona Zisch</p>
-          <p class="person-role">UCL Bartlett School of Architecture</p>
-          <p class="person-bio">Neuroarchitecture and embodied spatial experience. Co-creator of 100 Minds in Motion.</p>
-        </div>
-      </div>
-
-      <div class="person-card">
-        <div class="avatar" aria-hidden="true">
-          <img src="assets/images/people/sean-hanna.jpeg" alt=""
-               class="avatar-photo" onerror="this.remove()">
-          SH
-        </div>
-        <div>
-          <p class="person-name">Prof. Sean Hanna</p>
-          <p class="person-role">UCL Bartlett School of Architecture</p>
-          <p class="person-bio">Computational approaches to architectural design and space syntax.</p>
-        </div>
-      </div>
-
-      <div class="person-card">
-        <div class="avatar" aria-hidden="true">
-          <img src="assets/images/people/daniel-tang.jpg" alt=""
-               class="avatar-photo" style="filter:grayscale(100%)" onerror="this.remove()">
-          DT
-        </div>
-        <div>
-          <p class="person-name">Daniel Tang</p>
-          <p class="person-role">UCL Bartlett School of Architecture</p>
-          <p class="person-bio">Research and data, Minds in Motion.</p>
-        </div>
-      </div>
-
-      <div class="person-card">
-        <div class="avatar" aria-hidden="true">
-          <img src="assets/images/people/james-moultrie.jpg" alt=""
-               class="avatar-photo" style="filter:grayscale(100%)" onerror="this.remove()">
-          JM
-        </div>
-        <div>
-          <p class="person-name">James Moultrie</p>
-          <p class="person-role">UCL Experimental Psychology</p>
-          <p class="person-bio">Research and data, Minds in Motion.</p>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-
-<!-- ── Footer ──────────────────────────────────────────────────────────── -->
-<footer class="site-footer">
-  <p>
-    <strong style="color:rgba(255,255,255,0.85);">Minds in Motion</strong> is a UCL research study.<br>
-    Ethics approval: UCL Research Ethics Committee
-  </p>
-</footer>
-
 
 <script>
-  // ─────────────────────────────────────────────────────────────────────────
-  // Paste your Power Automate HTTP trigger URL here after setting up the flow.
-  // See microsoft/powerautomate-setup.md for full instructions.
-  // ─────────────────────────────────────────────────────────────────────────
-  const POWER_AUTOMATE_URL = 'https://default1faf88fea9984c5b93c9210a11d9a5.c2.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/4395178daadf45bf9d84fcc07ca49d5c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=NTlB5TNO2nfkinpgEVvQ50wWLmtd5HbFM4qVTq9eDzM';
+  // ═══════════════════════════════════════════════════════════════════════
+  // Power Automate endpoints — see microsoft/powerautomate-setup.md,
+  // section "Booking flows", for how to create these and where to copy the
+  // URLs from. Paste them here with the copy icon; never retype them.
+  // ═══════════════════════════════════════════════════════════════════════
+  const AVAILABILITY_URL = 'PASTE_YOUR_BOOKING_AVAILABILITY_URL_HERE';
+  const CONFIRM_URL      = 'PASTE_YOUR_BOOKING_CONFIRM_URL_HERE';
 
-  // ── Tab switching (exclusive: always exactly one tab active) ──────────────
-  const tabBtns   = document.querySelectorAll('.tab-btn');
-  const tabPanels = document.querySelectorAll('.tab-panel');
+  // Bump whenever QUESTIONS changes in a way that makes old answers
+  // unreadable. In-progress sessions on an older version are discarded, and
+  // the value is stored on every booking row so answers stay interpretable.
+  const QUESTIONNAIRE_VERSION = 'placeholder-v2';
 
-  tabBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      tabBtns.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
-      tabPanels.forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-      btn.setAttribute('aria-selected', 'true');
-      document.getElementById(btn.dataset.tab).classList.add('active');
+  const QUESTIONS_PER_PAGE = 5;
+  const STORAGE_KEY = 'mim-booking-state';
+  const FILLING_FAST_RATIO = 0.8;
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // QUESTIONNAIRE CONTENT — placeholder set, swap for the real instrument.
+  //
+  // Editing this array is the only change needed: pagination, progress,
+  // validation and storage all derive from it. Bump QUESTIONNAIRE_VERSION
+  // above when you do.
+  //
+  // Types: 'single' | 'multi' | 'text' | 'textarea' | 'number' | 'consent'.
+  // Items in section 'Consent' are always placed on their own final page.
+  // ═══════════════════════════════════════════════════════════════════════
+  const LIKERT_5 = ['Strongly disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly agree'];
+
+  const DEMOGRAPHIC_QUESTIONS = [
+    { id: 'd_age_band', section: 'About you', type: 'single', required: true,
+      label: '[PLACEHOLDER] Which age band are you in?',
+      options: ['18-24', '25-34', '35-44', '45-54', '55-64', '65+'] },
+    { id: 'd_sex', section: 'About you', type: 'single', required: true,
+      label: '[PLACEHOLDER] What is your sex?',
+      options: ['Female', 'Male', 'Prefer not to say'] },
+    { id: 'd_gender', section: 'About you', type: 'text', required: false,
+      label: '[PLACEHOLDER] How would you describe your gender? (optional)' },
+    { id: 'd_handedness', section: 'About you', type: 'single', required: true,
+      label: '[PLACEHOLDER] Which hand do you write with?',
+      options: ['Right', 'Left', 'Both'] },
+    { id: 'd_education', section: 'About you', type: 'single', required: true,
+      label: '[PLACEHOLDER] What is the highest level of education you have completed?',
+      options: ['Secondary school', 'Further education / college', 'Undergraduate degree',
+                'Postgraduate degree', 'Doctorate', 'Prefer not to say'] },
+    { id: 'd_sector', section: 'About you', type: 'single', required: true,
+      label: '[PLACEHOLDER] Which best describes what you do?',
+      options: ['Architecture or design', 'Science or research', 'Technology',
+                'Healthcare', 'Education', 'Student', 'Other'] },
+    { id: 'd_language', section: 'About you', type: 'text', required: true,
+      label: '[PLACEHOLDER] What is your first language?' },
+    { id: 'd_london_years', section: 'Everyday life', type: 'single', required: true,
+      label: '[PLACEHOLDER] How long have you lived in or around London?',
+      options: ['I do not live in London', 'Less than a year', '1-5 years',
+                '5-10 years', 'More than 10 years'] },
+    { id: 'd_nav_confidence', section: 'Everyday life', type: 'single', required: true,
+      label: '[PLACEHOLDER] How confident are you finding your way around an unfamiliar building?',
+      options: ['Not at all confident', 'Slightly confident', 'Moderately confident',
+                'Very confident', 'Extremely confident'] },
+    { id: 'd_nav_frequency', section: 'Everyday life', type: 'single', required: true,
+      label: '[PLACEHOLDER] How often do you visit buildings you have never been in before?',
+      options: ['Rarely', 'A few times a year', 'Monthly', 'Weekly', 'Most days'] },
+    { id: 'd_vision', section: 'Practical', type: 'multi', required: false,
+      label: '[PLACEHOLDER] Do you use any of the following? (select all that apply)',
+      options: ['Glasses', 'Contact lenses', 'Hearing aid', 'None of these'] },
+    { id: 'd_access', section: 'Practical', type: 'textarea', required: false,
+      label: '[PLACEHOLDER] Do you have any access requirements we should know about? (optional)',
+      hint: 'For example step-free access, a quiet space, or anything else that would help.' }
+  ];
+
+  // A real personality inventory runs 40+ items; this placeholder set is the
+  // same length so pagination and fatigue are realistic during testing.
+  const PERSONALITY_ITEMS = [
+    'is talkative in a group of strangers', 'tends to find fault with others',
+    'does a thorough job', 'gets nervous easily', 'has an active imagination',
+    'is reserved in new situations', 'is helpful and unselfish with others',
+    'can be somewhat careless', 'is relaxed and handles stress well',
+    'is curious about many different things', 'is full of energy',
+    'starts quarrels with others', 'is a reliable worker', 'worries a lot',
+    'is ingenious, a deep thinker', 'generates a lot of enthusiasm',
+    'has a forgiving nature', 'tends to be disorganised',
+    'is emotionally stable, not easily upset', 'is inventive',
+    'tends to be quiet', 'is generally trusting', 'tends to be lazy',
+    'can be moody', 'values artistic, aesthetic experiences',
+    'is sometimes shy or inhibited', 'is considerate and kind to almost everyone',
+    'does things efficiently', 'remains calm in tense situations',
+    'prefers work that is routine', 'is outgoing, sociable',
+    'is sometimes rude to others', 'makes plans and follows through with them',
+    'gets tense easily', 'likes to reflect and play with ideas',
+    'has few artistic interests', 'likes to co-operate with others',
+    'is easily distracted', 'is sophisticated in art, music, or literature',
+    'notices details other people miss'
+  ];
+
+  const PERSONALITY_QUESTIONS = PERSONALITY_ITEMS.map((item, i) => ({
+    id: 'p' + (i + 1), section: 'How you see yourself', type: 'single',
+    required: true, options: LIKERT_5,
+    label: '[PLACEHOLDER] I see myself as someone who ' + item
+  }));
+
+  // ── Consent ────────────────────────────────────────────────────────────
+  // Always rendered last, on their own page. Swap this placeholder wording
+  // for the approved consent form text; keep type 'consent' and
+  // required: true so each statement must be ticked individually.
+  const CONSENT_QUESTIONS = [
+    { id: 'c_read', section: 'Consent', type: 'consent', required: true,
+      label: '[PLACEHOLDER] I have read and understood the participant information sheet.',
+      link: { text: 'Read the information sheet', href: '[PLACEHOLDER: participant information sheet URL]' } },
+    { id: 'c_voluntary', section: 'Consent', type: 'consent', required: true,
+      label: '[PLACEHOLDER] I understand that taking part is voluntary and that I may withdraw at any time, without giving a reason.' },
+    { id: 'c_data', section: 'Consent', type: 'consent', required: true,
+      label: '[PLACEHOLDER] I understand how my data will be stored and used, and that it will be anonymised before analysis.' },
+    { id: 'c_agree', section: 'Consent', type: 'consent', required: true,
+      label: '[PLACEHOLDER] I agree to take part in this study.' }
+  ];
+
+  const QUESTIONS = DEMOGRAPHIC_QUESTIONS
+    .concat(PERSONALITY_QUESTIONS)
+    .concat(CONSENT_QUESTIONS);
+
+  // Consent always gets its own final page — it should never share a screen
+  // with questionnaire items.
+  const PAGES = (function () {
+    const pages = [], main = [], consent = [];
+    QUESTIONS.forEach(q => (q.type === 'consent' ? consent : main).push(q));
+    for (let i = 0; i < main.length; i += QUESTIONS_PER_PAGE) {
+      pages.push(main.slice(i, i + QUESTIONS_PER_PAGE));
+    }
+    if (consent.length) pages.push(consent);
+    return pages;
+  })();
+  const TOTAL_PAGES = PAGES.length;
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // State
+  // ═══════════════════════════════════════════════════════════════════════
+  let state = {
+    firstName: '', lastName: '', email: '',
+    slotId: null, answers: {}, page: 0,
+    version: QUESTIONNAIRE_VERSION
+  };
+
+  let slots = [];
+  let isSubmitting = false;
+  let returnToReview = false;
+
+  const $ = (id) => document.getElementById(id);
+
+  function saveState() {
+    try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* private mode */ }
+  }
+  function restoreState() {
+    let raw;
+    try { raw = sessionStorage.getItem(STORAGE_KEY); } catch (e) { return; }
+    if (!raw) return;
+    try {
+      const saved = JSON.parse(raw);
+      // Answers keyed to questions that no longer exist are worse than none,
+      // so a version mismatch discards the whole session.
+      if (saved && saved.version === QUESTIONNAIRE_VERSION) state = Object.assign(state, saved);
+      else sessionStorage.removeItem(STORAGE_KEY);
+    } catch (e) { sessionStorage.removeItem(STORAGE_KEY); }
+  }
+  function clearState() {
+    try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Steps + rail
+  // ═══════════════════════════════════════════════════════════════════════
+  const STEPS = {
+    info:      { el: 'step-info',      head: 'head-info',      n: 1, name: 'The study' },
+    slot:      { el: 'step-slot',      head: 'head-slot',      n: 2, name: 'Pick a time' },
+    questions: { el: 'step-questions', head: 'head-questions', n: 3, name: 'About you' },
+    review:    { el: 'step-review',    head: 'head-review',    n: 4, name: 'Confirm' },
+    success:   { el: 'step-success',   head: 'successHeading', n: 4, name: 'Booked' }
+  };
+  const TOTAL_STEPS = 4;
+
+  function showStep(name) {
+    const step = STEPS[name];
+    Object.keys(STEPS).forEach(k => $(STEPS[k].el).classList.remove('active'));
+    $(step.el).classList.add('active');
+
+    const done = name === 'success';
+    for (let i = 1; i <= TOTAL_STEPS; i++) {
+      const item = $('rail-' + i);
+      item.classList.toggle('current', i === step.n && !done);
+      item.classList.toggle('done', i < step.n || done);
+    }
+    const pct = done ? 100 : ((step.n - 1) / (TOTAL_STEPS - 1)) * 100;
+    $('railFill').style.height = pct + '%';
+    $('rmFill').style.width = (done ? 100 : (step.n / TOTAL_STEPS) * 100) + '%';
+    $('rmName').textContent = step.name;
+    $('rmCount').textContent = done ? 'Complete' : 'Step ' + step.n + ' of ' + TOTAL_STEPS;
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    revealIn($(step.el));
+    // Move focus so keyboard and screen-reader users aren't stranded at the
+    // bottom of the step they just left.
+    const head = $(step.head);
+    if (head) head.focus({ preventScroll: true });
+  }
+
+  function showError(el, msg) {
+    el.textContent = msg; el.style.display = 'block';
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  const hideError  = (el) => { el.style.display = 'none'; };
+  const showNotice = (el, msg) => { el.innerHTML = msg; el.style.display = 'block'; };
+  const hideNotice = (el) => { el.style.display = 'none'; };
+
+  function setLoading(btn, on, labelOn, labelOff) {
+    btn.disabled = on;
+    btn.classList.toggle('loading', on);
+    const label = btn.querySelector('.btn-label');
+    if (label) label.textContent = on ? labelOn : labelOff;
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  // ── Scroll reveal ──────────────────────────────────────────────────────
+  // Guarded hard: if IntersectionObserver is missing, motion is reduced, or
+  // an observer never fires, everything must still end up visible. A reveal
+  // that silently fails would leave a blank page.
+  const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let observer = null;
+  if (!REDUCED && 'IntersectionObserver' in window) {
+    observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target;
+        const delay = parseInt(el.dataset.revealDelay || '0', 10);
+        setTimeout(() => el.classList.add('in'), delay);
+        observer.unobserve(el);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+  }
+  function revealIn(scope) {
+    const items = scope.querySelectorAll('.reveal:not(.in)');
+    if (!observer) { items.forEach(el => el.classList.add('in')); return; }
+    items.forEach((el, i) => {
+      el.dataset.revealDelay = String(Math.min(i * 70, 420));
+      observer.observe(el);
     });
+    // Safety net: never let an unfired observer hide content permanently.
+    setTimeout(() => scope.querySelectorAll('.reveal:not(.in)').forEach(el => el.classList.add('in')), 1500);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Availability (Flow A)
+  // ═══════════════════════════════════════════════════════════════════════
+  async function fetchAvailability(email) {
+    const res = await fetch(AVAILABILITY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email || '' }),
+      redirect: 'follow'
+    });
+    const data = await res.json();
+    if (!data || !Array.isArray(data.slots)) throw new Error('Malformed availability response.');
+    return data;
+  }
+
+  async function loadSlots() {
+    $('slotsLoading').style.display = 'block';
+    $('slotsError').style.display = 'none';
+    $('slotsContainer').innerHTML = '';
+    try {
+      slots = (await fetchAvailability(state.email)).slots;
+      renderSlots();
+    } catch (e) {
+      $('slotsError').style.display = 'block';
+    } finally {
+      $('slotsLoading').style.display = 'none';
+    }
+  }
+
+  function badgeFor(slot) {
+    if (slot.full || slot.booked >= slot.capacity) return { cls: 'full', text: 'Full' };
+    if (slot.booked / slot.capacity >= FILLING_FAST_RATIO) return { cls: 'filling', text: 'Filling fast' };
+    return { cls: 'available', text: 'Available' };
+  }
+
+  function renderSlots() {
+    const container = $('slotsContainer');
+    container.innerHTML = '';
+
+    // Group by the date carried in each label, preserving the flow's order.
+    const groups = [];
+    slots.forEach(slot => {
+      const day = (slot.label || '').split(',')[0] || 'Session';
+      let g = groups.find(x => x.day === day);
+      if (!g) { g = { day: day, items: [] }; groups.push(g); }
+      g.items.push(slot);
+    });
+
+    // A slot that filled while still selected must not stay selected.
+    if (state.slotId && !slots.some(s => s.slotId === state.slotId && !s.full)) {
+      state.slotId = null; saveState();
+    }
+
+    groups.forEach(group => {
+      const wrap = document.createElement('div');
+      wrap.className = 'day';
+      const label = document.createElement('p');
+      label.className = 'day-label';
+      label.textContent = group.day;
+      wrap.appendChild(label);
+
+      const grid = document.createElement('div');
+      grid.className = 'slots';
+      grid.setAttribute('role', 'radiogroup');
+      grid.setAttribute('aria-label', group.day);
+
+      group.items.forEach(slot => {
+        const badge = badgeFor(slot);
+        const isFull = badge.cls === 'full';
+        const time = (slot.label || '').split(',').slice(1).join(',').trim() || slot.label;
+        const opt = document.createElement('div');
+        opt.className = 'slot';
+        opt.innerHTML =
+          '<input type="radio" name="slot" id="slot-' + escapeHtml(slot.slotId) + '"' +
+          ' value="' + escapeHtml(slot.slotId) + '"' + (isFull ? ' disabled' : '') +
+          (state.slotId === slot.slotId ? ' checked' : '') + '>' +
+          '<label for="slot-' + escapeHtml(slot.slotId) + '">' +
+            '<span class="slot-time">' + escapeHtml(time) + '</span>' +
+            '<span class="badge ' + badge.cls + '">' + badge.text + '</span>' +
+          '</label>';
+        opt.querySelector('input').addEventListener('change', (e) => {
+          state.slotId = e.target.value; saveState(); hideError($('detailsError'));
+        });
+        grid.appendChild(opt);
+      });
+
+      wrap.appendChild(grid);
+      container.appendChild(wrap);
+    });
+
+    if (slots.length && slots.every(s => badgeFor(s).cls === 'full')) {
+      showNotice($('slotNotice'),
+        'Every session is currently full. If more places open up we will email ' +
+        'everyone who registered interest.');
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Step 1 → 2
+  // ═══════════════════════════════════════════════════════════════════════
+  $('startBtn').addEventListener('click', () => showStep('slot'));
+  $('infoBackBtn').addEventListener('click', () => showStep('info'));
+  $('slotsRetryBtn').addEventListener('click', loadSlots);
+
+  function readDetails() {
+    state.firstName = $('firstName').value.trim();
+    state.lastName  = $('lastName').value.trim();
+    state.email     = $('email').value.trim();
+    saveState();
+  }
+  ['firstName', 'lastName', 'email'].forEach(id =>
+    $(id).addEventListener('input', readDetails));
+
+  $('detailsContinueBtn').addEventListener('click', async () => {
+    hideError($('detailsError'));
+    readDetails();
+
+    if (!state.firstName || !state.lastName || !state.email)
+      return showError($('detailsError'), 'Please fill in your name and email.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email))
+      return showError($('detailsError'), 'Please enter a valid email address.');
+    if (!state.slotId)
+      return showError($('detailsError'), 'Please choose a session time.');
+
+    setLoading($('detailsContinueBtn'), true, 'Checking…', 'Continue');
+    try {
+      // Re-check with the email attached: catching an existing booking here
+      // saves someone the whole questionnaire before being turned away.
+      const data = await fetchAvailability(state.email);
+      slots = data.slots;
+
+      if (data.alreadyBooked) {
+        renderSlots();
+        setLoading($('detailsContinueBtn'), false, '', 'Continue');
+        return showError($('detailsError'),
+          'That email address already has a place booked. To change it, reply to ' +
+          'your confirmation email.');
+      }
+
+      const chosen = slots.find(s => s.slotId === state.slotId);
+      if (!chosen || badgeFor(chosen).cls === 'full') {
+        renderSlots();
+        setLoading($('detailsContinueBtn'), false, '', 'Continue');
+        return showError($('detailsError'), 'That session just filled. Please choose another time.');
+      }
+
+      renderSlots();
+      setLoading($('detailsContinueBtn'), false, '', 'Continue');
+
+      // Coming back only to re-pick a slot shouldn't replay the questionnaire.
+      if (returnToReview && isQuestionnaireComplete()) {
+        returnToReview = false;
+        goToReview();
+      } else {
+        showStep('questions');
+        renderQuestionPage();
+      }
+    } catch (e) {
+      setLoading($('detailsContinueBtn'), false, '', 'Continue');
+      showError($('detailsError'),
+        'We couldn\'t check availability. Please check your connection and try again.');
+    }
   });
 
-  // ── Tab links in success card ─────────────────────────────────────────────
-  document.querySelectorAll('.tab-link').forEach(a => {
-    a.addEventListener('click', e => {
-      e.preventDefault();
-      const target = a.dataset.tab;
-      tabBtns.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
-      tabPanels.forEach(p => p.classList.remove('active'));
-      const btn = document.querySelector(`[data-tab="${target}"]`);
-      btn.classList.add('active'); btn.setAttribute('aria-selected', 'true');
-      document.getElementById(target).classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+  // ═══════════════════════════════════════════════════════════════════════
+  // Step 3 — questionnaire
+  // ═══════════════════════════════════════════════════════════════════════
+  const isAnswered = (q) => {
+    const a = state.answers[q.id];
+    if (q.type === 'consent') return a === true;
+    return Array.isArray(a) ? a.length > 0 : (a !== undefined && a !== '');
+  };
+  const answeredCount = () => QUESTIONS.filter(isAnswered).length;
+  const isQuestionnaireComplete = () => QUESTIONS.filter(q => q.required).every(isAnswered);
+
+  function renderQuestionPage() {
+    const container = $('questionsContainer');
+    container.innerHTML = '';
+    hideError($('questionError'));
+    let lastSection = null;
+
+    PAGES[state.page].forEach(q => {
+      const block = document.createElement('div');
+      block.className = 'q';
+
+      if (q.section && q.section !== lastSection) {
+        const s = document.createElement('p');
+        s.className = 'q-sect';
+        s.textContent = q.section;
+        block.appendChild(s);
+        lastSection = q.section;
+      }
+
+      const saved = state.answers[q.id];
+
+      if (q.type === 'consent') {
+        const wrap = document.createElement('label');
+        wrap.className = 'consent';
+        wrap.setAttribute('for', q.id);
+        const link = q.link
+          ? ' <a href="' + escapeHtml(q.link.href) + '" target="_blank" rel="noopener">' +
+            escapeHtml(q.link.text) + '</a>'
+          : '';
+        wrap.innerHTML =
+          '<input type="checkbox" id="' + escapeHtml(q.id) + '"' + (saved === true ? ' checked' : '') + '>' +
+          '<span class="box" aria-hidden="true">&#10003;</span>' +
+          '<span class="txt">' + escapeHtml(q.label) + link + '</span>';
+        wrap.querySelector('input').addEventListener('change', (e) => {
+          state.answers[q.id] = e.target.checked;
+          saveState(); updateProgress(); hideError($('questionError'));
+        });
+        block.appendChild(wrap);
+
+      } else if (q.type === 'single' || q.type === 'multi') {
+        const fs = document.createElement('fieldset');
+        const legend = document.createElement('legend');
+        legend.innerHTML = escapeHtml(q.label) + (q.required ? ' <span class="req">*</span>' : '');
+        fs.appendChild(legend);
+
+        const group = document.createElement('div');
+        group.className = 'choices';
+
+        q.options.forEach((opt, i) => {
+          const inputId = q.id + '-' + i;
+          const checked = q.type === 'multi'
+            ? Array.isArray(saved) && saved.indexOf(opt) !== -1
+            : saved === opt;
+          const div = document.createElement('div');
+          div.className = 'choice';
+          div.innerHTML =
+            '<input type="' + (q.type === 'multi' ? 'checkbox' : 'radio') + '"' +
+            ' name="' + escapeHtml(q.id) + '" id="' + escapeHtml(inputId) + '"' +
+            ' value="' + escapeHtml(opt) + '"' + (checked ? ' checked' : '') + '>' +
+            '<label for="' + escapeHtml(inputId) + '">' + escapeHtml(opt) + '</label>';
+          div.querySelector('input').addEventListener('change', () => {
+            if (q.type === 'multi') {
+              state.answers[q.id] = Array.prototype.slice
+                .call(group.querySelectorAll('input:checked')).map(i2 => i2.value);
+            } else {
+              state.answers[q.id] = opt;
+            }
+            saveState(); updateProgress(); hideError($('questionError'));
+          });
+          group.appendChild(div);
+        });
+
+        fs.appendChild(group);
+        block.appendChild(fs);
+
+      } else {
+        const label = document.createElement('label');
+        label.className = 'q-label';
+        label.setAttribute('for', q.id);
+        label.innerHTML = escapeHtml(q.label) + (q.required ? ' <span class="req">*</span>' : '');
+        block.appendChild(label);
+
+        let input;
+        if (q.type === 'textarea') {
+          input = document.createElement('textarea');
+          input.maxLength = 500;          // Excel cells cap out near 32k chars
+        } else {
+          input = document.createElement('input');
+          input.type = q.type === 'number' ? 'number' : 'text';
+          input.maxLength = 200;
+        }
+        input.id = q.id;
+        input.value = saved || '';
+        input.addEventListener('input', () => {
+          state.answers[q.id] = input.value.trim();
+          saveState(); updateProgress(); hideError($('questionError'));
+        });
+        block.appendChild(input);
+      }
+
+      if (q.hint) {
+        const hint = document.createElement('p');
+        hint.className = 'q-hint';
+        hint.textContent = q.hint;
+        block.appendChild(hint);
+      }
+      container.appendChild(block);
     });
+
+    updateProgress();
+    $('qBackBtn').textContent = state.page === 0 ? 'Change slot' : 'Back';
+    $('qNextBtn').querySelector('.btn-label').textContent =
+      state.page === TOTAL_PAGES - 1 ? 'Review booking' : 'Next';
+
+    $('head-questions').focus({ preventScroll: true });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateProgress() {
+    const answered = answeredCount();
+    $('qPageLabel').textContent = 'Page ' + (state.page + 1) + ' of ' + TOTAL_PAGES;
+    $('qCountLabel').textContent = answered + ' of ' + QUESTIONS.length + ' answered';
+    $('qProgressFill').style.width = (answered / QUESTIONS.length * 100) + '%';
+  }
+
+  function validatePage() {
+    const missing = PAGES[state.page].filter(q => q.required && !isAnswered(q));
+    if (!missing.length) return true;
+    const consentOnly = missing.every(q => q.type === 'consent');
+    showError($('questionError'),
+      consentOnly
+        ? 'Please tick every statement to give your consent.'
+        : (missing.length === 1
+            ? 'Please answer the remaining question on this page.'
+            : 'Please answer all ' + missing.length + ' remaining questions on this page.'));
+    return false;
+  }
+
+  $('qNextBtn').addEventListener('click', () => {
+    if (!validatePage()) return;
+    if (state.page < TOTAL_PAGES - 1) {
+      state.page++; saveState(); renderQuestionPage();
+    } else {
+      goToReview();
+    }
   });
 
-  // ── Form submission ───────────────────────────────────────────────────────
-  const form        = document.getElementById('signupForm');
-  const submitBtn   = document.getElementById('submitBtn');
-  const btnLabel    = submitBtn.querySelector('.btn-label');
-  const formError   = document.getElementById('formError');
-  const successCard = document.getElementById('successCard');
+  $('qBackBtn').addEventListener('click', () => {
+    if (state.page === 0) { showStep('slot'); }
+    else { state.page--; saveState(); renderQuestionPage(); }
+  });
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    formError.style.display = 'none';
+  // ═══════════════════════════════════════════════════════════════════════
+  // Step 4 — review and confirm
+  // ═══════════════════════════════════════════════════════════════════════
+  async function goToReview() {
+    hideError($('reviewError'));
+    hideNotice($('reviewNotice'));
 
-    const firstName   = form.firstName.value.trim();
-    const lastName    = form.lastName.value.trim();
-    const sexChecked  = form.querySelector('input[name="sex"]:checked');
-    const ageRaw      = form.age.value.trim();
-    const email       = form.email.value.trim();
-    const institution = form.institution.value.trim();
+    const slot = slots.find(s => s.slotId === state.slotId);
+    $('reviewSlot').textContent    = slot ? slot.label : '—';
+    $('reviewName').textContent    = state.firstName + ' ' + state.lastName;
+    $('reviewEmail').textContent   = state.email;
+    $('reviewAnswers').textContent = answeredCount() + ' of ' + QUESTIONS.length + ' answered';
 
-    if (!firstName || !lastName || !sexChecked || !ageRaw || !email || !institution) {
-      return showError('Please fill in all fields.');
+    // The commitment tick is a fresh, deliberate action every time.
+    $('commitCheck').checked = false;
+    $('confirmBtn').disabled = true;
+
+    showStep('review');
+
+    // Optimistic re-check for a friendlier message than a failed confirm.
+    // Flow B's own check is what actually decides.
+    try {
+      slots = (await fetchAvailability(state.email)).slots;
+      const chosen = slots.find(s => s.slotId === state.slotId);
+      if (!chosen || badgeFor(chosen).cls === 'full') handleSlotLost();
+    } catch (e) { /* the confirm attempt will surface any real problem */ }
+  }
+
+  $('commitCheck').addEventListener('change', (e) => {
+    $('confirmBtn').disabled = !e.target.checked;
+  });
+
+  // Losing a slot must never lose the questionnaire answers with it.
+  function handleSlotLost() {
+    state.slotId = null; saveState();
+    returnToReview = true;
+    renderSlots();
+    showNotice($('slotNotice'),
+      '<b>That session filled up while you were answering.</b> ' +
+      'Your answers are safe &mdash; pick another time and you will go straight ' +
+      'back to confirming.');
+    showStep('slot');
+    $('slotNotice').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  $('reviewBackBtn').addEventListener('click', () => {
+    state.page = TOTAL_PAGES - 1; saveState();
+    showStep('questions'); renderQuestionPage();
+  });
+
+  $('confirmBtn').addEventListener('click', async () => {
+    if (isSubmitting) return;               // belt and braces beside `disabled`
+    hideError($('reviewError'));
+
+    if (!state.slotId) return handleSlotLost();
+    if (!$('commitCheck').checked)
+      return showError($('reviewError'), 'Please confirm you can attend this session.');
+    if (!isQuestionnaireComplete()) {
+      state.page = 0; saveState();
+      showStep('questions'); renderQuestionPage();
+      return showError($('questionError'),
+        'Some required questions are still unanswered. Please complete them to confirm your place.');
     }
-    const age = parseInt(ageRaw, 10);
-    if (isNaN(age) || age < 18) {
-      return showError('Please enter a valid age (18 or over).');
-    }
 
-    setLoading(true);
+    isSubmitting = true;
+    setLoading($('confirmBtn'), true, 'Confirming…', 'Confirm my place');
 
     const payload = {
-      firstName, lastName, sex: sexChecked.value,
-      age, email, institution,
+      slotId: state.slotId,
+      firstName: state.firstName,
+      lastName: state.lastName,
+      email: state.email,
+      answers: state.answers,
+      questionnaireVersion: QUESTIONNAIRE_VERSION,
       timestamp: new Date().toISOString()
     };
 
     try {
-      const res = await fetch(POWER_AUTOMATE_URL, {
+      const res = await fetch(CONFIRM_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -802,38 +1298,53 @@
       });
 
       let data;
-      try { data = await res.json(); } catch { data = { result: 'success' }; }
+      try { data = await res.json(); } catch (e) { data = { result: 'success' }; }
 
-      if (data.error === 'email_duplicate') {
-        showError('That email address has already been used to sign up to the study.');
-        setLoading(false);
-        return;
+      if (data.error === 'slot_full') {
+        isSubmitting = false;
+        setLoading($('confirmBtn'), false, '', 'Confirm my place');
+        return handleSlotLost();
       }
-
+      if (data.error === 'booking_duplicate') {
+        isSubmitting = false;
+        setLoading($('confirmBtn'), false, '', 'Confirm my place');
+        return showError($('reviewError'),
+          'That email address already has a place booked. If that wasn\'t you, reply ' +
+          'to your confirmation email.');
+      }
       if (data.result === 'success') {
-        form.style.display = 'none';
-        document.getElementById('successHeading').textContent = 'You\'re in, ' + firstName + '.';
-        successCard.style.display = 'block';
+        const slot = slots.find(s => s.slotId === state.slotId);
+        $('successSlot').textContent = data.label || (slot ? slot.label : '');
+        $('successHeading').textContent = 'You\'re booked, ' + state.firstName + '.';
+        clearState();
+        showStep('success');
       } else {
         throw new Error(data.message || 'Server error.');
       }
-    } catch {
-      showError('Something went wrong. Please try again or email us directly.');
-      setLoading(false);
+    } catch (e) {
+      isSubmitting = false;
+      setLoading($('confirmBtn'), false, '', 'Confirm my place');
+      showError($('reviewError'),
+        'Something went wrong confirming your place. Your answers are saved — please try again.');
     }
   });
 
-  function setLoading(on) {
-    submitBtn.disabled = on;
-    btnLabel.textContent = on ? 'Submitting...' : 'Register my interest';
-    submitBtn.classList.toggle('loading', on);
-  }
+  // ═══════════════════════════════════════════════════════════════════════
+  // Boot
+  // ═══════════════════════════════════════════════════════════════════════
+  restoreState();
+  $('firstName').value = state.firstName;
+  $('lastName').value  = state.lastName;
+  $('email').value     = state.email;
+  showStep('info');
+  loadSlots();
 
-  function showError(msg) {
-    formError.textContent = msg;
-    formError.style.display = 'block';
-    formError.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
+  // A tab left open for an hour shouldn't offer a slot that filled long ago.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && $('step-slot').classList.contains('active')) {
+      loadSlots();
+    }
+  });
 </script>
 
 </body>

@@ -481,10 +481,10 @@ rebuilding anything.
 
 Two flows are needed:
 
-| Flow | What it does | Called |
-|---|---|---|
-| **Booking Availability** | Returns how full each slot is | On page load, and again just before confirming |
-| **Booking Confirm** | Re-checks capacity, then writes the booking | Once, when the participant confirms |
+| Flow                           | What it does                                | Called                                         |
+| ------------------------------ | ------------------------------------------- | ---------------------------------------------- |
+| **Booking Availability** | Returns how full each slot is               | On page load, and again just before confirming |
+| **Booking Confirm**      | Re-checks capacity, then writes the booking | Once, when the participant confirms            |
 
 ---
 
@@ -504,24 +504,24 @@ Name**).
 
 Type these headers into Row 1:
 
-| A | B | C | D | E | F |
-| --- | --- | --- | --- | --- | --- |
+| A       | B            | C    | D    | E     | F        |
+| ------- | ------------ | ---- | ---- | ----- | -------- |
 | Slot ID | Session Type | Date | Time | Label | Capacity |
 
 Then type these nine rows exactly. `Label` is what participants actually see
 on the website, so keep it readable.
 
-| Slot ID | Session Type | Date | Time | Label | Capacity |
-| --- | --- | --- | --- | --- | --- |
-| S1 | Crowd | 2026-09-15 | 10:00 | Tue 15 Sept, 10:00 | 40 |
-| S2 | Crowd | 2026-09-15 | 14:00 | Tue 15 Sept, 14:00 | 40 |
-| S3 | Crowd | 2026-09-15 | 16:00 | Tue 15 Sept, 16:00 | 40 |
-| S4 | Crowd | 2026-09-16 | 10:00 | Wed 16 Sept, 10:00 | 40 |
-| S5 | Crowd | 2026-09-16 | 14:00 | Wed 16 Sept, 14:00 | 40 |
-| S6 | Crowd | 2026-09-16 | 16:00 | Wed 16 Sept, 16:00 | 40 |
-| S7 | Crowd | 2026-09-17 | 10:00 | Thu 17 Sept, 10:00 | 40 |
-| S8 | Crowd | 2026-09-17 | 14:00 | Thu 17 Sept, 14:00 | 40 |
-| S9 | Crowd | 2026-09-17 | 16:00 | Thu 17 Sept, 16:00 | 40 |
+| Slot ID | Session Type | Date       | Time  | Label              | Capacity |
+| ------- | ------------ | ---------- | ----- | ------------------ | -------- |
+| S1      | Crowd        | 2026-09-15 | 10:00 | Tue 15 Sept, 10:00 | 40       |
+| S2      | Crowd        | 2026-09-15 | 14:00 | Tue 15 Sept, 14:00 | 40       |
+| S3      | Crowd        | 2026-09-15 | 16:00 | Tue 15 Sept, 16:00 | 40       |
+| S4      | Crowd        | 2026-09-16 | 10:00 | Wed 16 Sept, 10:00 | 40       |
+| S5      | Crowd        | 2026-09-16 | 14:00 | Wed 16 Sept, 14:00 | 40       |
+| S6      | Crowd        | 2026-09-16 | 16:00 | Wed 16 Sept, 16:00 | 40       |
+| S7      | Crowd        | 2026-09-17 | 10:00 | Thu 17 Sept, 10:00 | 40       |
+| S8      | Crowd        | 2026-09-17 | 14:00 | Thu 17 Sept, 14:00 | 40       |
+| S9      | Crowd        | 2026-09-17 | 16:00 | Thu 17 Sept, 16:00 | 40       |
 
 > **Why 40 when you only want 30 people?** Some people who book will not turn
 > up. Overbooking to 40 against a target of 30 absorbs that. If you want to
@@ -536,16 +536,16 @@ on the website, so keep it readable.
 
 Type these headers into Row 1. Leave all rows empty — the flow fills them in.
 
-| A | B | C | D | E |
-| --- | --- | --- | --- | --- |
+| A          | B                | C            | D       | E          |
+| ---------- | ---------------- | ------------ | ------- | ---------- |
 | Booking ID | Server Timestamp | Session Type | Slot ID | Slot Label |
 
-| F | G | H | I |
-| --- | --- | --- | --- |
+| F          | G         | H     | I                |
+| ---------- | --------- | ----- | ---------------- |
 | First Name | Last Name | Email | Client Timestamp |
 
-| J | K | L | M |
-| --- | --- | --- | --- |
+| J                     | K            | L                   | M         |
+| --------------------- | ------------ | ------------------- | --------- |
 | Questionnaire Version | Answers JSON | Registered Interest | Cancelled |
 
 What the less obvious columns are for:
@@ -567,6 +567,36 @@ What the less obvious columns are for:
 
 ---
 
+## How to read the expressions in this section
+
+Every **Filter array** below is written as a single line for **Edit in
+advanced mode** — the link underneath the condition boxes. Use that rather
+than the two basic-mode boxes. Basic mode only offers you column names when
+the incoming array carries a schema, which stops being true the moment an
+array has passed through one Filter array, and typing a column name into
+those boxes as plain text compares it as literal text and silently matches
+nothing.
+
+Three things appear in these expressions:
+
+| What you see                 | What it means                                                                                                                                                                                                                         |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `item()?['Slot ID']`       | The current row of**the array being filtered**, and the value in its `Slot ID` column. Inside a Filter array this always means the array in that action's own **From** box — never the row from an enclosing loop.     |
+| `triggerBody()?['slotId']` | A field from**the trigger** — the flow's first step, *When an HTTP request is received*. This is the JSON that `booking.html` POSTed, and the field names match the Request Body JSON Schema you pasted into that trigger. |
+| `outputs('CurrentSlotId')` | The result of an earlier**Compose** action of that name.                                                                                                                                                                        |
+
+> **The capitalisation difference is deliberate, not a typo.**
+> `item()?['Email']` is an **Excel column heading** — spelled exactly as it
+> appears in Row 1 of the sheet, capitals and spaces included.
+> `triggerBody()?['email']` is a **JSON field name** from the request —
+> spelled exactly as in the schema, which is lower-case first letter. Getting
+> either one's spelling wrong returns nothing and reports no error.
+
+Type these lines in rather than pasting them; pasted text can carry invisible
+characters that Power Automate rejects as an invalid expression.
+
+---
+
 ## Step 2 — Build the "Booking Availability" flow
 
 This one is safe to call from a public web page: it only ever returns
@@ -575,8 +605,9 @@ This one is safe to call from a public web page: it only ever returns
 1. [make.powerautomate.com](https://make.powerautomate.com) → **+ Create** →
    **Instant cloud flow** → name it **Minds in Motion Booking Availability**
    → trigger **When an HTTP request is received** → **Create**.
-2. Click the trigger, set **Method** to **POST**, and paste this into
-   **Request Body JSON Schema**:
+2. Click the trigger. Set **Who can trigger the flow?** to **Anyone**, set
+   **Method** to **POST**, and paste this into **Request Body JSON Schema**:
+
    ```json
    {
      "type": "object",
@@ -585,8 +616,25 @@ This one is safe to call from a public web page: it only ever returns
      }
    }
    ```
-   **Save**, then copy the **HTTP POST URL** using the copy icon — you need
-   it in Step 4.
+
+   > **"Who can trigger the flow?" defaults to "Any user in my tenant", and
+   > that will not work here.** That setting demands a UCL sign-in token on
+   > every call, and `booking.html` is a public web page whose visitors are
+   > not signed in to anything — every request would come back `401` and the
+   > slot grid would never load. **Anyone** is correct: the long `sig=`
+   > signature already embedded in the URL is what authorises the call, which
+   > is exactly how the existing signup flow works. Set this on **both**
+   > booking flows.
+   >
+
+   **Save**, then copy the URL from the **HTTP URL** box using the **copy
+   icon** beside it — you need it in Step 4.
+
+   > The box only fills in once the flow has been saved. Older Power Automate
+   > versions label it **HTTP POST URL** — same thing, and there is only ever
+   > one URL. The **Method** dropdown is what makes it a POST endpoint, so
+   > there is no separate "POST URL" to hunt for.
+   >
 3. **+ New step** → **Excel Online (Business)** → **List rows present in a
    table** → the `Slots` table in `minds_in_motion_bookings.xlsx`. Rename
    this action to **ListSlots**.
@@ -597,31 +645,78 @@ This one is safe to call from a public web page: it only ever returns
    > a name like "Filter array" as `Filter_array` internally, and typing the
    > wrong one is the single most common cause of "invalid reference" errors.
    > Names without spaces remove the guesswork entirely.
-
+   >
 5. **Filter array**, renamed **FilterCrowdSlots** — From: **ListSlots**'s
-   `value`; condition: **Session Type** is equal to `Crowd`.
+   `value`. **Edit in advanced mode**:
+
+   ```
+   @equals(item()?['Session Type'], 'Crowd')
+   ```
+
+   Keeps only the crowd slots, so EEG slots added to this table later are
+   ignored by this flow.
 6. **Filter array**, renamed **FilterActiveBookings** — From:
-   **ListBookings**'s `value`; condition: **Cancelled** is equal to
-   *(leave the right-hand box empty)*.
+   **ListBookings**'s `value`. **Edit in advanced mode**:
 
-   > Blank-cell checks have to be done here rather than in the Excel
-   > connector's own Filter Query field, which does not reliably match empty
-   > cells.
+   ```
+   @empty(item()?['Cancelled'])
+   ```
 
+   Keeps only bookings that have not been cancelled, so a cancelled person
+   stops taking up a place.
+
+   > `empty()` is used rather than comparing to `''` because an untouched
+   > Excel cell can come back as either an empty string or as null depending
+   > on the row, and `empty()` correctly catches both. This check also has to
+   > happen here rather than in the Excel connector's own Filter Query field,
+   > which does not reliably match empty cells at all.
+   >
 7. **Initialize variable** — Name `SlotAvailability`, Type **Array**, Value
    `[]`. This must sit *before* the loop in step 8.
+
+   > **Steps 5, 6 and 7 all sit at the top level of the flow — none of them
+   > belong inside a loop.** By the end of step 8 you should have exactly one
+   > loop in this flow. If a second one appears (often auto-created and named
+   > "For each 1"), drag these actions back out and delete it. Power Automate
+   > will not even save an *Initialize variable* that sits inside a loop.
+   >
 8. **Apply to each** — input: **FilterCrowdSlots**'s output (**Body**).
    Inside the loop add:
-   1. **Filter array**, renamed **FilterBySlot** — From:
-      **FilterActiveBookings**'s output; condition: **Slot ID** is equal to
-      the expression `item()?['Slot ID']`.
 
-      > `item()` is allowed here because this genuinely is inside an Apply to
-      > each. That is the same rule that made it fail in Create CSV table
-      > earlier in this document.
+   1. **Compose**, renamed **CurrentSlotId** — Inputs → **Expression** tab →
+      `item()?['Slot ID']`. This captures the slot the loop is currently on
+      so the next action can refer back to it.
+   2. **Filter array**, renamed **FilterBySlot** — From:
+      **FilterActiveBookings**'s output. Then click **Edit in advanced
+      mode** underneath the condition boxes and enter this single line:
 
-   2. **Compose**, renamed **SlotObject**. Click into Inputs and type `{` to
+      ```
+      @equals(item()?['Slot ID'], outputs('CurrentSlotId'))
+      ```
+
+      > **Why advanced mode, and why the extra Compose.** Inside a Filter
+      > array, `item()` means *the item being filtered* — here a booking —
+      > **not** the slot from the enclosing loop. So you cannot use `item()`
+      > for both sides of the comparison, and there is no way to express this
+      > correctly using the two basic-mode boxes. The line above reads: keep
+      > this booking if its Slot ID matches the slot we are currently
+      > counting.
+      >
+      > You will also notice the basic-mode picker offers you no field names
+      > here. That is expected: the array comes out of another Filter array,
+      > which carries no column schema, so there is nothing for it to list.
+      > Typing `Slot ID` into that box as plain text does **not** work — it
+      > is compared as the literal text "Slot ID" and never matches, which
+      > silently reports every slot as empty.
+      >
+      > `outputs('CurrentSlotId')` is used in preference to
+      > `items('Apply_to_each')` because the latter depends on the loop's
+      > exact internal name, which breaks if the loop is ever renamed or
+      > duplicated.
+      >
+   3. **Compose**, renamed **SlotObject**. Click into Inputs and type `{` to
       get the JSON editor, then build:
+
       ```
       slotId   →  expression  item()?['Slot ID']
       label    →  expression  item()?['Label']
@@ -629,13 +724,41 @@ This one is safe to call from a public web page: it only ever returns
       booked   →  expression  length(body('FilterBySlot'))
       full     →  expression  greaterOrEquals(length(body('FilterBySlot')), int(item()?['Capacity']))
       ```
-   3. **Append to array variable** — Name `SlotAvailability`, Value: the
+
+      > `item()` is correct in *this* action, unlike in FilterBySlot above.
+      > SlotObject is a direct child of the Apply to each, so here `item()`
+      > does mean the current slot.
+      >
+   4. **Append to array variable** — Name `SlotAvailability`, Value: the
       **Outputs** of **SlotObject** (click it from dynamic content).
-9. After the loop, **Filter array**, renamed **FilterEmailMatch** — From:
-   **FilterActiveBookings**'s output; condition: **Email** is equal to the
-   trigger's `email`. When no email is sent this simply comes back empty,
-   which is fine.
+9. After the loop — **outside it**, back at the flow's top level — add a
+   **Filter array**, renamed **FilterEmailMatch**. From:
+   **FilterActiveBookings**'s output (**Body**). **Edit in advanced mode**:
+
+   ```
+   @equals(toLower(coalesce(item()?['Email'], '')), toLower(coalesce(triggerBody()?['email'], '_none_')))
+   ```
+
+   This finds any existing booking belonging to whoever is currently using
+   the page, which is what tells `booking.html` to stop someone at the first
+   step instead of letting them redo the whole questionnaire.
+
+   > Reading it from the inside out: `item()?['Email']` is the **Email
+   > column** of the booking row being tested; `triggerBody()?['email']` is
+   > the **email field** `booking.html` sent in the request.
+   >
+   > `toLower()` on both sides means `Alex@UCL.ac.uk` matches
+   > `alex@ucl.ac.uk`, which people do type inconsistently.
+   >
+   > `coalesce(…, '_none_')` covers the page's first load, when nobody has
+   > typed an email yet and the field arrives empty. Without it `toLower()`
+   > is handed a null and the whole flow fails with a type error, so the slot
+   > grid never loads. The nonsense value `_none_` can never match a real
+   > email address, so the result is correctly empty. Comparing against `''`
+   > instead would wrongly match any booking row with a blank email.
+   >
 10. **Compose**, renamed **AvailabilityResponseBody**:
+
     ```
     result        →  success
     slots         →  the SlotAvailability variable
@@ -646,7 +769,7 @@ This one is safe to call from a public web page: it only ever returns
     > expressions straight into the Response action. This is the same lesson
     > as `NewSignupCount` earlier in this document: expressions typed into a
     > structured body field get silently mangled.
-
+    >
 11. **Response** — Status Code `200`; Headers
     `Access-Control-Allow-Origin: *` and `Content-Type: application/json`;
     Body: the **Outputs** of **AvailabilityResponseBody**.
@@ -662,28 +785,54 @@ This one is safe to call from a public web page: it only ever returns
 
 1. **+ Create** → **Instant cloud flow** → name it **Minds in Motion Booking
    Confirm** → **When an HTTP request is received** → **Create**.
+2. ### Leave Concurrency Control switched OFF
 
-2. ### Do this before adding a single action
-
-   Click the trigger's **⋯** menu → **Settings** → switch **Concurrency
-   Control** to **On** → set **Degree of Parallelism** to **1** → **Done**.
-
-   > **This is not optional, and it is easy to skip because nothing visibly
-   > breaks without it.**
+   > **Do not turn Concurrency Control on for this flow.** It cannot be used
+   > here, and switching it on makes the flow refuse to save with:
    >
-   > Picture two people confirming the last free place in a slot three
-   > seconds apart. Both flow runs start. Both count the existing bookings
-   > and both see 39 of 40. Neither has written its row yet, so both decide
-   > there is room, and both write. The slot now holds 41 people and nothing
-   > anywhere reports an error.
+   > *"InvalidConcurrencyConfiguration … concurrency control is not supported
+   > when the workflow contains actions of type 'response' without the
+   > operationOptions flag set to 'asynchronous'."*
    >
-   > Excel through this connector has no way to lock a row while you work on
-   > it, so the only reliable fix is to stop the two runs from overlapping in
-   > the first place. Degree of Parallelism 1 makes runs queue up and happen
-   > strictly one after another, so the second run counts 40 and correctly
-   > turns the person away.
+   > Concurrency control works by making runs queue up. A **Response** action
+   > has to answer a browser that is sitting there waiting, and a queued run
+   > cannot do that — so Power Automate forbids the combination. The only way
+   > around it would be to make the responses asynchronous, which returns a
+   > `202` and a polling URL instead of an answer, and `booking.html` would
+   > have to be rewritten to cope. Not worth it.
 
-3. Set **Method** to **POST** and paste this **Request Body JSON Schema**:
+   What you give up by leaving it off is the narrow window between counting
+   the existing bookings (step 7) and writing the new row (step 13). For that
+   to cause a problem, two people have to press Confirm within a second or so
+   of each other on a slot sitting at exactly 39 of 40 — and the result is a
+   41st booking in a slot that is already deliberately overbooked to 40
+   against a real target of 30. That is comfortably inside the no-show margin
+   you are already budgeting for.
+
+   > **If you later want this airtight**, there is a lock-free pattern that
+   > works alongside synchronous responses: write the row first, then check
+   > whether you ended up past the cutoff and delete your own row if so.
+   > Add a **Compose** named `NewBookingId` set to `guid()` and use
+   > `outputs('NewBookingId')` for the Booking ID column instead of calling
+   > `guid()` inline. Then after step 13, re-run **List rows** on Bookings,
+   > add a **Filter array** named `FilterAheadOfMe`:
+   > ```
+   > @and(equals(item()?['Slot ID'], triggerBody()?['slotId']), empty(item()?['Cancelled']), less(item()?['Booking ID'], outputs('NewBookingId')))
+   > ```
+   > then a **Condition** — `length(body('FilterAheadOfMe'))` **is greater
+   > than or equal to** `int(first(body('FilterSlotMeta'))?['Capacity'])`. If
+   > yes, **Delete a row** (Key Column `Booking ID`, Key Value
+   > `outputs('NewBookingId')`) and return the `409 slot_full` response; if
+   > no, return the normal success response. Both racing runs can see both
+   > rows by then, so they count consistently and exactly the right number of
+   > bookings survive. `booking.html` already handles `slot_full` at this
+   > point, so no website change is needed.
+
+3. Set **Who can trigger the flow?** to **Anyone** (see the note in Step 2 —
+   leaving it on "Any user in my tenant" makes every booking fail with a
+   `401`), set **Method** to **POST**, and paste this **Request Body JSON
+   Schema**:
+
    ```json
    {
      "type": "object",
@@ -698,24 +847,53 @@ This one is safe to call from a public web page: it only ever returns
      }
    }
    ```
-   **Save**, then copy the **HTTP POST URL** with the copy icon.
 
+   **Save**, then copy the **HTTP POST URL** with the copy icon.
 4. **List rows present in a table** → `Slots`, renamed **ListSlots**.
 5. **List rows present in a table** → `Bookings`, renamed **ListBookings**.
-6. **Filter array**, renamed **FilterSlotMeta** — From **ListSlots**;
-   conditions (**And**): **Slot ID** equal to the trigger's `slotId`, **and**
-   **Session Type** equal to `Crowd`.
-7. **Filter array**, renamed **FilterActiveForSlot** — From
-   **ListBookings**; conditions (**And**): **Slot ID** equal to `slotId`,
-   **and** **Cancelled** equal to *(blank)*.
-8. **Filter array**, renamed **FilterActiveForEmail** — From
-   **ListBookings**; conditions (**And**): **Email** equal to `email`,
-   **and** **Cancelled** equal to *(blank)*.
+6. **Filter array**, renamed **FilterSlotMeta** — From: **ListSlots**'s
+   `value`. **Edit in advanced mode**:
+
+   ```
+   @and(equals(item()?['Slot ID'], triggerBody()?['slotId']), equals(item()?['Session Type'], 'Crowd'))
+   ```
+
+   Looks up the one slot being booked and confirms it really exists and
+   really is a crowd slot, so a mistyped or EEG slot ID cannot be booked
+   through this endpoint. Everything downstream reads the slot's capacity
+   and label out of this result.
+7. **Filter array**, renamed **FilterActiveForSlot** — From:
+   **ListBookings**'s `value`. **Edit in advanced mode**:
+
+   ```
+   @and(equals(item()?['Slot ID'], triggerBody()?['slotId']), empty(item()?['Cancelled']))
+   ```
+
+   Every live booking already held against that slot. The number of items
+   this returns *is* the current headcount, which step 9 compares against
+   the slot's capacity.
+8. **Filter array**, renamed **FilterActiveForEmail** — From:
+   **ListBookings**'s `value`. **Edit in advanced mode**:
+
+   ```
+   @and(equals(toLower(coalesce(item()?['Email'], '')), toLower(coalesce(triggerBody()?['email'], '_none_'))), empty(item()?['Cancelled']))
+   ```
+
+   Any live booking this person already holds, in any slot — this is what
+   stops one person quietly taking two places.
+
+   > As in the availability flow: `item()?['…']` names an **Excel column**,
+   > `triggerBody()?['…']` names a **field from the request**, `toLower()`
+   > makes the email match case-insensitive, and `empty()` catches a blank
+   > `Cancelled` cell whether Excel returns it as `''` or as null.
+   >
 9. **Condition**, renamed **SlotInvalidOrFull**. Left-hand value, as an
    expression (type it, do not paste):
+
    ```
    or(equals(length(body('FilterSlotMeta')), 0), greaterOrEquals(length(body('FilterActiveForSlot')), int(first(body('FilterSlotMeta'))?['Capacity'])))
    ```
+
    Operator **is equal to**, right-hand value `true`.
 
    - **If yes** → **Response**: Status `409`, the two usual headers, Body:
@@ -723,7 +901,6 @@ This one is safe to call from a public web page: it only ever returns
      {"error":"slot_full"}
      ```
    - **If no** → carry on into step 10, *inside the If no branch*.
-
 10. Inside **If no**, add a second **Condition**, renamed
     **EmailAlreadyBooked**. Left-hand value, expression
     `length(body('FilterActiveForEmail'))`, operator **is greater than**,
@@ -735,37 +912,64 @@ This one is safe to call from a public web page: it only ever returns
       ```
     - **If no** → the write branch, steps 11–14 below, all inside this inner
       **If no**.
-
 11. **List rows present in a table** → the **`Signups`** table in
-    `minds_in_motion_signups.xlsx` (the other workbook), renamed
-    **ListSignups**. Then **Filter array**, renamed **FilterSignupMatch** —
-    From **ListSignups**; condition: **Email** equal to `email`.
+    `minds_in_motion_signups.xlsx` (the other workbook — not the bookings
+    one), renamed **ListSignups**. Then a **Filter array**, renamed
+    **FilterSignupMatch** — From: **ListSignups**'s `value`. **Edit in
+    advanced mode**:
+
+    ```
+    @equals(toLower(coalesce(item()?['Email'], '')), toLower(coalesce(triggerBody()?['email'], '_none_')))
+    ```
+
+    Checks whether this person ever registered interest on `index.html`.
+    Nobody is blocked either way — the result only decides what goes in the
+    `Registered Interest` column, flagging people who arrived via a
+    forwarded link or booked with a different address than they registered
+    with.
 12. **Compose**, renamed **AnswersJsonString** — Inputs, expression:
     `string(triggerBody()?['answers'])`
 13. **Add a row into a table** → the `Bookings` table. Map every column:
 
-    | Column | Value |
-    | --- | --- |
-    | Booking ID | expression `guid()` |
-    | Server Timestamp | expression `utcNow()` |
-    | Session Type | type `Crowd` |
-    | Slot ID | dynamic content `slotId` |
-    | Slot Label | expression `first(body('FilterSlotMeta'))?['Label']` |
-    | First Name | dynamic content `firstName` |
-    | Last Name | dynamic content `lastName` |
-    | Email | dynamic content `email` |
-    | Client Timestamp | dynamic content `timestamp` |
-    | Questionnaire Version | dynamic content `questionnaireVersion` |
-    | Answers JSON | **Outputs** of **AnswersJsonString** |
-    | Registered Interest | expression `if(greater(length(body('FilterSignupMatch')), 0), 'Yes', 'No')` |
-    | Cancelled | leave empty |
+    **Every row below is an expression** — click the field, switch to the
+    **Expression** tab, type the line, click **OK**. There are no exceptions
+    to remember, which is exactly why `'Crowd'` is written *with quotes*: as
+    an expression, a bare unquoted word is not valid syntax, and the flow
+    refuses to save with *"contains invalid expression(s)"*.
 
+    | Excel column          | Expression to enter                                                |
+    | --------------------- | ------------------------------------------------------------------ |
+    | Booking ID            | `guid()`                                                         |
+    | Server Timestamp      | `utcNow()`                                                       |
+    | Session Type          | `'Crowd'`                                                        |
+    | Slot ID               | `triggerBody()?['slotId']`                                       |
+    | Slot Label            | `first(body('FilterSlotMeta'))?['Label']`                        |
+    | First Name            | `triggerBody()?['firstName']`                                    |
+    | Last Name             | `triggerBody()?['lastName']`                                     |
+    | Email                 | `triggerBody()?['email']`                                        |
+    | Client Timestamp      | `triggerBody()?['timestamp']`                                    |
+    | Questionnaire Version | `triggerBody()?['questionnaireVersion']`                         |
+    | Answers JSON          | `outputs('AnswersJsonString')`                                   |
+    | Registered Interest   | `if(greater(length(body('FilterSignupMatch')), 0), 'Yes', 'No')` |
+    | Cancelled             | leave untouched — see the warning below                          |
+
+    > **`Cancelled` has to be left genuinely empty.** Do not open its
+    > Expression tab and click OK, and do not type a space. An expression box
+    > that was opened and left blank saves as an empty expression, and that
+    > is the other common cause of the same "invalid expression" error on
+    > this action.
+
+    > **To find which field is broken**, click the action's **Code view**
+    > tab. It lists every input exactly as stored. A healthy expression reads
+    > `"@{triggerBody()?['slotId']}"`; a broken one is either a bare word
+    > with no quotes inside the braces, or an empty `"@{}"`.
 14. **Response** — Status `200`, usual headers, Body built in the JSON
     editor:
+
     ```
-    result →  success
-    slotId →  dynamic content  slotId
-    label  →  expression       first(body('FilterSlotMeta'))?['Label']
+    result →  plain text   success
+    slotId →  expression   triggerBody()?['slotId']
+    label  →  expression   first(body('FilterSlotMeta'))?['Label']
     ```
 15. **Save**.
 
@@ -794,6 +998,51 @@ that campaign.
 
 ## Step 5 — Test it
 
+### Testing a flow on its own, before the website is wired up
+
+An HTTP-triggered flow cannot be set off from inside Power Automate — the
+**Test** button only puts it into "waiting for a request" mode. Something has
+to actually send it a request. Useful sequence:
+
+1. Open the flow, click **Test** (top right) → **Manually** → **Test**. It
+   now sits waiting, and will show you the run step by step as it happens.
+2. From a terminal, send it a request. For the availability flow:
+
+   ```bash
+   curl -sS -X POST '<paste the HTTP URL here>' \
+     -H 'Content-Type: application/json' \
+     -d '{"email":""}'
+   ```
+
+   You should get back `{"result":"success","slots":[ …nine slots… ], "alreadyBooked":false}`.
+
+   For the confirm flow:
+
+   ```bash
+   curl -sS -X POST '<paste the confirm URL here>' \
+     -H 'Content-Type: application/json' \
+     -d '{"slotId":"S1","firstName":"Flow","lastName":"Test",
+          "email":"flowtest@example.com","answers":{"d_age_band":"25-34"},
+          "questionnaireVersion":"placeholder-v1",
+          "timestamp":"2026-09-01T10:00:00.000Z"}'
+   ```
+
+   You should get `{"result":"success","slotId":"S1","label":"Tue 15 Sept, 10:00"}` and a new row in the `Bookings` table. Delete that test row
+   afterwards.
+3. Whatever the response, open the flow → **28 day run history** to see
+   exactly which action failed and what it received.
+
+Common responses and what they mean:
+
+| Response                                   | Meaning                                                                                                             |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `401` / a sign-in page                   | **Who can trigger the flow?** is still "Any user in my tenant" — change it to **Anyone**               |
+| `202 Accepted` with an empty body        | The flow has no**Response** action on the path it took, or the Response sits inside a branch that did not run |
+| `{"error":"slot_full"}` on an empty slot | `Capacity` is blank or stored as text, or `FilterActiveForSlot` is matching the wrong rows                      |
+| Times out after ~2 minutes                 | The Response action is unreachable — usually an action failed earlier in the branch                                |
+
+### Testing end to end through the website
+
 1. Open `booking.html`. All nine slots should appear, grouped by day, each
    showing **Available**.
 2. Book a place all the way through. In Excel, the new `Bookings` row should
@@ -804,13 +1053,18 @@ that campaign.
 4. Start again with the **same email**. You should be stopped at the first
    step, *before* the questionnaire, with a message saying that address
    already has a place.
-5. **Test the capacity limit properly.** In Excel, temporarily set one slot's
-   **Capacity** to `1`. Open `booking.html` in two browser tabs, fill in the
-   questionnaire in both, and press Confirm in both within a few seconds of
-   each other. Exactly one should succeed; the other should be told the
-   session just filled and be sent back to pick another time, *with its
-   answers still intact*. Check Excel: exactly one new row. Set Capacity back
-   to `40` afterwards.
+5. **Test the capacity limit.** In Excel, temporarily set one slot's
+   **Capacity** to `1`. Book that slot once so it is now full. Then open
+   `booking.html` again, fill in the questionnaire, and try to confirm the
+   same slot: you should be told the session just filled, be sent back to
+   pick another time, and find *your answers still intact*. Check Excel — no
+   second row was written. Set Capacity back to `40` afterwards.
+
+   > This tests the capacity check itself, which is the part that matters day
+   > to day. It deliberately does **not** test two people confirming at the
+   > exact same moment — as explained in Step 3.2, that narrow window is
+   > knowingly left open because the fix is incompatible with returning a
+   > response to the browser.
 6. Fill in half the questionnaire and refresh the page — your answers should
    still be there.
 
@@ -818,15 +1072,16 @@ that campaign.
 
 ## Troubleshooting
 
-| Symptom | Likely cause | Fix |
-| --- | --- | --- |
-| Page shows "We couldn't load the available times" | Availability URL wrong, or the flow failed | Press Try again; if it persists, check the flow's run history |
-| All slots show as Full when they are not | `Capacity` cells are empty or text | Check every Capacity cell contains a plain number |
-| A cancelled person still takes up a place | `Cancelled` cell has a space in it, not truly blank | Clear the cell completely (Delete, not spacebar) |
-| Two bookings landed in a slot with room for one | Concurrency Control not actually set to 1 | Re-open the Confirm flow's trigger Settings and confirm it is On with Degree of Parallelism 1 |
-| Slot times show the full date instead of just the time | A `Label` is missing its comma | Labels must read `Tue 15 Sept, 10:00` |
-| Everyone shows `Registered Interest` = `No` | ListSignups is pointed at the wrong file or table | It must read the `Signups` table in `minds_in_motion_signups.xlsx` |
-| Someone booked without doing the questionnaire | Someone called the flow directly, bypassing the page | The gate is in the website, not the flow; check `Answers JSON` looks complete |
+| Symptom                                                | Likely cause                                          | Fix                                                                                           |
+| ------------------------------------------------------ | ----------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Page shows "We couldn't load the available times"      | Availability URL wrong, or the flow failed            | Press Try again; if it persists, check the flow's run history                                 |
+| All slots show as Full when they are not               | `Capacity` cells are empty or text                  | Check every Capacity cell contains a plain number                                             |
+| A cancelled person still takes up a place              | `Cancelled` cell has a space in it, not truly blank | Clear the cell completely (Delete, not spacebar)                                              |
+| Two bookings landed in a slot with room for one        | Two people confirmed within a second of each other, in the gap between the capacity check and the row being written | Expected and accepted — see the note in Step 3.2. Free a place by putting a date in that person's `Cancelled` cell, or build the write-then-verify pattern described there |
+| Flow will not save: `InvalidConcurrencyConfiguration`  | Concurrency Control was switched on                   | Switch it back off — it cannot be used on a flow that has Response actions. See Step 3.2 |
+| Slot times show the full date instead of just the time | A`Label` is missing its comma                       | Labels must read`Tue 15 Sept, 10:00`                                                        |
+| Everyone shows`Registered Interest` = `No`         | ListSignups is pointed at the wrong file or table     | It must read the`Signups` table in `minds_in_motion_signups.xlsx`                         |
+| Someone booked without doing the questionnaire         | Someone called the flow directly, bypassing the page  | The gate is in the website, not the flow; check`Answers JSON` looks complete                |
 
 ---
 

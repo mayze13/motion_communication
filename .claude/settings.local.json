@@ -14,7 +14,9 @@
       "Bash(chmod +x run.sh)",
       "Bash(node build-test.js)",
       "Bash(node driver.js)",
-      "Bash(node shot.js)"
+      "Bash(node shot.js)",
+      "Bash(ls -la .vscode 2>/dev/null && cat .vscode/settings.json 2>/dev/null || echo \"no .vscode/ in this repo\"; echo \"--- parent workspace ---\"; ls -la ../.vscode 2>/dev/null || echo \"none at mayze13 level\")",
+      "Read(//home/james/code/mayze13/**)"
     ]
   }
 }
