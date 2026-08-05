@@ -16,7 +16,20 @@
       "Bash(node driver.js)",
       "Bash(node shot.js)",
       "Bash(ls -la .vscode 2>/dev/null && cat .vscode/settings.json 2>/dev/null || echo \"no .vscode/ in this repo\"; echo \"--- parent workspace ---\"; ls -la ../.vscode 2>/dev/null || echo \"none at mayze13 level\")",
-      "Read(//home/james/code/mayze13/**)"
+      "Read(//home/james/code/mayze13/**)",
+      "Bash(curl -s http://localhost:5173/booking.html)",
+      "Bash(python3 -c ' *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/booking.html)",
+      "Bash(node -e ' *)",
+      "Bash(node --check /tmp/claude-1000/-home-james-code-mayze13-motion-communication/5b8baac3-b9bf-4e81-a94e-e5f018b09623/scratchpad/chk.js)",
+      "Bash(grep -n \"showStep\\('info'\\);\\\\|loadSlots\\(\\);$\\\\|restoreState\\(\\);\" booking.html)",
+      "Bash(node --check chk.js)",
+      "Bash(node build.js)",
+      "Bash(./run.sh sheet *)",
+      "Bash(node build_eeg.js)",
+      "Bash(node shot_eeg.js)",
+      "Bash(timeout 45 google-chrome --headless --disable-gpu --no-sandbox --disable-dev-shm-usage --hide-scrollbars --window-size=1280,1250 --virtual-time-budget=12000 --screenshot=g-pick2.png 'file://__TRACKED_VAR__/shot-eeg.html#pick2')",
+      "Bash(python3 verify_wb.py)"
     ]
   }
 }

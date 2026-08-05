@@ -16,7 +16,8 @@
     • Any bulk sender: use the raw HTML source of this file.
 
   BEFORE SENDING, replace every placeholder marked with [BRACKETS]:
-    • [WEBSITE_URL]         — your deployed website URL or bit.ly short link
+    • [WEBSITE_URL]         — the GROUP-session booking page (booking.html)
+    • [EEG_WEBSITE_URL]     — the EEG booking page (booking_eeg.html)
     • [study email address] — the study inbox (e.g. mindsinmotion@ucl.ac.uk)
     • [ethics reference]    — UCL ethics approval reference number
     • [study image URL]     — direct link to a hosted study photo (600px wide)
@@ -232,9 +233,10 @@
                         </td>
                         <td style="font-size:14px;color:#3a2f52;line-height:1.55;
                                    font-family:Arial,Helvetica,sans-serif;">
-                          Open to <strong>all adults aged 18+</strong>, including
-                          neurodivergent individuals and wheelchair users. Full details
-                          on duration and scheduling provided on confirmation.
+                          Open to <strong>adults aged 18+</strong> who can move around a
+                          large indoor space unaided. A few eligibility questions are
+                          asked when you book. Full details on duration and scheduling
+                          provided on confirmation.
                         </td>
                       </tr>
                     </table>
@@ -266,34 +268,104 @@
 
 
           <!-- ════════════════════════════════
-               CTA BUTTON
+               CTA BUTTONS — two tracks, two pages
                ════════════════════════════════ -->
           <tr>
-            <td align="center" style="padding:32px 40px 28px;background-color:#ffffff;">
+            <td style="padding:32px 40px 8px;background-color:#ffffff;">
+              <p style="margin:0 0 18px;font-size:15px;line-height:1.6;color:#3a2f52;
+                        font-family:Arial,Helvetica,sans-serif;">
+                <strong>There are two ways to take part.</strong> Pick whichever
+                suits you and book a place:
+              </p>
+            </td>
+          </tr>
+
+          <!-- Track 1 — group session -->
+          <tr>
+            <td style="padding:0 40px 16px;background-color:#ffffff;">
               <table role="presentation" border="0" cellpadding="0" cellspacing="0"
-                     style="border-collapse:collapse;">
+                     width="100%" style="border-collapse:collapse;border:1px solid #ede7f7;
+                                         border-radius:8px;">
                 <tr>
-                  <td bgcolor="#361a54"
-                      style="background-color:#361a54;border-radius:8px;
-                             mso-padding-alt:0;">
-                    <!-- The href below is the "bulletproof button" pattern for email clients -->
-                    <a href="[WEBSITE_URL]"
-                       target="_blank"
-                       style="display:inline-block;padding:16px 36px;
-                              font-size:16px;font-weight:bold;color:#ffffff;
-                              text-decoration:none;border-radius:8px;
-                              font-family:Arial,Helvetica,sans-serif;
-                              letter-spacing:0.01em;
-                              mso-padding-alt:16px 36px;">
-                      Sign Up to Participate
-                    </a>
+                  <td style="padding:20px 22px;">
+                    <p style="margin:0 0 4px;font-size:16px;font-weight:bold;color:#361a54;
+                              font-family:Arial,Helvetica,sans-serif;">
+                      Group session &nbsp;&middot;&nbsp; &pound;30
+                    </p>
+                    <p style="margin:0 0 16px;font-size:14px;line-height:1.55;color:#3a2f52;
+                              font-family:Arial,Helvetica,sans-serif;">
+                      <strong>One visit</strong>, up to 2 hours, 15&ndash;17 September.
+                      No equipment worn. Open to adults 18+ who can move around a
+                      large indoor space unaided.
+                    </p>
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0"
+                           style="border-collapse:collapse;">
+                      <tr>
+                        <td bgcolor="#361a54" style="background-color:#361a54;border-radius:8px;
+                                                     mso-padding-alt:0;">
+                          <a href="[WEBSITE_URL]" target="_blank"
+                             style="display:inline-block;padding:14px 30px;font-size:15px;
+                                    font-weight:bold;color:#ffffff;text-decoration:none;
+                                    border-radius:8px;font-family:Arial,Helvetica,sans-serif;
+                                    mso-padding-alt:14px 30px;">
+                            Book a group session
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                    <p style="margin:10px 0 0;font-size:11px;color:#9278b2;
+                              font-family:Arial,Helvetica,sans-serif;">
+                      [WEBSITE_URL]
+                    </p>
                   </td>
                 </tr>
               </table>
-              <p style="margin:14px 0 0;font-size:12px;color:#9278b2;
-                        font-family:Arial,Helvetica,sans-serif;">
-                Or visit: <a href="[WEBSITE_URL]" style="color:#4a2570;">[WEBSITE_URL]</a>
-              </p>
+            </td>
+          </tr>
+
+          <!-- Track 2 — EEG sessions -->
+          <tr>
+            <td style="padding:0 40px 28px;background-color:#ffffff;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0"
+                     width="100%" style="border-collapse:collapse;border:1px solid #ede7f7;
+                                         border-radius:8px;">
+                <tr>
+                  <td style="padding:20px 22px;">
+                    <p style="margin:0 0 4px;font-size:16px;font-weight:bold;color:#361a54;
+                              font-family:Arial,Helvetica,sans-serif;">
+                      EEG sessions &nbsp;&middot;&nbsp; &pound;60 &nbsp;&middot;&nbsp;
+                      <span style="font-weight:normal;color:#6b5c88;">only 32 places</span>
+                    </p>
+                    <p style="margin:0 0 16px;font-size:14px;line-height:1.55;color:#3a2f52;
+                              font-family:Arial,Helvetica,sans-serif;">
+                      <strong>Two visits</strong> on different dates in September,
+                      wearing an EEG cap and eye-tracker. Because of the equipment
+                      there are extra requirements &mdash; including hair that lets
+                      sensors reach the scalp, and contact lenses rather than
+                      glasses. The booking page explains them all before you start.
+                    </p>
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0"
+                           style="border-collapse:collapse;">
+                      <tr>
+                        <td bgcolor="#361a54" style="background-color:#361a54;border-radius:8px;
+                                                     mso-padding-alt:0;">
+                          <a href="[EEG_WEBSITE_URL]" target="_blank"
+                             style="display:inline-block;padding:14px 30px;font-size:15px;
+                                    font-weight:bold;color:#ffffff;text-decoration:none;
+                                    border-radius:8px;font-family:Arial,Helvetica,sans-serif;
+                                    mso-padding-alt:14px 30px;">
+                            Book EEG sessions
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                    <p style="margin:10px 0 0;font-size:11px;color:#9278b2;
+                              font-family:Arial,Helvetica,sans-serif;">
+                      [EEG_WEBSITE_URL]
+                    </p>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 

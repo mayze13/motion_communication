@@ -1,1105 +1,482 @@
-# Minds in Motion — Microsoft Integration Setup
+# Minds in Motion — Power Automate & Hosting Setup
 
-This replaces the Google Apps Script approach. Participant data submitted on the website
-is sent to a **Power Automate** flow, which checks for a duplicate email, then writes a
-new row into an **Excel table hosted on SharePoint** (UCL servers).
+## Overview
 
----
+Three pages, three data destinations, seven flows:
 
-## Before you start
+| Page | Purpose | Writes to | Flows |
+| --- | --- | --- | --- |
+| `index.html` | Register interest (live, public, Netlify site 1) | `Signups` table | Signup Receiver, Export New Signups, Mark Batch as Mailed |
+| `booking.html` | Book a crowd session, 1 visit, £30 (Netlify site 2) | `Bookings` table | Booking Availability, Booking Confirm |
+| `booking_eeg.html` | Book EEG sessions, 2 visits, £60, 32 places only (Netlify site 3) | `Bookings` table | EEG Availability, EEG Confirm |
 
-**Licensing check:** The "When an HTTP request is received" trigger in Power Automate
-requires a **premium connector**. Most UCL Microsoft 365 accounts include this, but
-confirm with UCL IT before proceeding if you are unsure.
+Two workbooks, both on SharePoint, same document library:
 
-Sign in to [make.powerautomate.com](https://make.powerautomate.com) using your UCL
-Microsoft account (your UCL email ending in @ucl.ac.uk) to check access.
+- **`minds_in_motion_signups.xlsx`** — one table, `Signups`.
+- **`minds_in_motion_bookings.xlsx`** — two tables, `Slots` and `Bookings`, shared by both booking pages.
 
----
-
-## Step 1 — Create the Excel file on SharePoint
-
-1. Open the existing SharePoint Excel file (minds_in_motion_signups.xlsx) or create a
-   new one in your UCL OneDrive / SharePoint document library.
-2. In the first sheet (Sheet1), type these column headers in Row 1, one per cell:| A                | B          | C         | D   | E   | F     | G           | H                |
-   | ---------------- | ---------- | --------- | --- | --- | ----- | ----------- | ---------------- |
-   | Server Timestamp | First Name | Last Name | Sex | Age | Email | Institution | Client Timestamp |
-3. Select cells A1 through H1 (the headers), then select a few rows below as well
-   (e.g. A1:H10).
-4. Click **Insert** in the Excel ribbon, then **Table**. Make sure "My table has
-   headers" is checked. Click **OK**.
-5. Right-click the table and choose **Table > Table Name**. Name it: **Signups**
-6. Save the file.
+`apps-script/Code.gs` and the Google Sheets approach it describes are legacy and not wired to anything live — ignore them.
 
 ---
 
-## Step 2 — Create the Power Automate flow
+## Conventions
 
-1. Go to [make.powerautomate.com](https://make.powerautomate.com).
-2. Click **+ Create** in the left sidebar.
-3. Choose **Instant cloud flow**.
-4. Name it: **Minds in Motion Signup Receiver**
-5. For the trigger, choose: **When an HTTP request is received**
-6. Click **Create**.
+Read this once — every flow below relies on all of it and won't re-explain it.
 
-> **Note — the trigger step says "manual":** This is normal. Power Automate uses "manual"
-> as its internal type name for HTTP-triggered flows. To confirm you have the right trigger,
-> click the trigger step in the flow editor — you should see an **HTTP POST URL** field.
-> If you see that URL, everything is correct. If you instead see a form with labelled
-> input boxes and no URL, you accidentally chose "Manually trigger a flow"; delete the
-> flow and start again from Step 2.
+- **Trigger:** every HTTP-triggered flow needs **Method: POST** and **Who can trigger the flow? → Anyone**. The default, "Any user in my tenant," demands a UCL sign-in token, which public pages don't have — every request would 401. The long `sig=` parameter already in the URL is what authorises the call instead.
+- **Copying the URL:** always use the **copy icon** next to the HTTP URL field, never read-and-retype — it's truncated on screen and the hidden part carries the signature. It only appears after the first save. Older Power Automate labels this box "HTTP POST URL"; same thing, only ever one URL per trigger.
+- **Rename every action you'll reference by name.** Power Automate stores a display name's spaces as underscores internally (`Filter array` → `Filter_array`), which is the single most common cause of "invalid reference" errors. Rename on creation (**⋯** → **Rename**) to something with no spaces and skip the guesswork entirely.
+- **Filter array, always in advanced mode.** Click **Edit in advanced mode** under the condition boxes rather than using them — basic mode only offers column names when the array still carries a schema, which stops being true after the array has already passed through one Filter array once, and typing a column name into the boxes by hand compares it as a literal string and silently matches nothing.
+- **`item()` inside a Filter array means the row being filtered — never a row from an enclosing loop.** To compare against "the slot the outer loop is currently on," capture it first with a **Compose** action (e.g. `CurrentSlotId` → `item()?['Slot ID']`), then reference `outputs('CurrentSlotId')` inside the Filter array. This is also why `outputs('ComposeName')` is used instead of `items('Apply_to_each')`: the latter depends on the loop's exact internal name, which breaks the moment the loop is renamed or duplicated.
+- **Blank Excel cells:** use `@empty(item()?['ColumnName'])`, never `equals(..., '')`. An untouched cell can come back as an empty string or as null depending on the row, and only `empty()` catches both. The Excel connector's own Filter Query field doesn't reliably match blanks either, which is why blank-detection always happens via a Filter array instead.
+- **Type expressions, don't paste them.** Pasted text — especially copied out of a rendered document — can carry invisible characters or smart quotes that Power Automate rejects as an invalid expression with no useful error location.
+- **String literals inside expressions need quotes.** `'Crowd'` is a valid expression; bare `Crowd` is not, and the flow refuses to save with "contains invalid expression(s)." If a field should be genuinely empty (e.g. `Cancelled`), leave it completely untouched — opening its Expression tab and clicking OK with nothing typed saves an empty expression, which throws the same error.
+- **`item()` is only valid where there's a real per-item context.** That's a genuine Apply-to-each loop, or a **Select** action's own Map (Select is specifically designed for this — switch its Map to key/value mode, key = the target field name typed literally, value = an expression like `item()?['Email']`). It is **not** valid in **Create CSV table**'s Custom column values — that action isn't a loop, and using `item()` there fails at save with an "InvalidTemplate" error. If you need to shape data before a CSV, run it through **Select** first and leave Create CSV table's Columns on **Automatic**.
+- **Compose before Response or Send-an-email, for any computed value.** Typing a raw function expression directly into a rich-text field (an email Body, a Response Body's JSON editor) can get silently mangled as you type or as the surrounding text is edited. Compute it first in a plain **Compose** action, then insert that Compose's **Outputs** into the rich-text field via the ordinary dynamic-content picker — never by typing an expression into the rich-text field itself.
+- **Concurrency Control must stay off on any flow that has a Response action.** Power Automate's Response actions require a still-open connection back to the caller; Concurrency Control works by queuing runs, and a queued run can't answer anyone. Turning it on refuses to save with `InvalidConcurrencyConfiguration`. **It also cannot be switched off again once set** — the flow must be rebuilt, or exported → the concurrency block manually stripped from the JSON → re-imported. This trades away protection against two people booking the very last seat in the same instant; see each Confirm flow's write step for why that's an acceptable trade here, and the airtight alternative if you ever want to close it.
+- **`.ics` calendar attachments** need real CRLF line endings, which can't be typed into a Power Automate field directly. Build the template with `~` between lines, then wrap the whole thing in `replace(..., '~', decodeUriComponent('%0D%0A'))`. Avoid commas inside `SUMMARY`/`LOCATION`/`DESCRIPTION` (iCalendar treats them as separators and they'd need escaping as `\,`). Multiple `VEVENT` blocks in one file need **different `UID`s each**, or calendar apps treat the second as an edit to the first and only one event shows up.
+- **Testing any HTTP-triggered flow directly:** the **Test** button only arms the flow to wait for a real request — open the flow, **Test → Manually → Test**, then send it one from a terminal:
+  ```bash
+  curl -sS -X POST '<HTTP URL>' -H 'Content-Type: application/json' -d '{"...":"..."}'
+  ```
+  `401` means the trigger is still set to "Any user in my tenant." A bare `202 Accepted` means the branch that ran has no Response action on it. A ~2-minute timeout means an action failed earlier and the Response was never reached — check **28 day run history** on the flow for exactly which one.
 
 ---
 
-## Step 3 — Configure the HTTP trigger
+## Part 1 — Interest signups (`index.html`)
 
-In the flow editor, click the trigger step ("When an HTTP request is received").
+### Workbook — `minds_in_motion_signups.xlsx`, table `Signups`
 
-Set **Method** to: **POST**
+| Server Timestamp | First Name | Last Name | Sex | Age | Email | Institution | Client Timestamp | Exported Date | Mailed Date |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 
-Paste the following into the **Request Body JSON Schema** box:
+Create it: type the headers into Row 1, select the header row plus a few blank rows below, **Insert → Table**, tick "My table has headers," then right-click → **Table → Table Name** → `Signups`. `Exported Date`/`Mailed Date` are added in Part 2 — leave them out for now, blank always means "not done yet" once they exist.
 
+### Flow — Signup Receiver
+
+**Instant cloud flow** → trigger **When an HTTP request is received** → name **Minds in Motion Signup Receiver**.
+
+1. Configure the trigger per Conventions. Request Body JSON Schema:
+   ```json
+   {
+     "type": "object",
+     "properties": {
+       "firstName": {"type": "string"}, "lastName": {"type": "string"},
+       "sex": {"type": "string"}, "age": {"type": "number"},
+       "email": {"type": "string"}, "institution": {"type": "string"},
+       "timestamp": {"type": "string"}
+     }
+   }
+   ```
+2. **Excel Online (Business) → List rows present in a table** — File `minds_in_motion_signups.xlsx`, Table `Signups`. Expand **Show advanced options**, and in **Filter Query** build it by typing and clicking (this field only works reliably when built this way, not pasted): type `Email eq '`, click **Add dynamic content** → under the trigger heading click **email** (inserts a blue chip), then type a closing `'`. Result: `Email eq '` *email chip* `'`.
+3. **Condition** — left value: **Add dynamic content** → this action's **value** output; operator **is not empty**; right blank. True when that email already has a row.
+4. **If yes → Response**: `409`, headers `Access-Control-Allow-Origin: *` and `Content-Type: application/json`, body `{"error":"email_duplicate"}`.
+5. **If no → Add a row into a table** (same file/table). Map: Server Timestamp = expression `utcNow()`; First Name/Last Name/Sex/Age/Email/Institution/Client Timestamp = dynamic content `firstName`/`lastName`/`sex`/`age`/`email`/`institution`/`timestamp`.
+6. Still inside **If no → Response**: `200`, same headers, body `{"result":"success"}`.
+7. Save. Copy the trigger's HTTP URL.
+
+### Connect and test
+
+In `index.html`, set `const POWER_AUTOMATE_URL = '<the URL>';`. Submit the form once — a row should appear in Excel within seconds. Submit the same email again — you should see the duplicate message and no second row.
+
+---
+
+## Part 2 — Export & mail tracking
+
+Once signups arrive, you'll periodically want everyone's un-exported email addresses to paste into Mailchimp/Gmail (body: `email/outreach-template.html`), and a way to know afterwards who's been exported and mailed. Two extra `Signups` columns plus two manually-triggered flows do this; **the mass send itself stays external** — these flows only compile the list and stamp the columns.
+
+### Workbook
+
+Add columns **`Exported Date`** and **`Mailed Date`** to `Signups` (type the header into the cell right after the last column; the table auto-extends). Leave blank for all rows, including new signups.
+
+### Flow — Export New Signups
+
+**Instant cloud flow**, trigger **Manually trigger a flow**.
+
+1. **List rows present in a table** → `Signups`, no filter (list everything; blank-detection happens next, per Conventions).
+2. **Filter array**, renamed `FilterUnexported` — from the List-rows `value`, advanced mode: `@empty(item()?['Exported Date'])`.
+3. **Condition** — `length(body('FilterUnexported'))` **is greater than** `0`. Nothing new → flow ends, safe to run any time.
+4. Inside **If yes**, four actions as siblings, then a loop:
+   - **Compose**, renamed `NewSignupCount` → expression `length(body('FilterUnexported'))`. (Per Conventions: computed here, not typed into the email body directly.)
+   - **Select**, renamed `SelectEmailFields` — From: `FilterUnexported`'s output. Switch Map to key/value mode: Key `Email` → Value expression `item()?['Email']`; Key `First Name` → Value expression `item()?['First Name']`.
+   - **Create CSV table** — From: `SelectEmailFields`'s output, Columns: **Automatic** (per Conventions — Select already narrowed the columns, so Automatic now produces exactly Email + First Name).
+   - **Send an email (V2)** to yourself. Subject e.g. `Minds in Motion — new signups to export`. Body: insert `NewSignupCount`'s **Outputs** via the dynamic-content picker for the count. **Attachment Name:** literal plain text `new-signups.csv` (typing a token here instead is why extensions come out wrong). **Attachment Content:** `Create CSV table`'s **Output** specifically.
+   - **Apply to each** — input: `FilterUnexported`'s **Body**. Inside: **Update a row** (`Signups`) — Key Column `Email` (plain text; safe since the receiver flow guarantees uniqueness), Key Value: dynamic content **Email** if offered, else expression `item()?['Email']`; **Exported Date** = expression `utcNow()`.
+   - On the **Apply to each** step, **⋯ → Configure run after** → tick **is successful** on the Send-email step only. Rows are only stamped exported if the email actually went out — if it fails, nothing is marked and a re-run picks the same rows up again.
+5. Save.
+
+### Flow — Mark Batch as Mailed
+
+Run once you've actually sent the campaign externally using the exported list.
+
+1. **List rows present in a table** → `Signups`, no filter.
+2. **Filter array**, renamed `FilterUnmailed` — advanced mode: `@and(not(empty(item()?['Exported Date'])), empty(item()?['Mailed Date']))`.
+3. **Apply to each** → `FilterUnmailed`'s Body → **Update a row**: Key Column `Email`, Key Value as above; **Mailed Date** = expression `utcNow()`.
+4. Optional: **Send an email (V2)** to yourself confirming the count.
+5. Save.
+
+Only ever touches exported-but-not-mailed rows, so it's safe to re-run or skip a cycle.
+
+### The cycle
+
+Run **Export New Signups** → paste the CSV's addresses into Mailchimp/Gmail using `email/outreach-template.html` → send → run **Mark Batch as Mailed**. Repeat as new signups trickle in.
+
+---
+
+## Part 3 — Crowd booking (`booking.html`)
+
+One visit, up to 2 hours, £30, no equipment. The page walks: study info → 8-question eligibility gate (client-side only, nothing sent until it passes) → slot picker → BFI-2 + demographics questionnaire → confirm.
+
+### Workbook — `minds_in_motion_bookings.xlsx`
+
+**`Slots`** — every column that exists on this table, including the ones only the EEG funnel (Part 4) uses:
+
+| Slot ID | Session Type | Date | Time | Label | Capacity | Cohort | EEG Per Cohort | Start UTC | End UTC |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| S1 | Crowd | 2026-09-15 | 10:00 | Tue 15 Sept, 10:00 | 40 | | 2 | 20260915T090000Z | 20260915T110000Z |
+| S2 | Crowd | 2026-09-15 | 14:00 | Tue 15 Sept, 14:00 | 40 | | 2 | 20260915T130000Z | 20260915T150000Z |
+| S3 | Crowd | 2026-09-15 | 16:00 | Tue 15 Sept, 16:00 | 40 | | 2 | 20260915T150000Z | 20260915T170000Z |
+| S4 | Crowd | 2026-09-16 | 10:00 | Wed 16 Sept, 10:00 | 40 | | 2 | 20260916T090000Z | 20260916T110000Z |
+| S5 | Crowd | 2026-09-16 | 14:00 | Wed 16 Sept, 14:00 | 40 | | 2 | 20260916T130000Z | 20260916T150000Z |
+| S6 | Crowd | 2026-09-16 | 16:00 | Wed 16 Sept, 16:00 | 40 | | 2 | 20260916T150000Z | 20260916T170000Z |
+| S7 | Crowd | 2026-09-17 | 10:00 | Thu 17 Sept, 10:00 | 40 | | 2 | 20260917T090000Z | 20260917T110000Z |
+| S8 | Crowd | 2026-09-17 | 14:00 | Thu 17 Sept, 14:00 | 40 | | 2 | 20260917T130000Z | 20260917T150000Z |
+| S9 | Crowd | 2026-09-17 | 16:00 | Thu 17 Sept, 16:00 | 40 | | 0 | 20260917T150000Z | 20260917T170000Z |
+
+- **`Label`** is exactly what the page shows, split on the comma to group by day — keep the `Day DD Mon, HH:MM` format.
+- **`Capacity` 40 against a real target of ~30** absorbs no-shows. Change it any time by editing the cell; no flow or code change needed.
+- **`Cohort`/`EEG Per Cohort`** — blank/`2` (`0` for S9) here; only meaningful once Part 4 is built. `EEG Per Cohort` is *per cohort*: `2` = 2 C1 places **and** 2 C2 places on that session.
+- **`Start UTC`/`End UTC`** — `YYYYMMDDTHHMMSSZ`, used only for the confirmation-email `.ics`. September is British Summer Time, one hour ahead of UTC — 10:00 London is `T090000Z`. Stored as data rather than computed in-flow, since timezone arithmetic in expressions is fiddly and fails silently; these were generated from the rules and checked, not typed by hand.
+
+**`Bookings`** — one row per confirmed booking, never partial:
+
+| Booking ID | Server Timestamp | Session Type | Slot ID | Slot Label | First Name | Last Name | Email | Client Timestamp | Questionnaire Version | Answers JSON | Registered Interest | Cancelled | Cohort | Individual Slot ID | Individual Slot Label |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+
+Leave every row blank; the flows fill them in. Notes:
+- **`Session Type`** is the track: `Crowd` or `EEG`. **`Slot ID`/`Slot Label` always mean the crowd session**, for both tracks — that's what lets the crowd Availability flow work unchanged once EEG exists.
+- **`Answers JSON`** — the whole questionnaire as one JSON string. Deliberately opaque: changing the questions is then a one-line edit in the page's `QUESTIONS` array, never a schema or flow change.
+- **`Questionnaire Version`** — which question set that row answered; see Reference below.
+- **`Registered Interest`** — `Yes`/`No`, whether the email also exists in `Signups`. Never blocks anyone; just a flag.
+- **`Cancelled`** — blank = active. To free a place, type a date here; never delete the row, or you lose the answers.
+- **`Cohort`/`Individual Slot ID`/`Individual Slot Label`** — EEG-only (Part 4). Crowd bookings get `Cohort = 'C30'` and leave the other two blank.
+
+### Flow — Booking Availability
+
+Read-only, safe to call from the public page — returns only aggregate counts. Trigger per Conventions, schema `{"type":"object","properties":{"email":{"type":"string"}}}`.
+
+1. **List rows** → `Slots`, renamed `ListSlots`. **List rows** → `Bookings`, renamed `ListBookings`.
+2. **Filter array** `FilterCrowdSlots` — `@equals(item()?['Session Type'], 'Crowd')`.
+3. **Filter array** `FilterActiveBookings` — `@empty(item()?['Cancelled'])`.
+4. **Initialize variable** `SlotAvailability` (Array, `[]`) — top level, before any loop.
+5. **Apply to each** over `FilterCrowdSlots`:
+   1. **Compose** `CurrentSlotId` → `item()?['Slot ID']`.
+   2. **Filter array** `FilterBySlot` — from `FilterActiveBookings`: `@equals(item()?['Slot ID'], outputs('CurrentSlotId'))`.
+   3. **Compose** `SlotObject` (JSON editor): `slotId`/`label` = `item()?['Slot ID']`/`item()?['Label']`; `capacity` = `int(item()?['Capacity'])`; `booked` = `length(body('FilterBySlot'))`; `full` = `greaterOrEquals(length(body('FilterBySlot')), int(item()?['Capacity']))`.
+   4. **Append to array variable** `SlotAvailability` ← `SlotObject` output.
+6. **Filter array** `FilterEmailMatch` — from `FilterActiveBookings`: `@equals(toLower(coalesce(item()?['Email'], '')), toLower(coalesce(triggerBody()?['email'], '_none_')))`. (`coalesce(..., '_none_')` covers first page-load, when `email` is empty — without it `toLower(null)` throws and the grid never loads.)
+7. **Compose** `AvailabilityResponseBody`: `result` = `success`; `slots` = the `SlotAvailability` variable; `alreadyBooked` = `greater(length(body('FilterEmailMatch')), 0)`.
+8. **Response** `200`, headers `Access-Control-Allow-Origin: *` + `Content-Type: application/json`, body = `AvailabilityResponseBody` output.
+
+Leave Concurrency Control off (nothing to protect on a read).
+
+### Flow — Booking Confirm
+
+Trigger schema:
 ```json
-{
-  "type": "object",
-  "properties": {
-    "firstName":   { "type": "string" },
-    "lastName":    { "type": "string" },
-    "sex":         { "type": "string" },
-    "age":         { "type": "number" },
-    "email":       { "type": "string" },
-    "institution": { "type": "string" },
-    "timestamp":   { "type": "string" }
-  }
-}
+{"type":"object","properties":{
+  "slotId":{"type":"string"}, "firstName":{"type":"string"}, "lastName":{"type":"string"},
+  "email":{"type":"string"}, "answers":{"type":"object"},
+  "questionnaireVersion":{"type":"string"}, "timestamp":{"type":"string"}
+}}
 ```
+Leave Concurrency Control off (Conventions).
 
-Click **Save** (top right). After saving, the **HTTP POST URL** field at the top of
-the trigger will populate. **Copy this URL** — you will need it in Step 9.
+1. **List rows** → `Slots` (`ListSlots`), `Bookings` (`ListBookings`).
+2. **Filter array** `FilterSlotMeta` — `@and(equals(item()?['Slot ID'], triggerBody()?['slotId']), equals(item()?['Session Type'], 'Crowd'))`.
+3. **Filter array** `FilterActiveForSlot` — `@and(equals(item()?['Slot ID'], triggerBody()?['slotId']), empty(item()?['Cancelled']))`. Its length is the live headcount for that slot.
+4. **Filter array** `FilterActiveForEmail` — `@and(equals(toLower(coalesce(item()?['Email'],'')), toLower(coalesce(triggerBody()?['email'],'_none_'))), empty(item()?['Cancelled']))`.
+5. **Condition** `SlotInvalidOrFull` — `or(equals(length(body('FilterSlotMeta')), 0), greaterOrEquals(length(body('FilterActiveForSlot')), int(first(body('FilterSlotMeta'))?['Capacity'])))` equals `true`.
+   - **Yes → Response** `409`, `{"error":"slot_full"}`.
+   - **No →** nested **Condition** `EmailAlreadyBooked` — `length(body('FilterActiveForEmail'))` **is greater than** `0`.
+     - **Yes → Response** `409`, `{"error":"booking_duplicate"}`.
+     - **No →** the write branch:
+       1. **List rows** → the `Signups` table in `minds_in_motion_signups.xlsx` (**ListSignups**), then **Filter array** `FilterSignupMatch` — `@equals(toLower(coalesce(item()?['Email'],'')), toLower(coalesce(triggerBody()?['email'],'_none_')))`.
+       2. **Compose** `AnswersJsonString` → `string(triggerBody()?['answers'])`.
+       3. **Add a row into a table** → `Bookings`, every value an expression (Conventions):
 
----
+          | Column | Expression |
+          | --- | --- |
+          | Booking ID | `guid()` |
+          | Server Timestamp | `utcNow()` |
+          | Session Type | `'Crowd'` |
+          | Cohort | `'C30'` |
+          | Slot ID | `triggerBody()?['slotId']` |
+          | Slot Label | `first(body('FilterSlotMeta'))?['Label']` |
+          | First Name / Last Name / Email / Client Timestamp / Questionnaire Version | `triggerBody()?['firstName']` / `['lastName']` / `['email']` / `['timestamp']` / `['questionnaireVersion']` |
+          | Answers JSON | `outputs('AnswersJsonString')` |
+          | Registered Interest | `if(greater(length(body('FilterSignupMatch')), 0), 'Yes', 'No')` |
+          | Cancelled, Individual Slot ID, Individual Slot Label | leave completely untouched |
+       4. **Response** `200`: `result` (plain text) `success`; `slotId` = `triggerBody()?['slotId']`; `label` = `first(body('FilterSlotMeta'))?['Label']`.
+6. Save.
 
-## Step 4 — Check for duplicate email
+**The race window this leaves open:** two people confirming the same slot's last seat within about a second of each other could both pass step 3's check before either has written a row. Given the slot is already overbooked to 40 against a real target of 30, an occasional 41st booking is inside the no-show margin already budgeted for — accepted rather than fixed, because fixing it (Concurrency Control) isn't available on a flow with Response actions (Conventions). If you want it airtight anyway: generate the Booking ID in a `Compose` (`NewBookingId` → `guid()`) instead of inline, write the row, then re-list `Bookings`, filter to rows for that slot with a smaller Booking ID (`less(item()?['Booking ID'], outputs('NewBookingId'))`), and if that count is already at capacity, `Delete a row` (yourself) and return `slot_full` instead of the success response — `booking.html` already handles `slot_full` at this stage, so no page change is needed.
 
-1. Click **+ New step**.
-2. Search for: **Excel Online (Business)**
-3. Choose the action: **List rows present in a table**
-4. Configure it:
+### Confirmation email with a calendar invite
 
-   - **Location:** SharePoint
-   - **Document Library:** the library where the Excel file is saved
-   - **File:** navigate to and select **minds_in_motion_signups.xlsx**
-   - **Table:** select **Signups**
-5. Expand **Show advanced options**.
-6. In the **Filter Query** field, do the following — **do not paste; build it by typing and clicking**:
+After the `200` Response, still inside the same innermost **If no**:
 
-   1. Click inside the Filter Query field.
-   2. Type exactly (keyboard apostrophe/single-quote key for the `'`):
-      `Email eq '`
-   3. Without leaving the field, click **Add dynamic content** (the lightning-bolt icon
-      that appears next to the field, or the blue "Add dynamic content" link below).
-   4. Under the "When an HTTP request is received" heading, click **email**.
-      Power Automate inserts it as a blue chip in the field.
-   5. Immediately after the chip, type a single closing quote:
-      `'`
-
-   The field should now read:  `Email eq '` **email** `'`  (where **email** is a blue chip).
-
-   This returns only rows where the Email column matches the submitted address.
-
----
-
-## Step 5 — Add a Condition (branch on duplicate)
-
-1. Click **+ New step**.
-2. Search for: **Condition** (under Control).
-3. In the condition builder, click the left-hand value box.
-4. Click **Add dynamic content** (the lightning bolt / blue link).
-5. Under the "List rows present in a table" heading, click **value**.
-   (This is the array of matching rows returned by Step 4.)
-6. Set the operator to: **is not empty**
-7. Leave the right-hand value blank — it is not needed for this operator.
-
-This condition is true when at least one row with that email already exists.
-
----
-
-## Step 6 — If yes (duplicate): return error response
-
-Inside the **If yes** branch:
-
-1. Click **Add an action**.
-2. Search for: **Request** and choose: **Response**
-3. Configure it:
-   - **Status Code:** `409`
-   - **Headers:** click **+ Add new header**
-     - Name: `Access-Control-Allow-Origin` / Value: `*`
-   - Add another header:
-     - Name: `Content-Type` / Value: `application/json`
-   - **Body:**
-     ```json
-     {"error":"email_duplicate"}
-     ```
-
----
-
-## Step 7 — If no (new email): add row
-
-Inside the **If no** branch:
-
-1. Click **Add an action**.
-2. Search for: **Excel Online (Business)**
-3. Choose: **Add a row into a table**
-4. Configure it:
-
-   - **Location:** SharePoint
-   - **Document Library:** the same library
-   - **File:** **minds_in_motion_signups.xlsx**
-   - **Table:** **Signups**
-5. Map the columns using the dynamic content picker:
-
-   | Excel column     | Value                           |
-   | ---------------- | ------------------------------- |
-   | Server Timestamp | Expression:`utcNow()`         |
-   | First Name       | Dynamic content:`firstName`   |
-   | Last Name        | Dynamic content:`lastName`    |
-   | Sex              | Dynamic content:`sex`         |
-   | Age              | Dynamic content:`age`         |
-   | Email            | Dynamic content:`email`       |
-   | Institution      | Dynamic content:`institution` |
-   | Client Timestamp | Dynamic content:`timestamp`   |
-
-   For **Server Timestamp**: click the field, click **Expression**, type `utcNow()`, click **OK**.
-
----
-
-## Step 8 — If no (new email): return success response
-
-Still inside the **If no** branch, after the "Add a row" action:
-
-1. Click **Add an action**.
-2. Search for: **Request** and choose: **Response**
-3. Configure it:
-   - **Status Code:** `200`
-   - **Headers:**
-     - Name: `Access-Control-Allow-Origin` / Value: `*`
-     - Name: `Content-Type` / Value: `application/json`
-   - **Body:**
-     ```json
-     {"result":"success"}
-     ```
-
----
-
-## Step 9 — Save and connect the website
-
-1. Click **Save** (top right).
-2. Go back to the trigger step (labelled "manual" or "When an HTTP request is received"
-   — both are correct, "manual" is Power Automate's internal name for this trigger type).
-3. Find the **HTTP URL** or **HTTP POST URL** field at the top of that step.
-   **Important:** click the **copy icon** next to it — do not try to read and retype the
-   URL from the screen. The displayed URL is truncated; the real URL is much longer and
-   contains embedded auth parameters you cannot see.
-4. Open `website/index.html` in a text editor or VS Code.
-5. Find:
+1. **Compose** `IcsText`:
    ```
-   const POWER_AUTOMATE_URL = 'PASTE_YOUR_POWER_AUTOMATE_URL_HERE';
+   replace(concat('BEGIN:VCALENDAR~VERSION:2.0~PRODID:-//UCL//Minds in Motion//EN~CALSCALE:GREGORIAN~METHOD:PUBLISH~BEGIN:VEVENT~UID:', triggerBody()?['email'], '-', triggerBody()?['slotId'], '@ucl.ac.uk~DTSTAMP:', formatDateTime(utcNow(), 'yyyyMMddTHHmmss'), 'Z~DTSTART:', first(body('FilterSlotMeta'))?['Start UTC'], '~DTEND:', first(body('FilterSlotMeta'))?['End UTC'], '~SUMMARY:Minds in Motion - UCL PEARL~LOCATION:UCL PEARL Dagenham London~DESCRIPTION:Your session for the Minds in Motion study. Please arrive 10 minutes early.~END:VEVENT~END:VCALENDAR'), '~', decodeUriComponent('%0D%0A'))
    ```
-6. Replace the placeholder (keep the surrounding single quotes) with the URL you copied.
-7. Save the file.
+2. **Send an email (V2)** — To: `triggerBody()?['email']`; Subject e.g. `Your Minds in Motion session is booked`; Body: session details using `first(body('FilterSlotMeta'))?['Label']`, travel info, `[PLACEHOLDER: study email address]`; **Attachment Name** plain text `minds-in-motion.ics`; **Attachment Content** `base64(outputs('IcsText'))`.
 
----
+Placed after the Response so a mail problem never delays the participant's confirmation or the row being written — worst case, the email is missing and gets resent. Verify by booking a test slot and opening the `.ics` in both Google Calendar and Outlook — it must show **10:00–12:00 London** for S1, not 09:00 or 11:00.
 
-## Step 10 — Test the connection
-
-1. Open the website (via VS Code Live Server or a deployed URL).
-2. Fill in the signup form with a new test email and submit.
-3. You should see the thank-you message on screen.
-4. Open the Excel file on SharePoint — a new row should appear within seconds.
-5. Submit the form again with the **same email**. You should see the message:
-   _"That email address has already been used to sign up to the study."_
-   No duplicate row should appear in Excel.
-6. If anything is wrong, go to Power Automate → **My flows** → your flow →
-   **28 day run history** to see the execution log and any error details.
-
----
-
-## Troubleshooting
-
-| Symptom                           | Likely cause               | Fix                                                            |
-| --------------------------------- | -------------------------- | -------------------------------------------------------------- |
-| Form shows "Something went wrong" | Wrong or truncated URL     | Re-copy the URL using the copy icon in PA, not by reading it   |
-| No row in Excel                   | Flow ran but action failed | Check the flow run history in Power Automate                   |
-| Duplicate email not caught        | Filter Query syntax error  | Check Step 4 — quotes around the expression matter            |
-| "Premium connector" error         | Licensing issue            | Contact UCL IT to confirm Power Automate plan                  |
-| Flow never triggered              | CORS or network issue      | Check browser DevTools Network tab for the POST request status |
-
----
-
-## Note on the previous Google Apps Script integration
-
-The `apps-script/` folder and `Code.gs` file in this repo are no longer used.
-They documented the original Google Sheets integration, which has been replaced
-by this Power Automate + Excel on SharePoint approach to keep all data on UCL
-Microsoft servers.
-
----
-
-## Export & mail-tracking (Exported Date / Mailed Date)
-
-Once signups start arriving, you'll periodically want to pull out everyone's
-email address, paste it into Mailchimp/Gmail to send the mass outreach email
-(using `email/outreach-template.html`), and know afterwards who's already been
-exported and mailed — so the next batch only ever picks up new people.
-
-This is done with two extra columns on the Signups table and two small,
-manually-triggered Power Automate flows. The actual mass email send still
-happens outside Power Automate (Mailchimp/Gmail/BCC, as documented at the top
-of this file) — these flows only compile the list and stamp the tracking
-columns.
-
-### Part A — Add the tracking columns
-
-1. Open **minds_in_motion_signups.xlsx** and click any cell in the Signups
-   table.
-2. In the cell immediately to the right of the last column (**H: Client
-   Timestamp**), type the header **`Exported Date`** and press Enter. The
-   table automatically expands to include it as column **I**.
-3. In the next empty cell to the right, type the header **`Mailed Date`** and
-   press Enter — this becomes column **J**.
-4. Leave both columns blank for all rows. Blank means "not done yet"; every
-   new signup will also land with these two cells blank.
-
-### Part B — Build the "Export New Signups" flow
-
-Run this flow whenever you want to pull the latest batch of un-exported
-emails.
-
-1. Go to [make.powerautomate.com](https://make.powerautomate.com) → **+
-   Create** → **Instant cloud flow**.
-2. Name it **Export New Signups**. For the trigger, choose **Manually
-   trigger a flow**. Click **Create**.
-3. **+ New step** → **Excel Online (Business)** → **List rows present in a
-   table**. Configure Location/Document Library/File/Table exactly as in
-   Step 4 above (same file, **Signups** table), and leave Filter Query
-   blank — list *all* rows. (The Excel connector's server-side filter
-   doesn't reliably detect blank cells, so filtering happens in the next
-   step instead.)
-4. **+ New step** → search **Filter array** (under Data Operation), add it.
-
-   - Immediately rename it: click the **⋯** on the action → **Rename**
-     (or click directly on its title) → change it to **`FilterUnexported`**
-     (no space). Do this for every action you're about to reference by
-     typed expression — Power Automate stores a display name's spaces as
-     underscores internally (`Filter array` → `Filter_array`), which is a
-     common source of "invalid reference" errors when you type the name by
-     hand. Renaming it to have no space up front removes that guesswork
-     entirely: the name you see is the exact name you type.
-   - **From:** the `value` output of the List rows step.
-   - Build the condition: **`Exported Date`** is equal to *(leave the
-     right-hand side blank)*.
-5. **+ New step** → **Condition**. Set the left-hand value: click the field,
-   go to the **Expression** tab, and type exactly:
-   `length(body('FilterUnexported'))`
-   Operator **is greater than**, right-hand value `0`. If there's nothing
-   new, the flow ends here and sends nothing — safe to run any time without
-   checking first.
-
-   - If Power Automate still reports an invalid reference: click into the
-     expression box, delete what you typed, retype just `length(body(`,
-     then switch that same popup from the **Expression** tab to the
-     **Dynamic content** tab — under the "FilterUnexported" heading click
-     its output (usually listed as **value**) to insert the reference for
-     you, then type the closing `)`. This inserts Power Automate's own
-     guaranteed-correct token instead of relying on hand-typed text.
-6. Inside **If yes**, add the following five actions **one after another,
-   as siblings** (click **Add an action** inside the "If yes" box each time —
-   do not nest them inside one another; only step 6e has its own action
-   nested *inside it*, which is expected since it's a loop):
-
-   **6a. Compose** (Data Operation) — rename it (see step 4) to
-   `NewSignupCount`.
-
-   - **Inputs:** click the field, switch to the **Expression** tab, type
-     exactly `length(body('FilterUnexported'))` → **OK**. If it's rejected,
-     use the same Dynamic-content-tab fallback described in step 5.
-   - Why a separate Compose step: the Send-an-email action's Body field is
-     a rich-text/HTML editor, and typing a raw function expression directly
-     into it is what was causing the "invalid expression" error — the HTML
-     editor can silently corrupt the token as you type or when anything
-     else in the body is edited afterwards. A Compose action's Inputs field
-     is a plain value field, not rich text, so the expression evaluates
-     reliably there. You then just insert its *output* into the email as
-     normal dynamic content (6d below) instead of retyping the expression
-     inside the email body.
-
-   **6b. Select** (Data Operation) — rename it to `SelectEmailFields`.
-
-   - **From:** click the field → **Add dynamic content** → under the
-     "FilterUnexported" heading, click **Body** (its filtered-array output —
-     this is the only option offered here, and that's fine; the per-item
-     fields aren't exposed as separate clickable tokens this far downstream
-     of List rows, so you'll type them directly in the next part instead).
-   - **Map:** by default this is a single value box. Click the **Switch to
-     key/value mode** link just above/right of it — this turns it into a
-     small table of Key/Value rows.
-     - Row 1 — **Key:** type `Email` (plain text). **Value:** click into the
-       box, but this time switch to the **Expression** tab instead of
-       Dynamic content, and type `item()?['Email']` → **OK**.
-     - Row 2 — **Key:** `First Name`. **Value:** same way, Expression tab,
-       type `item()?['First Name']` → **OK**.
-   - This *is* the correct, Microsoft-documented way to use `item()` in a
-     Select action — unlike Create CSV table (the previous error), **Select**
-     is specifically designed to support `item()` in its own value mapping
-     without needing an explicit surrounding Apply-to-each loop. This step
-     is what narrows the data down to just the two fields you want; without
-     it, the next step would have no clean way to produce an Email + First
-     Name-only CSV.
-
-   **6c. Create CSV table** (Data Operation).
-
-   - **From:** the SelectEmailFields (6b) output.
-   - **Columns:** leave as **Automatic**. (Do *not* use Custom columns with
-     a typed `item()` expression here — Create CSV table isn't itself a
-     loop, so Power Automate rejects `item()`/`repeatItems` references in
-     its column values at save time with an "InvalidTemplate" error. Since
-     Select (6b) already narrowed the array down to just Email and First
-     Name, Automatic columns now produces exactly those two columns with no
-     expression needed.)
-
-   **6d. Send an email (V2)** (Office 365 Outlook).
-
-   - Send it **to yourself**. Subject: something like `Minds in Motion — new signups to export`. Body: type your message normally, then click
-     into the body where you want the count → **Add dynamic content** →
-     under the "NewSignupCount" (Compose, 6a) heading click **Outputs**.
-     Do **not** type or paste a raw expression into this field — always use
-     the dynamic content picker here.
-   - **Attachment Name:** type this field as **plain text**, literally
-     `new-signups.csv` — including the `.csv` extension. Don't use Add
-     dynamic content for this field at all; it's just a filename string,
-     and the extension you type here is the only thing that determines what
-     file type the recipient sees. If you inserted a token here (or left it
-     as an auto-suggested name), that's why the extension came through
-     wrong or missing — clear the field and type the literal text instead.
-   - **Attachment Content:** click **Add dynamic content** and pick
-     **Output** from under the "Create CSV table" (6c) heading specifically
-     — not Filter array's or Select's output, which are JSON, not CSV text.
-     Attaching the wrong step's output is the other common cause of a
-     wrong/garbled file: the *name* says `.csv` but the *content* isn't
-     actually CSV-formatted.
-
-   **6e. Apply to each** — its own input field (sometimes shown as "Select
-   an output from previous steps"; this is the array the loop iterates over,
-   one Update-a-row run per element): click it → **Add dynamic content** →
-   under the "FilterUnexported" heading click **Body** (the filtered array).
-
-   - Inside the loop (nested one level in, this is the only nesting in this
-     step), add **Excel Online (Business)** → **Update a row**:
-     Location/Document Library/File/Table as before.
-     - **Key Column:** type `Email` (plain text — this tells the connector
-       which column identifies the row; safe to use because the signup
-       flow's duplicate-email check guarantees every email is unique).
-     - **Key Value:** click into the field → try **Add dynamic content**
-       first — if there's no individual **Email** token listed (only a
-       whole-item/Body option, same as you just saw in the Select action),
-       switch to the **Expression** tab instead and type
-       `item()?['Email']` → **OK**. This is valid here specifically because
-       Update a row is genuinely inside a real Apply to each loop — unlike
-       the Create CSV table error earlier, `item()` is exactly what this
-       loop context is for.
-     - **Exported Date:** click into the field → **Add dynamic content** →
-       **Expression** tab → type `utcNow()` → **OK**.
-
-   After adding 6a–6e, go back to **6e (Apply to each)** and click its
-   **⋯** menu → **Configure run after** → tick **is successful** for the
-   Send email (6d) step (and untick "has failed"/"is skipped" if selected
-   by default). This is the safety rail: rows only get stamped as exported
-   if you actually received the list. If the email fails, nothing gets
-   marked, and re-running the flow later will pick the same rows up again.
-
-   **If the "invalid expression" error still appears on Send an email (V2)
-   after this change:** click its **⋯** menu → **Peek code** to see the raw
-   JSON for that action, and check every field for a stray `@` that isn't
-   meant to start an expression (e.g. inside a plain-text email address
-   typed directly into the body) — a literal `@` must be escaped as `@@`,
-   or for an action name that doesn't exactly match how it's spelled in the
-   designer (case and spacing both matter).
-7. **Save** the flow.
-
-### Part C — Build the "Mark Batch as Mailed" flow
-
-Run this once you've actually sent the campaign externally using the
-exported list.
-
-1. Create another **Instant cloud flow**, name it **Mark Batch as Mailed**,
-   trigger **Manually trigger a flow**.
-2. **List rows present in a table** — same Signups table, no filter.
-3. **Filter array** — add it, then rename it to **`FilterUnmailed`** (see
-   the naming note in Part B, step 4 — renaming any action you'll reference
-   later removes the space-vs-underscore guesswork). Condition, from the
-   List rows output: **`Exported Date`** is not equal to *(blank)* **and**
-   **`Mailed Date`** is equal to *(blank)*.
-4. **Apply to each** — its input field: click it → **Add dynamic content**
-   → under the "FilterUnmailed" heading click **Body**. Inside the loop,
-   **Update a row** (Excel Online (Business)): **Key Column** = type
-   `Email` (plain text); **Key Value** = try Add dynamic content first, and
-   if no individual **Email** token is offered, switch to the **Expression**
-   tab and type `item()?['Email']` (same reasoning as Part B, 6e — valid
-   here because you're genuinely inside an Apply to each loop); **Mailed
-   Date** = expression `utcNow()`.
-5. Optional: **Send an email (V2)** to yourself confirming how many rows
-   were marked.
-6. **Save** the flow.
-
-This flow only ever touches rows that were exported but not yet mailed, so
-it's safe to run more than once or skip a cycle — it won't re-mark or
-double-count anything.
-
-### Part D — The day-to-day cycle
-
-1. Run **Export New Signups** → you get an email with the new batch's CSV.
-2. Import/paste those addresses into Mailchimp (or Gmail mail-merge/BCC),
-   using `email/outreach-template.html` as the campaign body, and send.
-3. Run **Mark Batch as Mailed**.
-4. Repeat whenever new signups have trickled in — only genuinely new rows
-   get exported, and only newly-exported rows get marked mailed.
-
----
-
-# Booking flows (booking.html)
-
-`booking.html` is the second stage of recruitment. People who registered
-interest on `index.html` get emailed a link to it, and there they pick a
-session slot, complete a demographic + personality questionnaire, and only
-then confirm their place.
-
-This page books **crowd sessions only** — one visit, up to two hours, no EEG
-worn. EEG participants come through a separate funnel (two visits, extra
-screening) which is not built yet. The data model below has a
-`Session Type` column from day one so that funnel can be added later without
-rebuilding anything.
-
-Two flows are needed:
-
-| Flow                           | What it does                                | Called                                         |
-| ------------------------------ | ------------------------------------------- | ---------------------------------------------- |
-| **Booking Availability** | Returns how full each slot is               | On page load, and again just before confirming |
-| **Booking Confirm**      | Re-checks capacity, then writes the booking | Once, when the participant confirms            |
-
----
-
-## Step 1 — Create the bookings workbook
-
-Create a new Excel file in the **same SharePoint document library** as
-`minds_in_motion_signups.xlsx`. Name it:
-
-**minds_in_motion_bookings.xlsx**
-
-It needs two sheets, each with a named table (same technique as the original
-Signups table: select the header row plus a few rows below, **Insert →
-Table**, tick "My table has headers", then right-click → **Table → Table
-Name**).
-
-### Sheet 1 — table name: `Slots`
-
-Type these headers into Row 1:
-
-| A       | B            | C    | D    | E     | F        |
-| ------- | ------------ | ---- | ---- | ----- | -------- |
-| Slot ID | Session Type | Date | Time | Label | Capacity |
-
-Then type these nine rows exactly. `Label` is what participants actually see
-on the website, so keep it readable.
-
-| Slot ID | Session Type | Date       | Time  | Label              | Capacity |
-| ------- | ------------ | ---------- | ----- | ------------------ | -------- |
-| S1      | Crowd        | 2026-09-15 | 10:00 | Tue 15 Sept, 10:00 | 40       |
-| S2      | Crowd        | 2026-09-15 | 14:00 | Tue 15 Sept, 14:00 | 40       |
-| S3      | Crowd        | 2026-09-15 | 16:00 | Tue 15 Sept, 16:00 | 40       |
-| S4      | Crowd        | 2026-09-16 | 10:00 | Wed 16 Sept, 10:00 | 40       |
-| S5      | Crowd        | 2026-09-16 | 14:00 | Wed 16 Sept, 14:00 | 40       |
-| S6      | Crowd        | 2026-09-16 | 16:00 | Wed 16 Sept, 16:00 | 40       |
-| S7      | Crowd        | 2026-09-17 | 10:00 | Thu 17 Sept, 10:00 | 40       |
-| S8      | Crowd        | 2026-09-17 | 14:00 | Thu 17 Sept, 14:00 | 40       |
-| S9      | Crowd        | 2026-09-17 | 16:00 | Thu 17 Sept, 16:00 | 40       |
-
-> **Why 40 when you only want 30 people?** Some people who book will not turn
-> up. Overbooking to 40 against a target of 30 absorbs that. If you want to
-> change a slot's size later, just edit its **Capacity** cell — nothing in
-> the flows or the website needs to change.
-
-> **Why the `Label` column has to stay in sync:** the website shows nothing
-> but `Label`. It splits it on the comma to group slots by day, so keep the
-> format `Day DD Mon, HH:MM`.
-
-### Sheet 2 — table name: `Bookings`
-
-Type these headers into Row 1. Leave all rows empty — the flow fills them in.
-
-| A          | B                | C            | D       | E          |
-| ---------- | ---------------- | ------------ | ------- | ---------- |
-| Booking ID | Server Timestamp | Session Type | Slot ID | Slot Label |
-
-| F          | G         | H     | I                |
-| ---------- | --------- | ----- | ---------------- |
-| First Name | Last Name | Email | Client Timestamp |
-
-| J                     | K            | L                   | M         |
-| --------------------- | ------------ | ------------------- | --------- |
-| Questionnaire Version | Answers JSON | Registered Interest | Cancelled |
-
-What the less obvious columns are for:
-
-- **Answers JSON** — the entire questionnaire stored as one block of text.
-  It looks unfriendly in Excel, and that is on purpose: it means changing the
-  questions later is a one-line edit in `booking.html` and needs no change to
-  this table or to the flows. Without it you would be adding and removing
-  Excel columns every time the questionnaire changed.
-- **Questionnaire Version** — which set of questions that person answered.
-  Once the placeholder questions are replaced with real ones, this is what
-  tells you how to read the older rows.
-- **Registered Interest** — `Yes` if the email is already in the Signups
-  table, `No` if not. Nobody is blocked either way; it just flags people who
-  came in via a forwarded link or used a different address.
-- **Cancelled** — leave blank. If someone drops out, type a date here and
-  their place is immediately freed up for someone else. Do not delete the
-  row: deleting loses the questionnaire answers you have already collected.
-
----
-
-## How to read the expressions in this section
-
-Every **Filter array** below is written as a single line for **Edit in
-advanced mode** — the link underneath the condition boxes. Use that rather
-than the two basic-mode boxes. Basic mode only offers you column names when
-the incoming array carries a schema, which stops being true the moment an
-array has passed through one Filter array, and typing a column name into
-those boxes as plain text compares it as literal text and silently matches
-nothing.
-
-Three things appear in these expressions:
-
-| What you see                 | What it means                                                                                                                                                                                                                         |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `item()?['Slot ID']`       | The current row of**the array being filtered**, and the value in its `Slot ID` column. Inside a Filter array this always means the array in that action's own **From** box — never the row from an enclosing loop.     |
-| `triggerBody()?['slotId']` | A field from**the trigger** — the flow's first step, *When an HTTP request is received*. This is the JSON that `booking.html` POSTed, and the field names match the Request Body JSON Schema you pasted into that trigger. |
-| `outputs('CurrentSlotId')` | The result of an earlier**Compose** action of that name.                                                                                                                                                                        |
-
-> **The capitalisation difference is deliberate, not a typo.**
-> `item()?['Email']` is an **Excel column heading** — spelled exactly as it
-> appears in Row 1 of the sheet, capitals and spaces included.
-> `triggerBody()?['email']` is a **JSON field name** from the request —
-> spelled exactly as in the schema, which is lower-case first letter. Getting
-> either one's spelling wrong returns nothing and reports no error.
-
-Type these lines in rather than pasting them; pasted text can carry invisible
-characters that Power Automate rejects as an invalid expression.
-
----
-
-## Step 2 — Build the "Booking Availability" flow
-
-This one is safe to call from a public web page: it only ever returns
-*counts*, never anyone's name, email, or answers.
-
-1. [make.powerautomate.com](https://make.powerautomate.com) → **+ Create** →
-   **Instant cloud flow** → name it **Minds in Motion Booking Availability**
-   → trigger **When an HTTP request is received** → **Create**.
-2. Click the trigger. Set **Who can trigger the flow?** to **Anyone**, set
-   **Method** to **POST**, and paste this into **Request Body JSON Schema**:
-
-   ```json
-   {
-     "type": "object",
-     "properties": {
-       "email": { "type": "string" }
-     }
-   }
-   ```
-
-   > **"Who can trigger the flow?" defaults to "Any user in my tenant", and
-   > that will not work here.** That setting demands a UCL sign-in token on
-   > every call, and `booking.html` is a public web page whose visitors are
-   > not signed in to anything — every request would come back `401` and the
-   > slot grid would never load. **Anyone** is correct: the long `sig=`
-   > signature already embedded in the URL is what authorises the call, which
-   > is exactly how the existing signup flow works. Set this on **both**
-   > booking flows.
-   >
-
-   **Save**, then copy the URL from the **HTTP URL** box using the **copy
-   icon** beside it — you need it in Step 4.
-
-   > The box only fills in once the flow has been saved. Older Power Automate
-   > versions label it **HTTP POST URL** — same thing, and there is only ever
-   > one URL. The **Method** dropdown is what makes it a POST endpoint, so
-   > there is no separate "POST URL" to hunt for.
-   >
-3. **+ New step** → **Excel Online (Business)** → **List rows present in a
-   table** → the `Slots` table in `minds_in_motion_bookings.xlsx`. Rename
-   this action to **ListSlots**.
-4. Another **List rows present in a table** → the `Bookings` table. Rename it
-   to **ListBookings**.
-
-   > **Rename every action you will refer to later.** Power Automate stores
-   > a name like "Filter array" as `Filter_array` internally, and typing the
-   > wrong one is the single most common cause of "invalid reference" errors.
-   > Names without spaces remove the guesswork entirely.
-   >
-5. **Filter array**, renamed **FilterCrowdSlots** — From: **ListSlots**'s
-   `value`. **Edit in advanced mode**:
-
-   ```
-   @equals(item()?['Session Type'], 'Crowd')
-   ```
-
-   Keeps only the crowd slots, so EEG slots added to this table later are
-   ignored by this flow.
-6. **Filter array**, renamed **FilterActiveBookings** — From:
-   **ListBookings**'s `value`. **Edit in advanced mode**:
-
-   ```
-   @empty(item()?['Cancelled'])
-   ```
-
-   Keeps only bookings that have not been cancelled, so a cancelled person
-   stops taking up a place.
-
-   > `empty()` is used rather than comparing to `''` because an untouched
-   > Excel cell can come back as either an empty string or as null depending
-   > on the row, and `empty()` correctly catches both. This check also has to
-   > happen here rather than in the Excel connector's own Filter Query field,
-   > which does not reliably match empty cells at all.
-   >
-7. **Initialize variable** — Name `SlotAvailability`, Type **Array**, Value
-   `[]`. This must sit *before* the loop in step 8.
-
-   > **Steps 5, 6 and 7 all sit at the top level of the flow — none of them
-   > belong inside a loop.** By the end of step 8 you should have exactly one
-   > loop in this flow. If a second one appears (often auto-created and named
-   > "For each 1"), drag these actions back out and delete it. Power Automate
-   > will not even save an *Initialize variable* that sits inside a loop.
-   >
-8. **Apply to each** — input: **FilterCrowdSlots**'s output (**Body**).
-   Inside the loop add:
-
-   1. **Compose**, renamed **CurrentSlotId** — Inputs → **Expression** tab →
-      `item()?['Slot ID']`. This captures the slot the loop is currently on
-      so the next action can refer back to it.
-   2. **Filter array**, renamed **FilterBySlot** — From:
-      **FilterActiveBookings**'s output. Then click **Edit in advanced
-      mode** underneath the condition boxes and enter this single line:
-
-      ```
-      @equals(item()?['Slot ID'], outputs('CurrentSlotId'))
-      ```
-
-      > **Why advanced mode, and why the extra Compose.** Inside a Filter
-      > array, `item()` means *the item being filtered* — here a booking —
-      > **not** the slot from the enclosing loop. So you cannot use `item()`
-      > for both sides of the comparison, and there is no way to express this
-      > correctly using the two basic-mode boxes. The line above reads: keep
-      > this booking if its Slot ID matches the slot we are currently
-      > counting.
-      >
-      > You will also notice the basic-mode picker offers you no field names
-      > here. That is expected: the array comes out of another Filter array,
-      > which carries no column schema, so there is nothing for it to list.
-      > Typing `Slot ID` into that box as plain text does **not** work — it
-      > is compared as the literal text "Slot ID" and never matches, which
-      > silently reports every slot as empty.
-      >
-      > `outputs('CurrentSlotId')` is used in preference to
-      > `items('Apply_to_each')` because the latter depends on the loop's
-      > exact internal name, which breaks if the loop is ever renamed or
-      > duplicated.
-      >
-   3. **Compose**, renamed **SlotObject**. Click into Inputs and type `{` to
-      get the JSON editor, then build:
-
-      ```
-      slotId   →  expression  item()?['Slot ID']
-      label    →  expression  item()?['Label']
-      capacity →  expression  int(item()?['Capacity'])
-      booked   →  expression  length(body('FilterBySlot'))
-      full     →  expression  greaterOrEquals(length(body('FilterBySlot')), int(item()?['Capacity']))
-      ```
-
-      > `item()` is correct in *this* action, unlike in FilterBySlot above.
-      > SlotObject is a direct child of the Apply to each, so here `item()`
-      > does mean the current slot.
-      >
-   4. **Append to array variable** — Name `SlotAvailability`, Value: the
-      **Outputs** of **SlotObject** (click it from dynamic content).
-9. After the loop — **outside it**, back at the flow's top level — add a
-   **Filter array**, renamed **FilterEmailMatch**. From:
-   **FilterActiveBookings**'s output (**Body**). **Edit in advanced mode**:
-
-   ```
-   @equals(toLower(coalesce(item()?['Email'], '')), toLower(coalesce(triggerBody()?['email'], '_none_')))
-   ```
-
-   This finds any existing booking belonging to whoever is currently using
-   the page, which is what tells `booking.html` to stop someone at the first
-   step instead of letting them redo the whole questionnaire.
-
-   > Reading it from the inside out: `item()?['Email']` is the **Email
-   > column** of the booking row being tested; `triggerBody()?['email']` is
-   > the **email field** `booking.html` sent in the request.
-   >
-   > `toLower()` on both sides means `Alex@UCL.ac.uk` matches
-   > `alex@ucl.ac.uk`, which people do type inconsistently.
-   >
-   > `coalesce(…, '_none_')` covers the page's first load, when nobody has
-   > typed an email yet and the field arrives empty. Without it `toLower()`
-   > is handed a null and the whole flow fails with a type error, so the slot
-   > grid never loads. The nonsense value `_none_` can never match a real
-   > email address, so the result is correctly empty. Comparing against `''`
-   > instead would wrongly match any booking row with a blank email.
-   >
-10. **Compose**, renamed **AvailabilityResponseBody**:
-
-    ```
-    result        →  success
-    slots         →  the SlotAvailability variable
-    alreadyBooked →  expression  greater(length(body('FilterEmailMatch')), 0)
-    ```
-
-    > Build the response body in a Compose first rather than typing these
-    > expressions straight into the Response action. This is the same lesson
-    > as `NewSignupCount` earlier in this document: expressions typed into a
-    > structured body field get silently mangled.
-    >
-11. **Response** — Status Code `200`; Headers
-    `Access-Control-Allow-Origin: *` and `Content-Type: application/json`;
-    Body: the **Outputs** of **AvailabilityResponseBody**.
-12. **Save**.
-
-> Do **not** turn on Concurrency Control for this flow. It only reads, so
-> there is nothing to protect, and limiting it would just make the page
-> slower when several people load it at once.
-
----
-
-## Step 3 — Build the "Booking Confirm" flow
-
-1. **+ Create** → **Instant cloud flow** → name it **Minds in Motion Booking
-   Confirm** → **When an HTTP request is received** → **Create**.
-2. ### Leave Concurrency Control switched OFF
-
-   > **Do not turn Concurrency Control on for this flow.** It cannot be used
-   > here, and switching it on makes the flow refuse to save with:
-   >
-   > *"InvalidConcurrencyConfiguration … concurrency control is not supported
-   > when the workflow contains actions of type 'response' without the
-   > operationOptions flag set to 'asynchronous'."*
-   >
-   > Concurrency control works by making runs queue up. A **Response** action
-   > has to answer a browser that is sitting there waiting, and a queued run
-   > cannot do that — so Power Automate forbids the combination. The only way
-   > around it would be to make the responses asynchronous, which returns a
-   > `202` and a polling URL instead of an answer, and `booking.html` would
-   > have to be rewritten to cope. Not worth it.
-
-   What you give up by leaving it off is the narrow window between counting
-   the existing bookings (step 7) and writing the new row (step 13). For that
-   to cause a problem, two people have to press Confirm within a second or so
-   of each other on a slot sitting at exactly 39 of 40 — and the result is a
-   41st booking in a slot that is already deliberately overbooked to 40
-   against a real target of 30. That is comfortably inside the no-show margin
-   you are already budgeting for.
-
-   > **If you later want this airtight**, there is a lock-free pattern that
-   > works alongside synchronous responses: write the row first, then check
-   > whether you ended up past the cutoff and delete your own row if so.
-   > Add a **Compose** named `NewBookingId` set to `guid()` and use
-   > `outputs('NewBookingId')` for the Booking ID column instead of calling
-   > `guid()` inline. Then after step 13, re-run **List rows** on Bookings,
-   > add a **Filter array** named `FilterAheadOfMe`:
-   > ```
-   > @and(equals(item()?['Slot ID'], triggerBody()?['slotId']), empty(item()?['Cancelled']), less(item()?['Booking ID'], outputs('NewBookingId')))
-   > ```
-   > then a **Condition** — `length(body('FilterAheadOfMe'))` **is greater
-   > than or equal to** `int(first(body('FilterSlotMeta'))?['Capacity'])`. If
-   > yes, **Delete a row** (Key Column `Booking ID`, Key Value
-   > `outputs('NewBookingId')`) and return the `409 slot_full` response; if
-   > no, return the normal success response. Both racing runs can see both
-   > rows by then, so they count consistently and exactly the right number of
-   > bookings survive. `booking.html` already handles `slot_full` at this
-   > point, so no website change is needed.
-
-3. Set **Who can trigger the flow?** to **Anyone** (see the note in Step 2 —
-   leaving it on "Any user in my tenant" makes every booking fail with a
-   `401`), set **Method** to **POST**, and paste this **Request Body JSON
-   Schema**:
-
-   ```json
-   {
-     "type": "object",
-     "properties": {
-       "slotId":               { "type": "string" },
-       "firstName":            { "type": "string" },
-       "lastName":             { "type": "string" },
-       "email":                { "type": "string" },
-       "answers":              { "type": "object" },
-       "questionnaireVersion": { "type": "string" },
-       "timestamp":            { "type": "string" }
-     }
-   }
-   ```
-
-   **Save**, then copy the **HTTP POST URL** with the copy icon.
-4. **List rows present in a table** → `Slots`, renamed **ListSlots**.
-5. **List rows present in a table** → `Bookings`, renamed **ListBookings**.
-6. **Filter array**, renamed **FilterSlotMeta** — From: **ListSlots**'s
-   `value`. **Edit in advanced mode**:
-
-   ```
-   @and(equals(item()?['Slot ID'], triggerBody()?['slotId']), equals(item()?['Session Type'], 'Crowd'))
-   ```
-
-   Looks up the one slot being booked and confirms it really exists and
-   really is a crowd slot, so a mistyped or EEG slot ID cannot be booked
-   through this endpoint. Everything downstream reads the slot's capacity
-   and label out of this result.
-7. **Filter array**, renamed **FilterActiveForSlot** — From:
-   **ListBookings**'s `value`. **Edit in advanced mode**:
-
-   ```
-   @and(equals(item()?['Slot ID'], triggerBody()?['slotId']), empty(item()?['Cancelled']))
-   ```
-
-   Every live booking already held against that slot. The number of items
-   this returns *is* the current headcount, which step 9 compares against
-   the slot's capacity.
-8. **Filter array**, renamed **FilterActiveForEmail** — From:
-   **ListBookings**'s `value`. **Edit in advanced mode**:
-
-   ```
-   @and(equals(toLower(coalesce(item()?['Email'], '')), toLower(coalesce(triggerBody()?['email'], '_none_'))), empty(item()?['Cancelled']))
-   ```
-
-   Any live booking this person already holds, in any slot — this is what
-   stops one person quietly taking two places.
-
-   > As in the availability flow: `item()?['…']` names an **Excel column**,
-   > `triggerBody()?['…']` names a **field from the request**, `toLower()`
-   > makes the email match case-insensitive, and `empty()` catches a blank
-   > `Cancelled` cell whether Excel returns it as `''` or as null.
-   >
-9. **Condition**, renamed **SlotInvalidOrFull**. Left-hand value, as an
-   expression (type it, do not paste):
-
-   ```
-   or(equals(length(body('FilterSlotMeta')), 0), greaterOrEquals(length(body('FilterActiveForSlot')), int(first(body('FilterSlotMeta'))?['Capacity'])))
-   ```
-
-   Operator **is equal to**, right-hand value `true`.
-
-   - **If yes** → **Response**: Status `409`, the two usual headers, Body:
-     ```json
-     {"error":"slot_full"}
-     ```
-   - **If no** → carry on into step 10, *inside the If no branch*.
-10. Inside **If no**, add a second **Condition**, renamed
-    **EmailAlreadyBooked**. Left-hand value, expression
-    `length(body('FilterActiveForEmail'))`, operator **is greater than**,
-    right-hand value `0`.
-
-    - **If yes** → **Response**: Status `409`, usual headers, Body:
-      ```json
-      {"error":"booking_duplicate"}
-      ```
-    - **If no** → the write branch, steps 11–14 below, all inside this inner
-      **If no**.
-11. **List rows present in a table** → the **`Signups`** table in
-    `minds_in_motion_signups.xlsx` (the other workbook — not the bookings
-    one), renamed **ListSignups**. Then a **Filter array**, renamed
-    **FilterSignupMatch** — From: **ListSignups**'s `value`. **Edit in
-    advanced mode**:
-
-    ```
-    @equals(toLower(coalesce(item()?['Email'], '')), toLower(coalesce(triggerBody()?['email'], '_none_')))
-    ```
-
-    Checks whether this person ever registered interest on `index.html`.
-    Nobody is blocked either way — the result only decides what goes in the
-    `Registered Interest` column, flagging people who arrived via a
-    forwarded link or booked with a different address than they registered
-    with.
-12. **Compose**, renamed **AnswersJsonString** — Inputs, expression:
-    `string(triggerBody()?['answers'])`
-13. **Add a row into a table** → the `Bookings` table. Map every column:
-
-    **Every row below is an expression** — click the field, switch to the
-    **Expression** tab, type the line, click **OK**. There are no exceptions
-    to remember, which is exactly why `'Crowd'` is written *with quotes*: as
-    an expression, a bare unquoted word is not valid syntax, and the flow
-    refuses to save with *"contains invalid expression(s)"*.
-
-    | Excel column          | Expression to enter                                                |
-    | --------------------- | ------------------------------------------------------------------ |
-    | Booking ID            | `guid()`                                                         |
-    | Server Timestamp      | `utcNow()`                                                       |
-    | Session Type          | `'Crowd'`                                                        |
-    | Slot ID               | `triggerBody()?['slotId']`                                       |
-    | Slot Label            | `first(body('FilterSlotMeta'))?['Label']`                        |
-    | First Name            | `triggerBody()?['firstName']`                                    |
-    | Last Name             | `triggerBody()?['lastName']`                                     |
-    | Email                 | `triggerBody()?['email']`                                        |
-    | Client Timestamp      | `triggerBody()?['timestamp']`                                    |
-    | Questionnaire Version | `triggerBody()?['questionnaireVersion']`                         |
-    | Answers JSON          | `outputs('AnswersJsonString')`                                   |
-    | Registered Interest   | `if(greater(length(body('FilterSignupMatch')), 0), 'Yes', 'No')` |
-    | Cancelled             | leave untouched — see the warning below                          |
-
-    > **`Cancelled` has to be left genuinely empty.** Do not open its
-    > Expression tab and click OK, and do not type a space. An expression box
-    > that was opened and left blank saves as an empty expression, and that
-    > is the other common cause of the same "invalid expression" error on
-    > this action.
-
-    > **To find which field is broken**, click the action's **Code view**
-    > tab. It lists every input exactly as stored. A healthy expression reads
-    > `"@{triggerBody()?['slotId']}"`; a broken one is either a bare word
-    > with no quotes inside the braces, or an empty `"@{}"`.
-14. **Response** — Status `200`, usual headers, Body built in the JSON
-    editor:
-
-    ```
-    result →  plain text   success
-    slotId →  expression   triggerBody()?['slotId']
-    label  →  expression   first(body('FilterSlotMeta'))?['Label']
-    ```
-15. **Save**.
-
----
-
-## Step 4 — Connect the website
-
-Open `booking.html` and find these two lines near the top of the `<script>`
-block:
+### Connect and host
 
 ```js
 const AVAILABILITY_URL = 'PASTE_YOUR_BOOKING_AVAILABILITY_URL_HERE';
 const CONFIRM_URL      = 'PASTE_YOUR_BOOKING_CONFIRM_URL_HERE';
 ```
+in `booking.html`. Hosting is a separate Netlify site — see Part 5. `booking.html` is deliberately not linked from `index.html`; the only way in is the link in `email/outreach-template.html`'s `[WEBSITE_URL]` placeholder.
 
-Replace each placeholder (keep the quotes) with the matching URL, copied
-with the **copy icon** rather than read off the screen — the displayed URL is
-truncated and the real one contains authentication parameters you cannot see.
+### Test
 
-`booking.html` is deliberately **not** linked from `index.html`. The only way
-in is the link you send, which you set by putting the booking page's URL into
-`email/outreach-template.html`'s existing `[WEBSITE_URL]` placeholder for
-that campaign.
+1. Load the page — 9 slots, grouped by day, all "Available."
+2. Book one through to confirmation. Check the `Bookings` row, and that reloading availability now shows that slot's count up by one.
+3. Book again with the same email — stopped at the first step, before the questionnaire.
+4. Temporarily set one slot's Capacity to `1`, fill it, then try to book it again — told it just filled, sent back to pick another time, **answers still intact**, no second row written. Restore Capacity to `40`.
+5. Fill in half the questionnaire and refresh — answers restore.
 
 ---
 
-## Step 5 — Test it
+## Part 4 — EEG booking (`booking_eeg.html`)
 
-### Testing a flow on its own, before the website is wired up
+**32 places exactly.** Two visits: an individual session (90 min) and a crowd session (shared with Part 3's S1–S8), £60 paid after the second. 13-question eligibility gate (Part 3's set, minus general vision/hearing, plus contact-lenses-not-glasses, hair/scalp, no head covering, scalp condition, adhesive allergy).
 
-An HTTP-triggered flow cannot be set off from inside Power Automate — the
-**Test** button only puts it into "waiting for a request" mode. Something has
-to actually send it a request. Useful sequence:
+**Cohorts**, by which period the *individual* session falls in:
+- **C1** — individual 9–14 Sept, then the crowd session
+- **C2** — crowd session first, then individual 18–23 Sept
 
-1. Open the flow, click **Test** (top right) → **Manually** → **Test**. It
-   now sits waiting, and will show you the run step by step as it happens.
-2. From a terminal, send it a request. For the availability flow:
+**Why the numbers land on exactly 32:** 9–14 Sept has 4 working days (Wed 9, Thu 10, Fri 11, Mon 14); 18–23 Sept has 4 (Fri 18, Mon 21, Tue 22, Wed 23). 4 slots/day × 4 days × 2 periods = 32 individual places. On the crowd side, S1–S8 × 2 C1 + 2 C2 = 32. Both sides are 16 C1 + 16 C2, and every booking consumes exactly one place on each side, so they can't drift apart. **S9 takes no EEG participants** — that's what makes the crowd side land on exactly 32, expressed purely as `EEG Per Cohort = 0` on S9, never as flow logic.
 
-   ```bash
-   curl -sS -X POST '<paste the HTTP URL here>' \
-     -H 'Content-Type: application/json' \
-     -d '{"email":""}'
+### Workbook — 32 more `Slots` rows
+
+`Session Type = Individual`, `Capacity = 1` for all. Already in `minds_in_motion_bookings.xlsx` — generated from the rules above and checked programmatically rather than typed by hand, since a single wrong `Start UTC` silently emails someone the wrong hour.
+
+| Slot ID | Cohort | Date | Time | Label | Start UTC | End UTC |
+| --- | --- | --- | --- | --- | --- | --- |
+| I01 | C1 | 2026-09-09 | 09:30 | Wednesday 9 Sept, 09:30 | 20260909T083000Z | 20260909T100000Z |
+| I02 | C1 | 2026-09-09 | 11:00 | Wednesday 9 Sept, 11:00 | 20260909T100000Z | 20260909T113000Z |
+| I03 | C1 | 2026-09-09 | 13:30 | Wednesday 9 Sept, 13:30 | 20260909T123000Z | 20260909T140000Z |
+| I04 | C1 | 2026-09-09 | 15:00 | Wednesday 9 Sept, 15:00 | 20260909T140000Z | 20260909T153000Z |
+| I05 | C1 | 2026-09-10 | 09:30 | Thursday 10 Sept, 09:30 | 20260910T083000Z | 20260910T100000Z |
+| I06 | C1 | 2026-09-10 | 11:00 | Thursday 10 Sept, 11:00 | 20260910T100000Z | 20260910T113000Z |
+| I07 | C1 | 2026-09-10 | 13:30 | Thursday 10 Sept, 13:30 | 20260910T123000Z | 20260910T140000Z |
+| I08 | C1 | 2026-09-10 | 15:00 | Thursday 10 Sept, 15:00 | 20260910T140000Z | 20260910T153000Z |
+| I09 | C1 | 2026-09-11 | 09:30 | Friday 11 Sept, 09:30 | 20260911T083000Z | 20260911T100000Z |
+| I10 | C1 | 2026-09-11 | 11:00 | Friday 11 Sept, 11:00 | 20260911T100000Z | 20260911T113000Z |
+| I11 | C1 | 2026-09-11 | 13:30 | Friday 11 Sept, 13:30 | 20260911T123000Z | 20260911T140000Z |
+| I12 | C1 | 2026-09-11 | 15:00 | Friday 11 Sept, 15:00 | 20260911T140000Z | 20260911T153000Z |
+| I13 | C1 | 2026-09-14 | 09:30 | Monday 14 Sept, 09:30 | 20260914T083000Z | 20260914T100000Z |
+| I14 | C1 | 2026-09-14 | 11:00 | Monday 14 Sept, 11:00 | 20260914T100000Z | 20260914T113000Z |
+| I15 | C1 | 2026-09-14 | 13:30 | Monday 14 Sept, 13:30 | 20260914T123000Z | 20260914T140000Z |
+| I16 | C1 | 2026-09-14 | 15:00 | Monday 14 Sept, 15:00 | 20260914T140000Z | 20260914T153000Z |
+| I17 | C2 | 2026-09-18 | 09:30 | Friday 18 Sept, 09:30 | 20260918T083000Z | 20260918T100000Z |
+| I18 | C2 | 2026-09-18 | 11:00 | Friday 18 Sept, 11:00 | 20260918T100000Z | 20260918T113000Z |
+| I19 | C2 | 2026-09-18 | 13:30 | Friday 18 Sept, 13:30 | 20260918T123000Z | 20260918T140000Z |
+| I20 | C2 | 2026-09-18 | 15:00 | Friday 18 Sept, 15:00 | 20260918T140000Z | 20260918T153000Z |
+| I21 | C2 | 2026-09-21 | 09:30 | Monday 21 Sept, 09:30 | 20260921T083000Z | 20260921T100000Z |
+| I22 | C2 | 2026-09-21 | 11:00 | Monday 21 Sept, 11:00 | 20260921T100000Z | 20260921T113000Z |
+| I23 | C2 | 2026-09-21 | 13:30 | Monday 21 Sept, 13:30 | 20260921T123000Z | 20260921T140000Z |
+| I24 | C2 | 2026-09-21 | 15:00 | Monday 21 Sept, 15:00 | 20260921T140000Z | 20260921T153000Z |
+| I25 | C2 | 2026-09-22 | 09:30 | Tuesday 22 Sept, 09:30 | 20260922T083000Z | 20260922T100000Z |
+| I26 | C2 | 2026-09-22 | 11:00 | Tuesday 22 Sept, 11:00 | 20260922T100000Z | 20260922T113000Z |
+| I27 | C2 | 2026-09-22 | 13:30 | Tuesday 22 Sept, 13:30 | 20260922T123000Z | 20260922T140000Z |
+| I28 | C2 | 2026-09-22 | 15:00 | Tuesday 22 Sept, 15:00 | 20260922T140000Z | 20260922T153000Z |
+| I29 | C2 | 2026-09-23 | 09:30 | Wednesday 23 Sept, 09:30 | 20260923T083000Z | 20260923T100000Z |
+| I30 | C2 | 2026-09-23 | 11:00 | Wednesday 23 Sept, 11:00 | 20260923T100000Z | 20260923T113000Z |
+| I31 | C2 | 2026-09-23 | 13:30 | Wednesday 23 Sept, 13:30 | 20260923T123000Z | 20260923T140000Z |
+| I32 | C2 | 2026-09-23 | 15:00 | Wednesday 23 Sept, 15:00 | 20260923T140000Z | 20260923T153000Z |
+
+Crowd `Slots` rows and every `Bookings` column already exist from Part 3 — nothing more to add there. EEG bookings get `Session Type = 'EEG'`, a real `Cohort` (`C1`/`C2`), and both `Individual Slot ID`/`Individual Slot Label` filled in.
+
+### Booking Availability / Booking Confirm (Part 3) — unaffected
+
+Booking Availability already filters `Slots` to `Session Type = Crowd` and counts every non-cancelled booking against each Slot ID — EEG bookings carry the crowd `Slot ID` too, so they're already counted, correctly coming *out of* the 40 rather than adding to it. Booking Confirm needs nothing extra either; `Cohort = 'C30'` was already folded into Part 3's mapping table above.
+
+### Flow — EEG Availability
+
+Same shape as Booking Availability, trigger per Conventions, same schema.
+
+1. **List rows** → `Slots` (`ListSlots`), `Bookings` (`ListBookings`).
+2. **Filter array** `FilterActive` — `@empty(item()?['Cancelled'])`.
+3. **Filter array** `FilterIndSlots` — `@equals(item()?['Session Type'], 'Individual')`.
+4. **Filter array** `FilterEEGCrowdSlots` — `@and(equals(item()?['Session Type'], 'Crowd'), greater(int(item()?['EEG Per Cohort']), 0))` (this is what leaves S9 out, without naming it).
+5. **Initialize variable** `IndAvail` and `CrowdAvail` (both Array, `[]`), top level.
+6. **Apply to each** over `FilterIndSlots`:
+   1. **Compose** `CurId` → `item()?['Slot ID']`.
+   2. **Filter array** `TakenInd` — from `FilterActive`: `@and(equals(item()?['Individual Slot ID'], outputs('CurId')), empty(item()?['Cancelled']))`.
+   3. **Compose** `IndObj` — `slotId`/`cohort`/`label` from `item()?[...]`; `full` = `greaterOrEquals(length(body('TakenInd')), 1)`.
+   4. **Append to array variable** `IndAvail` ← `IndObj`.
+7. **Apply to each** over `FilterEEGCrowdSlots`:
+   1. **Compose** `CurCrowdId` → `item()?['Slot ID']`.
+   2. **Filter array** `AllInSlot` — `@and(equals(item()?['Slot ID'], outputs('CurCrowdId')), empty(item()?['Cancelled']))`.
+   3. **Filter array** `EEGC1` — `@and(equals(item()?['Slot ID'], outputs('CurCrowdId')), equals(item()?['Session Type'],'EEG'), equals(item()?['Cohort'],'C1'), empty(item()?['Cancelled']))`. **Filter array** `EEGC2` — same with `'C2'`.
+   4. **Compose** `CrowdObj` — `slotId`/`label` from `item()?[...]`; `capacity` = `int(item()?['Capacity'])`; `booked` = `length(body('AllInSlot'))`; `eegC1`/`eegC2` = `length(body('EEGC1'))`/`length(body('EEGC2'))`; `eegPerCohort` = `int(item()?['EEG Per Cohort'])`.
+   5. **Append to array variable** `CrowdAvail` ← `CrowdObj`.
+8. **Filter array** `EmailMatch` — from `FilterActive`: `@equals(toLower(coalesce(item()?['Email'], '')), toLower(coalesce(triggerBody()?['email'], '_none_')))`.
+9. **Compose** `EEGResponseBody` — `result` = `success`; `individual` = `IndAvail`; `crowd` = `CrowdAvail`; `alreadyBooked` = `greater(length(body('EmailMatch')), 0)`.
+10. **Response** `200`, usual headers, body = `EEGResponseBody`.
+
+### Flow — EEG Confirm
+
+Schema adds `individualSlotId`:
+```json
+{"type":"object","properties":{
+  "slotId":{"type":"string"}, "individualSlotId":{"type":"string"},
+  "firstName":{"type":"string"}, "lastName":{"type":"string"}, "email":{"type":"string"},
+  "answers":{"type":"object"}, "questionnaireVersion":{"type":"string"}, "timestamp":{"type":"string"}
+}}
+```
+Leave Concurrency Control off.
+
+1. **List rows** → `Slots` (`ListSlots`), `Bookings` (`ListBookings`).
+2. **Filter array** `IndMeta` — `@and(equals(item()?['Slot ID'], triggerBody()?['individualSlotId']), equals(item()?['Session Type'],'Individual'))`.
+3. **Filter array** `CrowdMeta` — `@and(equals(item()?['Slot ID'], triggerBody()?['slotId']), equals(item()?['Session Type'],'Crowd'))`.
+4. **Compose** `Cohort` → `first(body('IndMeta'))?['Cohort']`. Never sent by the browser — derived from whichever individual session they took, so it can't be tampered with.
+5. **Filter array** `IndTaken` — `@and(equals(item()?['Individual Slot ID'], triggerBody()?['individualSlotId']), empty(item()?['Cancelled']))`.
+6. **Filter array** `CrowdAll` — `@and(equals(item()?['Slot ID'], triggerBody()?['slotId']), empty(item()?['Cancelled']))`.
+7. **Filter array** `CrowdCohort` — `@and(equals(item()?['Slot ID'], triggerBody()?['slotId']), equals(item()?['Session Type'],'EEG'), equals(item()?['Cohort'], outputs('Cohort')), empty(item()?['Cancelled']))`.
+8. **Filter array** `EmailTaken` — `@and(equals(toLower(coalesce(item()?['Email'],'')), toLower(coalesce(triggerBody()?['email'],'_none_'))), empty(item()?['Cancelled']))`.
+9. **List rows** → the `Signups` table in `minds_in_motion_signups.xlsx` (**ListSignups**), then **Filter array** `FilterSignupMatch` — `@equals(toLower(coalesce(item()?['Email'],'')), toLower(coalesce(triggerBody()?['email'],'_none_')))`. (Same purpose as in Booking Confirm — flags `Registered Interest`, blocks nobody.)
+
+Four checks, each its own **Condition** returning `409` with a distinct body, nested in order (each "No" branch contains the next):
+
+| Condition (left value **is equal to** `true`) | Response body |
+| --- | --- |
+| `or(equals(length(body('IndMeta')),0), greaterOrEquals(length(body('IndTaken')),1))` | `{"error":"individual_taken"}` |
+| `or(equals(length(body('CrowdMeta')),0), greaterOrEquals(length(body('CrowdAll')), int(first(body('CrowdMeta'))?['Capacity'])))` | `{"error":"slot_full"}` |
+| `greaterOrEquals(length(body('CrowdCohort')), int(first(body('CrowdMeta'))?['EEG Per Cohort']))` | `{"error":"cohort_full"}` |
+| `greater(length(body('EmailTaken')),0)` | `{"error":"booking_duplicate"}` |
+
+In the innermost "all clear" branch: **Compose** `AnswersJsonString` → `string(triggerBody()?['answers'])`, then **Add a row into a table** → `Bookings`:
+
+| Column | Expression |
+| --- | --- |
+| Booking ID | `guid()` |
+| Server Timestamp | `utcNow()` |
+| Session Type | `'EEG'` |
+| Cohort | `outputs('Cohort')` |
+| Slot ID | `triggerBody()?['slotId']` |
+| Slot Label | `first(body('CrowdMeta'))?['Label']` |
+| Individual Slot ID | `triggerBody()?['individualSlotId']` |
+| Individual Slot Label | `first(body('IndMeta'))?['Label']` |
+| First Name / Last Name / Email / Client Timestamp / Questionnaire Version | `triggerBody()?['firstName']` / `['lastName']` / `['email']` / `['timestamp']` / `['questionnaireVersion']` |
+| Answers JSON | `outputs('AnswersJsonString')` |
+| Registered Interest | `if(greater(length(body('FilterSignupMatch')), 0), 'Yes', 'No')` |
+| Cancelled | leave completely untouched |
+
+Then **Response** `200`: `result` (plain text) `success`; `slotId` = `triggerBody()?['slotId']`; `label` = `first(body('CrowdMeta'))?['Label']`; `individualLabel` = `first(body('IndMeta'))?['Label']`; `cohort` = `outputs('Cohort')`.
+
+### Confirmation email — one file, two events
+
+After the Response: **Compose** `IcsText` with two `VEVENT` blocks, **different UIDs** (`-ind` / `-grp`, per Conventions):
+
+```
+replace(concat('BEGIN:VCALENDAR~VERSION:2.0~PRODID:-//UCL//Minds in Motion//EN~CALSCALE:GREGORIAN~METHOD:PUBLISH~BEGIN:VEVENT~UID:', triggerBody()?['email'], '-ind@ucl.ac.uk~DTSTAMP:', formatDateTime(utcNow(),'yyyyMMddTHHmmss'), 'Z~DTSTART:', first(body('IndMeta'))?['Start UTC'], '~DTEND:', first(body('IndMeta'))?['End UTC'], '~SUMMARY:Minds in Motion - individual session~LOCATION:UCL PEARL Dagenham London~END:VEVENT~BEGIN:VEVENT~UID:', triggerBody()?['email'], '-grp@ucl.ac.uk~DTSTAMP:', formatDateTime(utcNow(),'yyyyMMddTHHmmss'), 'Z~DTSTART:', first(body('CrowdMeta'))?['Start UTC'], '~DTEND:', first(body('CrowdMeta'))?['End UTC'], '~SUMMARY:Minds in Motion - group session~LOCATION:UCL PEARL Dagenham London~END:VEVENT~END:VCALENDAR'), '~', decodeUriComponent('%0D%0A'))
+```
+
+**Send an email (V2)** as in Part 3, Attachment Content `base64(outputs('IcsText'))`.
+
+### Connect and host
+
+```js
+const AVAILABILITY_URL = 'PASTE_YOUR_EEG_AVAILABILITY_URL_HERE';
+const CONFIRM_URL      = 'PASTE_YOUR_EEG_CONFIRM_URL_HERE';
+```
+in `booking_eeg.html`, plus fill `[PLACEHOLDER: study email address]` and `[PLACEHOLDER: crowd booking URL]` (the note pointing ineligible people at the crowd-only page). Host as a third Netlify site — Part 5. Put the address into `email/outreach-template.html`'s `[EEG_WEBSITE_URL]` placeholder.
+
+### Test
+
+1. Call EEG Availability with `{"email":""}` — 32 entries under `individual` (16 C1, 16 C2), 8 under `crowd` (**S9 must not appear**).
+2. Book one place end to end. Check the `Bookings` row: `Session Type = EEG`, correct `Cohort`, both slot IDs and labels filled.
+3. Re-check availability — that individual slot is `full:true`, its crowd session's `eegC1`/`eegC2` is up by one.
+4. Fill one crowd session's two C1 places, try a third C1 — greyed out on the page, `cohort_full` if called directly. A C2 participant can still book it.
+5. Open the `.ics` — two events, correct London times.
+6. Book with an email that already has a booking of either kind — `booking_duplicate`.
+
+---
+
+## Part 5 — Hosting
+
+`index.html` is already live on Netlify site 1, deployed straight from this repo, and **must not change** — no build command, publish directory root. `booking.html` and `booking_eeg.html` each get their **own** Netlify site pointed at the same GitHub repo, using a build command to stage that one file as the site's root. No files are added to the repo; nothing is duplicated.
+
+For each of the two booking pages:
+
+1. Netlify → **Add new site → Import an existing project** → GitHub → the same repo.
+2. **Branch:** `main`. **Base directory:** empty. **Publish directory:** `dist`. **Build command:**
    ```
-
-   You should get back `{"result":"success","slots":[ …nine slots… ], "alreadyBooked":false}`.
-
-   For the confirm flow:
-
-   ```bash
-   curl -sS -X POST '<paste the confirm URL here>' \
-     -H 'Content-Type: application/json' \
-     -d '{"slotId":"S1","firstName":"Flow","lastName":"Test",
-          "email":"flowtest@example.com","answers":{"d_age_band":"25-34"},
-          "questionnaireVersion":"placeholder-v1",
-          "timestamp":"2026-09-01T10:00:00.000Z"}'
+   mkdir -p dist && cp <file>.html dist/index.html && cp -r assets dist/assets && printf 'User-agent: *\nDisallow: /\n' > dist/robots.txt
    ```
+   — `<file>` is `booking` or `booking_eeg`. This stages that page as the homepage, brings its one referenced asset (the UCL logo), and writes a `robots.txt` disallowing crawling — belt and braces alongside the page's own `noindex` meta tag, since these pages are meant to be reached only via the emailed link.
+3. Deploy, then **Site configuration → Site details → Change site name** to something readable but not guessable (avoid `minds-in-motion-booking`-type names if you want it to stay effectively unlisted).
+4. Put the resulting `https://<name>.netlify.app/` address into the matching placeholder in `email/outreach-template.html` (`[WEBSITE_URL]` or `[EEG_WEBSITE_URL]`).
+5. Confirm site 1 (the landing page) still loads unchanged and its build settings are still empty/root — a second site can't affect it, but costs nothing to check.
 
-   You should get `{"result":"success","slotId":"S1","label":"Tue 15 Sept, 10:00"}` and a new row in the `Bookings` table. Delete that test row
-   afterwards.
-3. Whatever the response, open the flow → **28 day run history** to see
-   exactly which action failed and what it received.
-
-Common responses and what they mean:
-
-| Response                                   | Meaning                                                                                                             |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| `401` / a sign-in page                   | **Who can trigger the flow?** is still "Any user in my tenant" — change it to **Anyone**               |
-| `202 Accepted` with an empty body        | The flow has no**Response** action on the path it took, or the Response sits inside a branch that did not run |
-| `{"error":"slot_full"}` on an empty slot | `Capacity` is blank or stored as text, or `FilterActiveForSlot` is matching the wrong rows                      |
-| Times out after ~2 minutes                 | The Response action is unreachable — usually an action failed earlier in the branch                                |
-
-### Testing end to end through the website
-
-1. Open `booking.html`. All nine slots should appear, grouped by day, each
-   showing **Available**.
-2. Book a place all the way through. In Excel, the new `Bookings` row should
-   have the right `Slot ID`, a long string in `Answers JSON`, and
-   `Registered Interest` = `Yes` if you used an email already in Signups.
-3. Reload the page — that slot should now read 1 booking's worth of capacity
-   used (it stays "Available" until it is 80% full).
-4. Start again with the **same email**. You should be stopped at the first
-   step, *before* the questionnaire, with a message saying that address
-   already has a place.
-5. **Test the capacity limit.** In Excel, temporarily set one slot's
-   **Capacity** to `1`. Book that slot once so it is now full. Then open
-   `booking.html` again, fill in the questionnaire, and try to confirm the
-   same slot: you should be told the session just filled, be sent back to
-   pick another time, and find *your answers still intact*. Check Excel — no
-   second row was written. Set Capacity back to `40` afterwards.
-
-   > This tests the capacity check itself, which is the part that matters day
-   > to day. It deliberately does **not** test two people confirming at the
-   > exact same moment — as explained in Step 3.2, that narrow window is
-   > knowingly left open because the fix is incompatible with returning a
-   > response to the browser.
-6. Fill in half the questionnaire and refresh the page — your answers should
-   still be there.
+**Loose end:** because site 1 publishes the whole repo, `booking.html`/`booking_eeg.html` are *also* reachable at `<landing-site>/booking.html` etc. — same page, same flows, just not the address you advertise. To close that off, add a repo-root file called `_redirects` (no extension) containing one line per page:
+```
+/booking.html       /   301
+/booking_eeg.html    /   301
+```
+This affects **only site 1** — Netlify reads `_redirects` from the directory a site publishes, and the booking sites publish `dist`, which never contains this file. Optional; skip it if the duplicate addresses don't matter to you.
 
 ---
 
-## Troubleshooting
+## Reference
 
-| Symptom                                                | Likely cause                                          | Fix                                                                                           |
-| ------------------------------------------------------ | ----------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Page shows "We couldn't load the available times"      | Availability URL wrong, or the flow failed            | Press Try again; if it persists, check the flow's run history                                 |
-| All slots show as Full when they are not               | `Capacity` cells are empty or text                  | Check every Capacity cell contains a plain number                                             |
-| A cancelled person still takes up a place              | `Cancelled` cell has a space in it, not truly blank | Clear the cell completely (Delete, not spacebar)                                              |
-| Two bookings landed in a slot with room for one        | Two people confirmed within a second of each other, in the gap between the capacity check and the row being written | Expected and accepted — see the note in Step 3.2. Free a place by putting a date in that person's `Cancelled` cell, or build the write-then-verify pattern described there |
-| Flow will not save: `InvalidConcurrencyConfiguration`  | Concurrency Control was switched on                   | Switch it back off — it cannot be used on a flow that has Response actions. See Step 3.2 |
-| Slot times show the full date instead of just the time | A`Label` is missing its comma                       | Labels must read`Tue 15 Sept, 10:00`                                                        |
-| Everyone shows`Registered Interest` = `No`         | ListSignups is pointed at the wrong file or table     | It must read the`Signups` table in `minds_in_motion_signups.xlsx`                         |
-| Someone booked without doing the questionnaire         | Someone called the flow directly, bypassing the page  | The gate is in the website, not the flow; check`Answers JSON` looks complete                |
+### What lands in `Answers JSON`
 
----
+Both booking pages share one instrument, version `v1-bfi2`, **71 keys** per row:
 
-## Changing the questionnaire later
+| Keys | What |
+| --- | --- |
+| `screeningPassed` | Always `true`. The individual eligibility answers are **never stored** — psychiatric history and pregnancy are special-category data under GDPR, and since only eligible people ever reach submit, every stored value would be identical anyway. This flag just records that the gate ran. |
+| `d_sex`, `d_age`, `d_handedness`, `d_education`, `d_sector`, `d_language` | Demographics |
+| `bfi1` … `bfi60` | Big Five Inventory-2, stored as the chosen label text (map to 1–5 via `BFI_SCALE`'s order when scoring: `Disagree strongly` = 1 … `Agree strongly` = 5). The domain/facet scoring key and the required copyright line (© 2015 Oliver P. John and Christopher J. Soto) are a comment directly above `BFI_ITEMS` in the page source. |
+| `c_read`, `c_voluntary`, `c_data`, `c_agree` | Consent, stored as `true` |
 
-The questions live in one place: the `QUESTIONS` array near the top of the
-`<script>` block in `booking.html`. Every question is currently marked
-`[PLACEHOLDER]` so unfinished content is obvious.
+~3 KB per row — well inside Excel's ~32,000-character cell limit.
 
-When you replace them with the real instrument:
+### Changing the questionnaire
 
-1. Edit the array. Each entry needs an `id`, a `section`, a `type`
-   (`single`, `multi`, `text`, `textarea` or `number`), a `label`, `options`
-   for the choice types, and `required`.
-2. **Bump `QUESTIONNAIRE_VERSION`** on the line just above it (for example to
-   `v2`). This does two things: anyone midway through the old questionnaire
-   gets a clean start instead of a half-restored one, and every booking row
-   records which version that person answered, so old rows stay readable.
+Everything lives in `DEMOGRAPHIC_QUESTIONS`, `BFI_ITEMS` and `CONSENT_QUESTIONS` (→ `QUESTIONS`) in each page's `<script>`. Each entry: `id`, `section`, `type` (`single`/`multi`/`text`/`textarea`/`number`/`consent`), `label`, `options` where relevant, `required`; `number` types can add `min`/`max` for range-checking. **Bump `QUESTIONNAIRE_VERSION`** whenever you do — this discards any in-progress session on the old set (rather than half-restoring it) and keeps every stored row tagged with what it answered.
 
-Nothing else needs to change — pagination, the progress bar, validation and
-storage all work off that one array.
+Pages are built **one section at a time** via `SECTION_PAGE_SIZE` (demographics 6/page, BFI-2 10/page, consent all on one page; anything unlisted falls back to `DEFAULT_PAGE_SIZE`), so a section never spans two pages. Nothing else — progress bar, validation, storage, the step machine — needs touching.
+
+### Changing the eligibility criteria
+
+`booking.html`'s `SCREENING` (8 questions) and `booking_eeg.html`'s (13) are **drafts** and must be checked against the actual UCL REC approval before going live. Each is grouped so the eligible answer is uniform within a group (`expect: 'Yes'` or `'No'` per group) — Continue stays disabled until every answer matches. Someone who fails sees a neutral message naming no specific question, shown only once every question is answered (showing it earlier would point at the deciding one). Nothing about a failed attempt is ever transmitted.
+
+### Troubleshooting
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| `401` on any flow | Trigger's "Who can trigger" is still "Any user in my tenant" | Set to **Anyone** |
+| Flow won't save: `InvalidConcurrencyConfiguration` | Concurrency Control switched on with Response actions present | Switch off — see Conventions |
+| Flow won't save: "contains invalid expression(s)" | An unquoted string literal, or an Expression box opened and left blank | Quote string literals (`'Crowd'`); leave truly-blank fields untouched, don't open-and-clear them |
+| "Invalid reference" to an action | Typed the action's name with a space | Rename the action to have no space, or reference it with the underscore form |
+| A Filter array always returns everything or nothing | Used basic mode, or typed a column name as plain text | Use **Edit in advanced mode**; see Conventions for the `item()` rules |
+| Attachment has the wrong extension or garbled content | Attachment Name was a token instead of typed text, or Attachment Content points at the wrong action's output | Type the filename literally; point Content at the actual CSV/ICS-producing action |
+| Signup/Booking form shows "Something went wrong" | Wrong or truncated endpoint URL pasted into the page | Re-copy via the copy icon, never by reading the field |
+| Duplicate email not caught | Filter Query syntax error (signup flow), or a Filter array condition typo (booking flows) | Rebuild the Filter Query by typing+clicking; re-check the advanced-mode expression |
+| A cancelled person still holds a place | `Cancelled` cell has a stray space, not truly blank | Clear the cell with Delete, not a keystroke |
+| All slots show Full when they're not | `Capacity` (or `EEG Per Cohort`) is empty or stored as text | Every such cell must be a plain number |
+| `Registered Interest` always `No` | `ListSignups` points at the wrong file/table | Must read the `Signups` table in `minds_in_motion_signups.xlsx` |
+| Two bookings landed in a slot with room for one | Two confirms within the same instant — the accepted race window | See Part 3's write-step note; not a bug |
+| EEG booking accepted for a 3rd person in one cohort on one session | `cohort_full` check missing or comparing the wrong cohort | Re-check `CrowdCohort`'s expression matches `outputs('Cohort')`, not a literal |
+| `.ics` only shows one of two EEG events | Both `VEVENT`s used the same `UID` | Give them different suffixes (`-ind` / `-grp`) |
+| Netlify site 2/3 shows the wrong page | Publish directory isn't `dist`, or the build command's `cp` target is wrong | Check the deploy log; confirm Publish directory is exactly `dist` |
+| Changes to a booking page don't appear live | Netlify only rebuilds on push | Commit and push; check the site's Deploys tab |
