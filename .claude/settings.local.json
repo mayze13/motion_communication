@@ -29,7 +29,9 @@
       "Bash(node build_eeg.js)",
       "Bash(node shot_eeg.js)",
       "Bash(timeout 45 google-chrome --headless --disable-gpu --no-sandbox --disable-dev-shm-usage --hide-scrollbars --window-size=1280,1250 --virtual-time-budget=12000 --screenshot=g-pick2.png 'file://__TRACKED_VAR__/shot-eeg.html#pick2')",
-      "Bash(python3 verify_wb.py)"
+      "Bash(python3 verify_wb.py)",
+      "Bash(node build_admin.js eeg)",
+      "Bash(./run_admin.sh)"
     ]
   }
 }

@@ -2003,8 +2003,14 @@
     // Optimistic re-check for a friendlier message than a failed confirm.
     // Flow B's own check is what actually decides.
     try {
-      slots = (await fetchAvailability(state.email)).crowd;
-      individualSlots = (await fetchAvailability(state.email)).individual;
+      // One call, not two — the second was a redundant round trip.
+      const fresh = await fetchAvailability(state.email);
+      slots = fresh.crowd;
+      individualSlots = fresh.individual;
+      // If the user already confirmed (or navigated) while this was in
+      // flight, its answer is stale — acting on it would yank them off the
+      // success screen. Only an outstanding review is worth correcting.
+      if (!$('step-review').classList.contains('active')) return;
       const chosen = slots.find(s => s.slotId === state.slotId);
       const ind = individualSlots.find(s => s.slotId === state.individualSlotId);
       if (!ind || ind.full || !chosen || crowdClosedFor(chosen, cohortOf(state.individualSlotId)))
@@ -2145,5 +2151,356 @@
   });
 </script>
 
+<!-- ══ ADMIN / QA MODE ══════════════════════════════════════════════════
+     Hidden QA panel. Type the passphrase into the invisible box at the
+     bottom-left corner to reveal it. Shortcuts the page, never the backend:
+     availability and confirm still hit the live Power Automate flows.
+     ══════════════════════════════════════════════════════════════════ -->
+
+<style>
+  /* Admin/QA mode. Deliberately unlike the real UI so it can never be
+     mistaken for it. Everything here is prefixed adm-/#adm. */
+  #admTrigger {
+    position: fixed; left: 0; bottom: 0; z-index: 9998;
+    width: 120px; height: 28px; padding: 0; margin: 0;
+    border: none; outline: none; background: transparent; opacity: 0;
+    font-size: 16px;            /* stops iOS zooming when focused */
+    -webkit-appearance: none; appearance: none;
+  }
+  #admPanel {
+    display: none;
+    position: fixed; left: 12px; bottom: 12px; z-index: 9999;
+    width: 330px; max-width: calc(100vw - 24px);
+    max-height: calc(100vh - 24px); overflow: auto;
+    background: #16101f; color: #e9e2f5; border: 1px solid #4a3a66;
+    border-radius: 12px; padding: 13px 14px;
+    font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    box-shadow: 0 18px 50px -14px rgba(0,0,0,.7);
+  }
+  #admPanel.open { display: block; }
+  .adm-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .adm-title { font-weight: 700; letter-spacing: .14em; color: #c9a6ff; }
+  .adm-x {
+    background: none; border: none; color: #8d7fa6; cursor: pointer;
+    font-size: 17px; line-height: 1; padding: 0 2px;
+  }
+  .adm-x:hover { color: #e9e2f5; }
+  .adm-sect {
+    font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+    color: #8d7fa6; margin: 12px 0 6px;
+  }
+  .adm-sect:first-of-type { margin-top: 0; }
+  .adm-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .adm-btn {
+    flex: 1 1 auto; min-width: 68px;
+    background: #2a1f3d; color: #e9e2f5; border: 1px solid #4a3a66;
+    border-radius: 7px; padding: 7px 9px; cursor: pointer;
+    font: inherit; transition: background .12s, border-color .12s;
+  }
+  .adm-btn:hover:not(:disabled) { background: #3a2b55; border-color: #7c4dbe; }
+  .adm-btn:disabled { opacity: .45; cursor: not-allowed; }
+  .adm-btn.go { background: #4a2570; border-color: #7c4dbe; }
+  .adm-num {
+    width: 58px; background: #0f0a17; color: #e9e2f5;
+    border: 1px solid #4a3a66; border-radius: 7px; padding: 7px 8px;
+    font: inherit; text-align: center;
+  }
+  .adm-chk { display: flex; align-items: center; gap: 5px; cursor: pointer; color: #b6a8cc; }
+  .adm-chk input { accent-color: #7c4dbe; }
+  .adm-log {
+    margin-top: 10px; max-height: 168px; overflow: auto;
+    background: #0f0a17; border: 1px solid #33284a; border-radius: 7px;
+    padding: 8px 9px; white-space: pre-wrap; word-break: break-word;
+    font-size: 11px; color: #b6a8cc;
+  }
+  .adm-log:empty { display: none; }
+  .adm-ok { color: #7ddba0; }
+  .adm-bad { color: #ff9a8f; }
+  .adm-note { color: #8d7fa6; margin-top: 8px; font-size: 10.5px; }
+</style>
+
+<input id="admTrigger" type="text" aria-hidden="true" tabindex="-1"
+       autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+<div id="admPanel" role="dialog" aria-label="Admin mode" aria-hidden="true">
+  <div class="adm-head">
+    <span class="adm-title">ADMIN · EEG</span>
+    <button type="button" class="adm-x" id="admClose" title="Close (Esc)">&times;</button>
+  </div>
+
+  <p class="adm-sect">Jump to</p>
+  <div class="adm-row">
+    <button type="button" class="adm-btn" id="admJumpSlot">Slots</button>
+    <button type="button" class="adm-btn" id="admJumpQ">Questions</button>
+    <button type="button" class="adm-btn go" id="admJumpReview">Review</button>
+  </div>
+
+  <p class="adm-sect">Bulk signups &rarr; live confirm flow</p>
+  <div class="adm-row">
+    <input type="number" class="adm-num" id="admCount" value="5" min="1" max="60">
+    <label class="adm-chk"><input type="checkbox" id="admParallel"> all at once</label>
+    <button type="button" class="adm-btn go" id="admSend">Send</button>
+  </div>
+
+  <p class="adm-sect">Utilities</p>
+  <div class="adm-row">
+    <button type="button" class="adm-btn" id="admAvail">Availability</button>
+    <button type="button" class="adm-btn" id="admReload">Reload slots</button>
+    <button type="button" class="adm-btn" id="admClear">Clear state</button>
+  </div>
+
+  <div class="adm-log" id="admLog"></div>
+  <p class="adm-note">Bookings are real. Clear them by filtering Email on
+    <b>admintest+</b>.</p>
+</div>
+
+<script>
+(function () {
+  // Admin/QA mode. Shortcuts through the PAGE only — every network call below
+  // is the same one the real UI makes, against the same live flows, with a
+  // payload of exactly the same shape. The gates aren't disabled, they're
+  // satisfied: screening answers are set to their expected values so
+  // screeningPassed() returns true on its own, and the questionnaire is
+  // filled so isQuestionnaireComplete() passes untouched. That keeps the code
+  // path under test identical to the real one.
+  var PASS = 'akalirelia';
+  var IS_EEG = true;
+  var g = function (id) { return document.getElementById(id); };
+  var panel = g('admPanel'), trig = g('admTrigger'), logEl = g('admLog');
+
+  // ── activation ────────────────────────────────────────────────────────
+  function toggle(on) {
+    var open = (on === undefined) ? !panel.classList.contains('open') : on;
+    panel.classList.toggle('open', open);
+    panel.setAttribute('aria-hidden', open ? 'false' : 'true');
+    if (open) log('admin mode on');
+  }
+  trig.addEventListener('input', function () {
+    if (trig.value.toLowerCase().indexOf(PASS) !== -1) { trig.value = ''; toggle(); }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && panel.classList.contains('open')) toggle(false);
+  });
+  g('admClose').addEventListener('click', function () { toggle(false); });
+
+  // ── log ───────────────────────────────────────────────────────────────
+  function log(msg, cls) {
+    var line = document.createElement('div');
+    if (cls) line.className = cls;
+    line.textContent = msg;
+    logEl.appendChild(line);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  // ── test identity ─────────────────────────────────────────────────────
+  // .test is a reserved TLD, so these can never reach a real inbox, and the
+  // admintest+ prefix makes the whole batch one filter to delete afterwards.
+  var stamp = Date.now();
+  function testEmail(i) { return 'admintest+' + stamp + '-' + i + '@mindsinmotion.test'; }
+
+  // ── filling the gates ─────────────────────────────────────────────────
+  function answerFor(q) {
+    if (q.type === 'consent') return true;
+    if (q.type === 'multi')   return [q.options[0]];
+    if (q.type === 'single')  return q.options[0];
+    if (q.type === 'number')  return '34';     // inside the 18-120 range check
+    return 'Admin test';
+  }
+  function builtAnswers() {
+    var a = {};
+    QUESTIONS.forEach(function (q) { a[q.id] = answerFor(q); });
+    return a;
+  }
+  function fillScreening() {
+    SCREENING_QUESTIONS.forEach(function (q) { screenAnswers[q.id] = q.expect; });
+    renderScreening();          // redraws from screenAnswers, then re-evaluates
+  }
+  function fillIdentity(i) {
+    state.firstName = 'Admin'; state.lastName = 'Test'; state.email = testEmail(i || 0);
+    g('firstName').value = state.firstName;
+    g('lastName').value  = state.lastName;
+    g('email').value     = state.email;
+    saveState();
+  }
+  function fillAnswers() {
+    state.answers = builtAnswers();
+    saveState();
+  }
+
+  // ── slot allocation ───────────────────────────────────────────────────
+  // Works on a local copy so a sequential batch of N takes N distinct slots
+  // instead of hammering the same one and collecting N-1 rejections.
+  var free = function (s) {
+    return !s.full && (s.capacity == null || (s.booked || 0) < s.capacity);
+  };
+  function allocator() {
+    if (!IS_EEG) {
+      var work = slots.map(function (s) { return Object.assign({}, s); });
+      return function () {
+        var s = work.find(free);
+        if (!s) return null;
+        s.booked = (s.booked || 0) + 1;
+        return { slotId: s.slotId, label: s.label };
+      };
+    }
+    var ind = individualSlots.map(function (s) { return Object.assign({}, s); });
+    var crd = slots.map(function (s) { return Object.assign({}, s); });
+    return function () {
+      var i = ind.find(function (s) { return !s.full; });
+      if (!i) return null;
+      var coh = i.cohort;
+      var c = crd.find(function (s) {
+        var taken = (coh === 'C1') ? (s.eegC1 || 0) : (s.eegC2 || 0);
+        return (s.booked || 0) < (s.capacity || 0) && taken < (s.eegPerCohort || 0);
+      });
+      if (!c) return null;
+      i.full = true;
+      c.booked = (c.booked || 0) + 1;
+      if (coh === 'C1') c.eegC1 = (c.eegC1 || 0) + 1; else c.eegC2 = (c.eegC2 || 0) + 1;
+      return { slotId: c.slotId, individualSlotId: i.slotId, cohort: coh, label: c.label };
+    };
+  }
+  function applyAlloc(a) {
+    state.slotId = a.slotId;
+    if (IS_EEG) state.individualSlotId = a.individualSlotId;
+    saveState();
+    if (IS_EEG) renderIndividual();
+    renderSlots();
+  }
+
+  // ── jumps ─────────────────────────────────────────────────────────────
+  g('admJumpSlot').addEventListener('click', function () {
+    fillScreening(); fillIdentity();
+    showStep('slot');
+    log('→ slot picker (screening satisfied, identity filled)');
+  });
+
+  g('admJumpQ').addEventListener('click', function () {
+    fillScreening(); fillIdentity();
+    var a = allocator()();
+    if (!a) return log('no slot available', 'adm-bad');
+    applyAlloc(a);
+    state.page = 0; saveState();
+    showStep('questions'); renderQuestionPage();
+    log('→ questionnaire (' + a.slotId + (a.individualSlotId ? ' + ' + a.individualSlotId : '') + ')');
+  });
+
+  // goToReview() clears the commitment box and disables Confirm as part of its
+  // synchronous opening — so tick straight after calling it, before awaiting
+  // its availability re-check, or the tick lands a beat late.
+  function tickCommit() {
+    var c = g('commitCheck');
+    if (c && !c.checked) { c.checked = true; c.dispatchEvent(new Event('change', { bubbles: true })); }
+  }
+
+  g('admJumpReview').addEventListener('click', async function () {
+    fillScreening(); fillIdentity(); fillAnswers();
+    var a = allocator()();
+    if (!a) return log('no slot available', 'adm-bad');
+    applyAlloc(a);
+    var pending = goToReview();
+    tickCommit();
+    await pending;
+    tickCommit();                       // re-assert after the re-check settles
+    log('→ review, ready to confirm (' + a.slotId +
+        (a.individualSlotId ? ' + ' + a.individualSlotId : '') + ')');
+  });
+
+  // ── bulk send ─────────────────────────────────────────────────────────
+  function payloadFor(i, a) {
+    var p = {
+      slotId: a.slotId,
+      firstName: 'Admin',
+      lastName: 'Test',
+      email: testEmail(i),
+      answers: Object.assign({ screeningPassed: true }, builtAnswers()),
+      questionnaireVersion: QUESTIONNAIRE_VERSION,
+      timestamp: new Date().toISOString()
+    };
+    if (IS_EEG) p.individualSlotId = a.individualSlotId;
+    return p;
+  }
+
+  async function sendOne(i, a) {
+    var tag = a.slotId + (a.individualSlotId ? '+' + a.individualSlotId : '');
+    try {
+      var res = await fetch(CONFIRM_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payloadFor(i, a)),
+        redirect: 'follow'
+      });
+      var data;
+      try { data = await res.json(); } catch (e) { data = { result: 'success' }; }
+      if (data.result === 'success') { log('✓ ' + tag + ' · ' + res.status, 'adm-ok'); return true; }
+      log('✗ ' + tag + ' · ' + (data.error || res.status), 'adm-bad');
+      return false;
+    } catch (e) {
+      log('✗ ' + tag + ' · network: ' + e.message, 'adm-bad');
+      return false;
+    }
+  }
+
+  g('admSend').addEventListener('click', async function () {
+    var btn = this;
+    var n = Math.max(1, Math.min(60, parseInt(g('admCount').value, 10) || 1));
+    var parallel = g('admParallel').checked;
+    var next = allocator(), jobs = [];
+    for (var i = 0; i < n; i++) {
+      var a = next();
+      if (!a) { log('only ' + i + ' slot(s) free — sending those', 'adm-bad'); break; }
+      jobs.push({ i: i, a: a });
+    }
+    if (!jobs.length) return log('nothing to send', 'adm-bad');
+
+    btn.disabled = true;
+    log('— sending ' + jobs.length + (parallel ? ' at once —' : ' one by one —'));
+    var results;
+    if (parallel) {
+      results = await Promise.all(jobs.map(function (j) { return sendOne(j.i, j.a); }));
+    } else {
+      results = [];
+      for (var k = 0; k < jobs.length; k++) results.push(await sendOne(jobs[k].i, jobs[k].a));
+    }
+    var ok = results.filter(Boolean).length;
+    log('— done: ' + ok + ' ok, ' + (results.length - ok) + ' failed —',
+        ok === results.length ? 'adm-ok' : 'adm-bad');
+    btn.disabled = false;
+    loadSlots();               // refresh the grid against reality
+  });
+
+  // ── utilities ─────────────────────────────────────────────────────────
+  g('admAvail').addEventListener('click', async function () {
+    try {
+      var d = await fetchAvailability(state.email || '');
+      if (IS_EEG) {
+        log('individual[' + (d.individual || []).length + '] keys: ' +
+            Object.keys((d.individual || [])[0] || {}).join(', '));
+        log('crowd[' + (d.crowd || []).length + '] keys: ' +
+            Object.keys((d.crowd || [])[0] || {}).join(', '));
+        log(JSON.stringify((d.crowd || [])[0]));
+      } else {
+        log('slots[' + (d.slots || []).length + '] keys: ' +
+            Object.keys((d.slots || [])[0] || {}).join(', '));
+        log(JSON.stringify((d.slots || [])[0]));
+      }
+      log('alreadyBooked: ' + d.alreadyBooked);
+    } catch (e) {
+      log('✗ availability: ' + e.message, 'adm-bad');
+    }
+  });
+
+  g('admReload').addEventListener('click', function () { loadSlots(); log('slots reloaded'); });
+  g('admClear').addEventListener('click', function () {
+    try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    log('sessionStorage cleared — reload to start clean');
+  });
+})();
+</script>
+
+<!-- ══ end admin / QA mode ══ -->
 </body>
 </html>
