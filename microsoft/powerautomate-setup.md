@@ -4,11 +4,11 @@
 
 Three pages, three data destinations, seven flows:
 
-| Page | Purpose | Writes to | Flows |
-| --- | --- | --- | --- |
-| `index.html` | Register interest (live, public, Netlify site 1) | `Signups` table | Signup Receiver, Export New Signups, Mark Batch as Mailed |
-| `booking.html` | Book a crowd session, 1 visit, £30 (Netlify site 2) | `Bookings` table | Booking Availability, Booking Confirm |
-| `booking_eeg.html` | Book EEG sessions, 2 visits, £60, 32 places only (Netlify site 3) | `Bookings` table | EEG Availability, EEG Confirm |
+| Page                 | Purpose                                                            | Writes to          | Flows                                                     |
+| -------------------- | ------------------------------------------------------------------ | ------------------ | --------------------------------------------------------- |
+| `index.html`       | Register interest (live, public, Netlify site 1)                   | `Signups` table  | Signup Receiver, Export New Signups, Mark Batch as Mailed |
+| `booking.html`     | Book a crowd session, 1 visit, £30 (Netlify site 2)               | `Bookings` table | Booking Availability, Booking Confirm                     |
+| `booking_eeg.html` | Book EEG sessions, 2 visits, £60, 32 places only (Netlify site 3) | `Bookings` table | EEG Availability, EEG Confirm                             |
 
 Two workbooks, both on SharePoint, same document library:
 
@@ -36,9 +36,11 @@ Read this once — every flow below relies on all of it and won't re-explain it.
 - **Concurrency Control must stay off on any flow that has a Response action.** Power Automate's Response actions require a still-open connection back to the caller; Concurrency Control works by queuing runs, and a queued run can't answer anyone. Turning it on refuses to save with `InvalidConcurrencyConfiguration`. **It also cannot be switched off again once set** — the flow must be rebuilt, or exported → the concurrency block manually stripped from the JSON → re-imported. This trades away protection against two people booking the very last seat in the same instant; see each Confirm flow's write step for why that's an acceptable trade here, and the airtight alternative if you ever want to close it.
 - **`.ics` calendar attachments** need real CRLF line endings, which can't be typed into a Power Automate field directly. Build the template with `~` between lines, then wrap the whole thing in `replace(..., '~', decodeUriComponent('%0D%0A'))`. Avoid commas inside `SUMMARY`/`LOCATION`/`DESCRIPTION` (iCalendar treats them as separators and they'd need escaping as `\,`). Multiple `VEVENT` blocks in one file need **different `UID`s each**, or calendar apps treat the second as an edit to the first and only one event shows up.
 - **Testing any HTTP-triggered flow directly:** the **Test** button only arms the flow to wait for a real request — open the flow, **Test → Manually → Test**, then send it one from a terminal:
+
   ```bash
   curl -sS -X POST '<HTTP URL>' -H 'Content-Type: application/json' -d '{"...":"..."}'
   ```
+
   `401` means the trigger is still set to "Any user in my tenant." A bare `202 Accepted` means the branch that ran has no Response action on it. A ~2-minute timeout means an action failed earlier and the Response was never reached — check **28 day run history** on the flow for exactly which one.
 
 ---
@@ -48,7 +50,7 @@ Read this once — every flow below relies on all of it and won't re-explain it.
 ### Workbook — `minds_in_motion_signups.xlsx`, table `Signups`
 
 | Server Timestamp | First Name | Last Name | Sex | Age | Email | Institution | Client Timestamp | Exported Date | Mailed Date |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ---------------- | ---------- | --------- | --- | --- | ----- | ----------- | ---------------- | ------------- | ----------- |
 
 Create it: type the headers into Row 1, select the header row plus a few blank rows below, **Insert → Table**, tick "My table has headers," then right-click → **Table → Table Name** → `Signups`. `Exported Date`/`Mailed Date` are added in Part 2 — leave them out for now, blank always means "not done yet" once they exist.
 
@@ -131,17 +133,17 @@ One visit, up to 2 hours, £30, no equipment. The page walks: study info → 8-q
 
 **`Slots`** — every column that exists on this table, including the ones only the EEG funnel (Part 4) uses:
 
-| Slot ID | Session Type | Date | Time | Label | Capacity | Cohort | EEG Per Cohort | Start UTC | End UTC |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| S1 | Crowd | 2026-09-15 | 10:00 | Tue 15 Sept, 10:00 | 40 | | 2 | 20260915T090000Z | 20260915T110000Z |
-| S2 | Crowd | 2026-09-15 | 14:00 | Tue 15 Sept, 14:00 | 40 | | 2 | 20260915T130000Z | 20260915T150000Z |
-| S3 | Crowd | 2026-09-15 | 16:00 | Tue 15 Sept, 16:00 | 40 | | 2 | 20260915T150000Z | 20260915T170000Z |
-| S4 | Crowd | 2026-09-16 | 10:00 | Wed 16 Sept, 10:00 | 40 | | 2 | 20260916T090000Z | 20260916T110000Z |
-| S5 | Crowd | 2026-09-16 | 14:00 | Wed 16 Sept, 14:00 | 40 | | 2 | 20260916T130000Z | 20260916T150000Z |
-| S6 | Crowd | 2026-09-16 | 16:00 | Wed 16 Sept, 16:00 | 40 | | 2 | 20260916T150000Z | 20260916T170000Z |
-| S7 | Crowd | 2026-09-17 | 10:00 | Thu 17 Sept, 10:00 | 40 | | 2 | 20260917T090000Z | 20260917T110000Z |
-| S8 | Crowd | 2026-09-17 | 14:00 | Thu 17 Sept, 14:00 | 40 | | 2 | 20260917T130000Z | 20260917T150000Z |
-| S9 | Crowd | 2026-09-17 | 16:00 | Thu 17 Sept, 16:00 | 40 | | 0 | 20260917T150000Z | 20260917T170000Z |
+| Slot ID | Session Type | Date       | Time  | Label              | Capacity | Cohort | EEG Per Cohort | Start UTC        | End UTC          |
+| ------- | ------------ | ---------- | ----- | ------------------ | -------- | ------ | -------------- | ---------------- | ---------------- |
+| S1      | Crowd        | 2026-09-15 | 10:00 | Tue 15 Sept, 10:00 | 40       |        | 2              | 20260915T090000Z | 20260915T110000Z |
+| S2      | Crowd        | 2026-09-15 | 14:00 | Tue 15 Sept, 14:00 | 40       |        | 2              | 20260915T130000Z | 20260915T150000Z |
+| S3      | Crowd        | 2026-09-15 | 16:00 | Tue 15 Sept, 16:00 | 40       |        | 2              | 20260915T150000Z | 20260915T170000Z |
+| S4      | Crowd        | 2026-09-16 | 10:00 | Wed 16 Sept, 10:00 | 40       |        | 2              | 20260916T090000Z | 20260916T110000Z |
+| S5      | Crowd        | 2026-09-16 | 14:00 | Wed 16 Sept, 14:00 | 40       |        | 2              | 20260916T130000Z | 20260916T150000Z |
+| S6      | Crowd        | 2026-09-16 | 16:00 | Wed 16 Sept, 16:00 | 40       |        | 2              | 20260916T150000Z | 20260916T170000Z |
+| S7      | Crowd        | 2026-09-17 | 10:00 | Thu 17 Sept, 10:00 | 40       |        | 2              | 20260917T090000Z | 20260917T110000Z |
+| S8      | Crowd        | 2026-09-17 | 14:00 | Thu 17 Sept, 14:00 | 40       |        | 2              | 20260917T130000Z | 20260917T150000Z |
+| S9      | Crowd        | 2026-09-17 | 16:00 | Thu 17 Sept, 16:00 | 40       |        | 0              | 20260917T150000Z | 20260917T170000Z |
 
 - **`Label`** is exactly what the page shows, split on the comma to group by day — keep the `Day DD Mon, HH:MM` format.
 - **`Capacity` 40 against a real target of ~30** absorbs no-shows. Change it any time by editing the cell; no flow or code change needed.
@@ -151,9 +153,10 @@ One visit, up to 2 hours, £30, no equipment. The page walks: study info → 8-q
 **`Bookings`** — one row per confirmed booking, never partial:
 
 | Booking ID | Server Timestamp | Session Type | Slot ID | Slot Label | First Name | Last Name | Email | Client Timestamp | Questionnaire Version | Answers JSON | Registered Interest | Cancelled | Cohort | Individual Slot ID | Individual Slot Label |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ---------- | ---------------- | ------------ | ------- | ---------- | ---------- | --------- | ----- | ---------------- | --------------------- | ------------ | ------------------- | --------- | ------ | ------------------ | --------------------- |
 
 Leave every row blank; the flows fill them in. Notes:
+
 - **`Session Type`** is the track: `Crowd` or `EEG`. **`Slot ID`/`Slot Label` always mean the crowd session**, for both tracks — that's what lets the crowd Availability flow work unchanged once EEG exists.
 - **`Answers JSON`** — the whole questionnaire as one JSON string. Deliberately opaque: changing the questions is then a one-line edit in the page's `QUESTIONS` array, never a schema or flow change.
 - **`Questionnaire Version`** — which question set that row answered; see Reference below.
@@ -183,6 +186,7 @@ Leave Concurrency Control off (nothing to protect on a read).
 ### Flow — Booking Confirm
 
 Trigger schema:
+
 ```json
 {"type":"object","properties":{
   "slotId":{"type":"string"}, "firstName":{"type":"string"}, "lastName":{"type":"string"},
@@ -190,6 +194,7 @@ Trigger schema:
   "questionnaireVersion":{"type":"string"}, "timestamp":{"type":"string"}
 }}
 ```
+
 Leave Concurrency Control off (Conventions).
 
 1. **List rows** → `Slots` (`ListSlots`), `Bookings` (`ListBookings`).
@@ -203,20 +208,18 @@ Leave Concurrency Control off (Conventions).
      - **No →** the write branch:
        1. **List rows** → the `Signups` table in `minds_in_motion_signups.xlsx` (**ListSignups**), then **Filter array** `FilterSignupMatch` — `@equals(toLower(coalesce(item()?['Email'],'')), toLower(coalesce(triggerBody()?['email'],'_none_')))`.
        2. **Compose** `AnswersJsonString` → `string(triggerBody()?['answers'])`.
-       3. **Add a row into a table** → `Bookings`, every value an expression (Conventions):
-
-          | Column | Expression |
-          | --- | --- |
-          | Booking ID | `guid()` |
-          | Server Timestamp | `utcNow()` |
-          | Session Type | `'Crowd'` |
-          | Cohort | `'C30'` |
-          | Slot ID | `triggerBody()?['slotId']` |
-          | Slot Label | `first(body('FilterSlotMeta'))?['Label']` |
+       3. **Add a row into a table** → `Bookings`, every value an expression (Conventions):| Column                                                                    | Expression                                                                                                            |
+          | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+          | Booking ID                                                                | `guid()`                                                                                                            |
+          | Server Timestamp                                                          | `utcNow()`                                                                                                          |
+          | Session Type                                                              | `'Crowd'`                                                                                                           |
+          | Cohort                                                                    | `'C30'`                                                                                                             |
+          | Slot ID                                                                   | `triggerBody()?['slotId']`                                                                                          |
+          | Slot Label                                                                | `first(body('FilterSlotMeta'))?['Label']`                                                                           |
           | First Name / Last Name / Email / Client Timestamp / Questionnaire Version | `triggerBody()?['firstName']` / `['lastName']` / `['email']` / `['timestamp']` / `['questionnaireVersion']` |
-          | Answers JSON | `outputs('AnswersJsonString')` |
-          | Registered Interest | `if(greater(length(body('FilterSignupMatch')), 0), 'Yes', 'No')` |
-          | Cancelled, Individual Slot ID, Individual Slot Label | leave completely untouched |
+          | Answers JSON                                                              | `outputs('AnswersJsonString')`                                                                                      |
+          | Registered Interest                                                       | `if(greater(length(body('FilterSignupMatch')), 0), 'Yes', 'No')`                                                    |
+          | Cancelled, Individual Slot ID, Individual Slot Label                      | leave completely untouched                                                                                            |
        4. **Response** `200`: `result` (plain text) `success`; `slotId` = `triggerBody()?['slotId']`; `label` = `first(body('FilterSlotMeta'))?['Label']`.
 6. Save.
 
@@ -240,6 +243,7 @@ Placed after the Response so a mail problem never delays the participant's confi
 const AVAILABILITY_URL = 'PASTE_YOUR_BOOKING_AVAILABILITY_URL_HERE';
 const CONFIRM_URL      = 'PASTE_YOUR_BOOKING_CONFIRM_URL_HERE';
 ```
+
 in `booking.html`. Hosting is a separate Netlify site — see Part 5. `booking.html` is deliberately not linked from `index.html`; the only way in is the link in `email/outreach-template.html`'s `[WEBSITE_URL]` placeholder.
 
 ### Test
@@ -257,6 +261,7 @@ in `booking.html`. Hosting is a separate Netlify site — see Part 5. `booking.h
 **32 places exactly.** Two visits: an individual session (90 min) and a crowd session (shared with Part 3's S1–S8), £60 paid after the second. 13-question eligibility gate (Part 3's set, minus general vision/hearing, plus contact-lenses-not-glasses, hair/scalp, no head covering, scalp condition, adhesive allergy).
 
 **Cohorts**, by which period the *individual* session falls in:
+
 - **C1** — individual 9–14 Sept, then the crowd session
 - **C2** — crowd session first, then individual 18–23 Sept
 
@@ -266,40 +271,40 @@ in `booking.html`. Hosting is a separate Netlify site — see Part 5. `booking.h
 
 `Session Type = Individual`, `Capacity = 1` for all. Already in `minds_in_motion_bookings.xlsx` — generated from the rules above and checked programmatically rather than typed by hand, since a single wrong `Start UTC` silently emails someone the wrong hour.
 
-| Slot ID | Cohort | Date | Time | Label | Start UTC | End UTC |
-| --- | --- | --- | --- | --- | --- | --- |
-| I01 | C1 | 2026-09-09 | 09:30 | Wednesday 9 Sept, 09:30 | 20260909T083000Z | 20260909T100000Z |
-| I02 | C1 | 2026-09-09 | 11:00 | Wednesday 9 Sept, 11:00 | 20260909T100000Z | 20260909T113000Z |
-| I03 | C1 | 2026-09-09 | 13:30 | Wednesday 9 Sept, 13:30 | 20260909T123000Z | 20260909T140000Z |
-| I04 | C1 | 2026-09-09 | 15:00 | Wednesday 9 Sept, 15:00 | 20260909T140000Z | 20260909T153000Z |
-| I05 | C1 | 2026-09-10 | 09:30 | Thursday 10 Sept, 09:30 | 20260910T083000Z | 20260910T100000Z |
-| I06 | C1 | 2026-09-10 | 11:00 | Thursday 10 Sept, 11:00 | 20260910T100000Z | 20260910T113000Z |
-| I07 | C1 | 2026-09-10 | 13:30 | Thursday 10 Sept, 13:30 | 20260910T123000Z | 20260910T140000Z |
-| I08 | C1 | 2026-09-10 | 15:00 | Thursday 10 Sept, 15:00 | 20260910T140000Z | 20260910T153000Z |
-| I09 | C1 | 2026-09-11 | 09:30 | Friday 11 Sept, 09:30 | 20260911T083000Z | 20260911T100000Z |
-| I10 | C1 | 2026-09-11 | 11:00 | Friday 11 Sept, 11:00 | 20260911T100000Z | 20260911T113000Z |
-| I11 | C1 | 2026-09-11 | 13:30 | Friday 11 Sept, 13:30 | 20260911T123000Z | 20260911T140000Z |
-| I12 | C1 | 2026-09-11 | 15:00 | Friday 11 Sept, 15:00 | 20260911T140000Z | 20260911T153000Z |
-| I13 | C1 | 2026-09-14 | 09:30 | Monday 14 Sept, 09:30 | 20260914T083000Z | 20260914T100000Z |
-| I14 | C1 | 2026-09-14 | 11:00 | Monday 14 Sept, 11:00 | 20260914T100000Z | 20260914T113000Z |
-| I15 | C1 | 2026-09-14 | 13:30 | Monday 14 Sept, 13:30 | 20260914T123000Z | 20260914T140000Z |
-| I16 | C1 | 2026-09-14 | 15:00 | Monday 14 Sept, 15:00 | 20260914T140000Z | 20260914T153000Z |
-| I17 | C2 | 2026-09-18 | 09:30 | Friday 18 Sept, 09:30 | 20260918T083000Z | 20260918T100000Z |
-| I18 | C2 | 2026-09-18 | 11:00 | Friday 18 Sept, 11:00 | 20260918T100000Z | 20260918T113000Z |
-| I19 | C2 | 2026-09-18 | 13:30 | Friday 18 Sept, 13:30 | 20260918T123000Z | 20260918T140000Z |
-| I20 | C2 | 2026-09-18 | 15:00 | Friday 18 Sept, 15:00 | 20260918T140000Z | 20260918T153000Z |
-| I21 | C2 | 2026-09-21 | 09:30 | Monday 21 Sept, 09:30 | 20260921T083000Z | 20260921T100000Z |
-| I22 | C2 | 2026-09-21 | 11:00 | Monday 21 Sept, 11:00 | 20260921T100000Z | 20260921T113000Z |
-| I23 | C2 | 2026-09-21 | 13:30 | Monday 21 Sept, 13:30 | 20260921T123000Z | 20260921T140000Z |
-| I24 | C2 | 2026-09-21 | 15:00 | Monday 21 Sept, 15:00 | 20260921T140000Z | 20260921T153000Z |
-| I25 | C2 | 2026-09-22 | 09:30 | Tuesday 22 Sept, 09:30 | 20260922T083000Z | 20260922T100000Z |
-| I26 | C2 | 2026-09-22 | 11:00 | Tuesday 22 Sept, 11:00 | 20260922T100000Z | 20260922T113000Z |
-| I27 | C2 | 2026-09-22 | 13:30 | Tuesday 22 Sept, 13:30 | 20260922T123000Z | 20260922T140000Z |
-| I28 | C2 | 2026-09-22 | 15:00 | Tuesday 22 Sept, 15:00 | 20260922T140000Z | 20260922T153000Z |
-| I29 | C2 | 2026-09-23 | 09:30 | Wednesday 23 Sept, 09:30 | 20260923T083000Z | 20260923T100000Z |
-| I30 | C2 | 2026-09-23 | 11:00 | Wednesday 23 Sept, 11:00 | 20260923T100000Z | 20260923T113000Z |
-| I31 | C2 | 2026-09-23 | 13:30 | Wednesday 23 Sept, 13:30 | 20260923T123000Z | 20260923T140000Z |
-| I32 | C2 | 2026-09-23 | 15:00 | Wednesday 23 Sept, 15:00 | 20260923T140000Z | 20260923T153000Z |
+| Slot ID | Cohort | Date       | Time  | Label                    | Start UTC        | End UTC          |
+| ------- | ------ | ---------- | ----- | ------------------------ | ---------------- | ---------------- |
+| I01     | C1     | 2026-09-09 | 09:30 | Wednesday 9 Sept, 09:30  | 20260909T083000Z | 20260909T100000Z |
+| I02     | C1     | 2026-09-09 | 11:00 | Wednesday 9 Sept, 11:00  | 20260909T100000Z | 20260909T113000Z |
+| I03     | C1     | 2026-09-09 | 13:30 | Wednesday 9 Sept, 13:30  | 20260909T123000Z | 20260909T140000Z |
+| I04     | C1     | 2026-09-09 | 15:00 | Wednesday 9 Sept, 15:00  | 20260909T140000Z | 20260909T153000Z |
+| I05     | C1     | 2026-09-10 | 09:30 | Thursday 10 Sept, 09:30  | 20260910T083000Z | 20260910T100000Z |
+| I06     | C1     | 2026-09-10 | 11:00 | Thursday 10 Sept, 11:00  | 20260910T100000Z | 20260910T113000Z |
+| I07     | C1     | 2026-09-10 | 13:30 | Thursday 10 Sept, 13:30  | 20260910T123000Z | 20260910T140000Z |
+| I08     | C1     | 2026-09-10 | 15:00 | Thursday 10 Sept, 15:00  | 20260910T140000Z | 20260910T153000Z |
+| I09     | C1     | 2026-09-11 | 09:30 | Friday 11 Sept, 09:30    | 20260911T083000Z | 20260911T100000Z |
+| I10     | C1     | 2026-09-11 | 11:00 | Friday 11 Sept, 11:00    | 20260911T100000Z | 20260911T113000Z |
+| I11     | C1     | 2026-09-11 | 13:30 | Friday 11 Sept, 13:30    | 20260911T123000Z | 20260911T140000Z |
+| I12     | C1     | 2026-09-11 | 15:00 | Friday 11 Sept, 15:00    | 20260911T140000Z | 20260911T153000Z |
+| I13     | C1     | 2026-09-14 | 09:30 | Monday 14 Sept, 09:30    | 20260914T083000Z | 20260914T100000Z |
+| I14     | C1     | 2026-09-14 | 11:00 | Monday 14 Sept, 11:00    | 20260914T100000Z | 20260914T113000Z |
+| I15     | C1     | 2026-09-14 | 13:30 | Monday 14 Sept, 13:30    | 20260914T123000Z | 20260914T140000Z |
+| I16     | C1     | 2026-09-14 | 15:00 | Monday 14 Sept, 15:00    | 20260914T140000Z | 20260914T153000Z |
+| I17     | C2     | 2026-09-18 | 09:30 | Friday 18 Sept, 09:30    | 20260918T083000Z | 20260918T100000Z |
+| I18     | C2     | 2026-09-18 | 11:00 | Friday 18 Sept, 11:00    | 20260918T100000Z | 20260918T113000Z |
+| I19     | C2     | 2026-09-18 | 13:30 | Friday 18 Sept, 13:30    | 20260918T123000Z | 20260918T140000Z |
+| I20     | C2     | 2026-09-18 | 15:00 | Friday 18 Sept, 15:00    | 20260918T140000Z | 20260918T153000Z |
+| I21     | C2     | 2026-09-21 | 09:30 | Monday 21 Sept, 09:30    | 20260921T083000Z | 20260921T100000Z |
+| I22     | C2     | 2026-09-21 | 11:00 | Monday 21 Sept, 11:00    | 20260921T100000Z | 20260921T113000Z |
+| I23     | C2     | 2026-09-21 | 13:30 | Monday 21 Sept, 13:30    | 20260921T123000Z | 20260921T140000Z |
+| I24     | C2     | 2026-09-21 | 15:00 | Monday 21 Sept, 15:00    | 20260921T140000Z | 20260921T153000Z |
+| I25     | C2     | 2026-09-22 | 09:30 | Tuesday 22 Sept, 09:30   | 20260922T083000Z | 20260922T100000Z |
+| I26     | C2     | 2026-09-22 | 11:00 | Tuesday 22 Sept, 11:00   | 20260922T100000Z | 20260922T113000Z |
+| I27     | C2     | 2026-09-22 | 13:30 | Tuesday 22 Sept, 13:30   | 20260922T123000Z | 20260922T140000Z |
+| I28     | C2     | 2026-09-22 | 15:00 | Tuesday 22 Sept, 15:00   | 20260922T140000Z | 20260922T153000Z |
+| I29     | C2     | 2026-09-23 | 09:30 | Wednesday 23 Sept, 09:30 | 20260923T083000Z | 20260923T100000Z |
+| I30     | C2     | 2026-09-23 | 11:00 | Wednesday 23 Sept, 11:00 | 20260923T100000Z | 20260923T113000Z |
+| I31     | C2     | 2026-09-23 | 13:30 | Wednesday 23 Sept, 13:30 | 20260923T123000Z | 20260923T140000Z |
+| I32     | C2     | 2026-09-23 | 15:00 | Wednesday 23 Sept, 15:00 | 20260923T140000Z | 20260923T153000Z |
 
 Crowd `Slots` rows and every `Bookings` column already exist from Part 3 — nothing more to add there. EEG bookings get `Session Type = 'EEG'`, a real `Cohort` (`C1`/`C2`), and both `Individual Slot ID`/`Individual Slot Label` filled in.
 
@@ -312,9 +317,9 @@ Booking Availability already filters `Slots` to `Session Type = Crowd` and count
 Same shape as Booking Availability, trigger per Conventions, same schema.
 
 1. **List rows** → `Slots` (`ListSlots`), `Bookings` (`ListBookings`).
-2. **Filter array** `FilterActive` — `@empty(item()?['Cancelled'])`.
-3. **Filter array** `FilterIndSlots` — `@equals(item()?['Session Type'], 'Individual')`.
-4. **Filter array** `FilterEEGCrowdSlots` — `@and(equals(item()?['Session Type'], 'Crowd'), greater(int(item()?['EEG Per Cohort']), 0))` (this is what leaves S9 out, without naming it).
+2. **Filter array** `FilterActive` — from `ListBookings`: `@empty(item()?['Cancelled'])`.
+3. **Filter array** `FilterIndSlots` — from `ListSlots`: `@equals(item()?['Session Type'], 'Individual')`.
+4. **Filter array** `FilterEEGCrowdSlots` — from `ListSlots`: `@and(equals(item()?['Session Type'], 'Crowd'), greater(int(item()?['EEG Per Cohort']), 0))` (this is what leaves S9 out, without naming it).
 5. **Initialize variable** `IndAvail` and `CrowdAvail` (both Array, `[]`), top level.
 6. **Apply to each** over `FilterIndSlots`:
    1. **Compose** `CurId` → `item()?['Slot ID']`.
@@ -334,6 +339,7 @@ Same shape as Booking Availability, trigger per Conventions, same schema.
 ### Flow — EEG Confirm
 
 Schema adds `individualSlotId`:
+
 ```json
 {"type":"object","properties":{
   "slotId":{"type":"string"}, "individualSlotId":{"type":"string"},
@@ -341,43 +347,44 @@ Schema adds `individualSlotId`:
   "answers":{"type":"object"}, "questionnaireVersion":{"type":"string"}, "timestamp":{"type":"string"}
 }}
 ```
+
 Leave Concurrency Control off.
 
 1. **List rows** → `Slots` (`ListSlots`), `Bookings` (`ListBookings`).
-2. **Filter array** `IndMeta` — `@and(equals(item()?['Slot ID'], triggerBody()?['individualSlotId']), equals(item()?['Session Type'],'Individual'))`.
-3. **Filter array** `CrowdMeta` — `@and(equals(item()?['Slot ID'], triggerBody()?['slotId']), equals(item()?['Session Type'],'Crowd'))`.
+2. **Filter array** `IndMeta` — from `ListSlots`: `@and(equals(item()?['Slot ID'], triggerBody()?['individualSlotId']), equals(item()?['Session Type'],'Individual'))`.
+3. **Filter array** `CrowdMeta` — from `ListSlots`: `@and(equals(item()?['Slot ID'], triggerBody()?['slotId']), equals(item()?['Session Type'],'Crowd'))`.
 4. **Compose** `Cohort` → `first(body('IndMeta'))?['Cohort']`. Never sent by the browser — derived from whichever individual session they took, so it can't be tampered with.
-5. **Filter array** `IndTaken` — `@and(equals(item()?['Individual Slot ID'], triggerBody()?['individualSlotId']), empty(item()?['Cancelled']))`.
-6. **Filter array** `CrowdAll` — `@and(equals(item()?['Slot ID'], triggerBody()?['slotId']), empty(item()?['Cancelled']))`.
-7. **Filter array** `CrowdCohort` — `@and(equals(item()?['Slot ID'], triggerBody()?['slotId']), equals(item()?['Session Type'],'EEG'), equals(item()?['Cohort'], outputs('Cohort')), empty(item()?['Cancelled']))`.
-8. **Filter array** `EmailTaken` — `@and(equals(toLower(coalesce(item()?['Email'],'')), toLower(coalesce(triggerBody()?['email'],'_none_'))), empty(item()?['Cancelled']))`.
-9. **List rows** → the `Signups` table in `minds_in_motion_signups.xlsx` (**ListSignups**), then **Filter array** `FilterSignupMatch` — `@equals(toLower(coalesce(item()?['Email'],'')), toLower(coalesce(triggerBody()?['email'],'_none_')))`. (Same purpose as in Booking Confirm — flags `Registered Interest`, blocks nobody.)
+5. **Filter array** `IndTaken` — from `ListBookings`: `@and(equals(item()?['Individual Slot ID'], triggerBody()?['individualSlotId']), empty(item()?['Cancelled']))`.
+6. **Filter array** `CrowdAll` — from `ListBookings`: `@and(equals(item()?['Slot ID'], triggerBody()?['slotId']), empty(item()?['Cancelled']))`.
+7. **Filter array** `CrowdCohort` — from `ListBookings`: `@and(equals(item()?['Slot ID'], triggerBody()?['slotId']), equals(item()?['Session Type'],'EEG'), equals(item()?['Cohort'], outputs('Cohort')), empty(item()?['Cancelled']))`.
+8. **Filter array** `EmailTaken` — from `ListBookings`: `@and(equals(toLower(coalesce(item()?['Email'],'')), toLower(coalesce(triggerBody()?['email'],'_none_'))), empty(item()?['Cancelled']))`.
+9. **List rows** → the `Signups` table in `minds_in_motion_signups.xlsx` (**ListSignups**), then **Filter array** `FilterSignupMatch` — from `ListSignups`: `@equals(toLower(coalesce(item()?['Email'],'')), toLower(coalesce(triggerBody()?['email'],'_none_')))`. (Same purpose as in Booking Confirm — flags `Registered Interest`, blocks nobody.)
 
 Four checks, each its own **Condition** returning `409` with a distinct body, nested in order (each "No" branch contains the next):
 
-| Condition (left value **is equal to** `true`) | Response body |
-| --- | --- |
-| `or(equals(length(body('IndMeta')),0), greaterOrEquals(length(body('IndTaken')),1))` | `{"error":"individual_taken"}` |
-| `or(equals(length(body('CrowdMeta')),0), greaterOrEquals(length(body('CrowdAll')), int(first(body('CrowdMeta'))?['Capacity'])))` | `{"error":"slot_full"}` |
-| `greaterOrEquals(length(body('CrowdCohort')), int(first(body('CrowdMeta'))?['EEG Per Cohort']))` | `{"error":"cohort_full"}` |
-| `greater(length(body('EmailTaken')),0)` | `{"error":"booking_duplicate"}` |
+| Condition (left value**is equal to** `true`)                                                                               | Response body                     |
+| ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| `or(equals(length(body('IndMeta')),0), greaterOrEquals(length(body('IndTaken')),1))`                                             | `{"error":"individual_taken"}`  |
+| `or(equals(length(body('CrowdMeta')),0), greaterOrEquals(length(body('CrowdAll')), int(first(body('CrowdMeta'))?['Capacity'])))` | `{"error":"slot_full"}`         |
+| `greaterOrEquals(length(body('CrowdCohort')), int(first(body('CrowdMeta'))?['EEG Per Cohort']))`                                 | `{"error":"cohort_full"}`       |
+| `greater(length(body('EmailTaken')),0)`                                                                                          | `{"error":"booking_duplicate"}` |
 
 In the innermost "all clear" branch: **Compose** `AnswersJsonString` → `string(triggerBody()?['answers'])`, then **Add a row into a table** → `Bookings`:
 
-| Column | Expression |
-| --- | --- |
-| Booking ID | `guid()` |
-| Server Timestamp | `utcNow()` |
-| Session Type | `'EEG'` |
-| Cohort | `outputs('Cohort')` |
-| Slot ID | `triggerBody()?['slotId']` |
-| Slot Label | `first(body('CrowdMeta'))?['Label']` |
-| Individual Slot ID | `triggerBody()?['individualSlotId']` |
-| Individual Slot Label | `first(body('IndMeta'))?['Label']` |
+| Column                                                                    | Expression                                                                                                            |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Booking ID                                                                | `guid()`                                                                                                            |
+| Server Timestamp                                                          | `utcNow()`                                                                                                          |
+| Session Type                                                              | `'EEG'`                                                                                                             |
+| Cohort                                                                    | `outputs('Cohort')`                                                                                                 |
+| Slot ID                                                                   | `triggerBody()?['slotId']`                                                                                          |
+| Slot Label                                                                | `first(body('CrowdMeta'))?['Label']`                                                                                |
+| Individual Slot ID                                                        | `triggerBody()?['individualSlotId']`                                                                                |
+| Individual Slot Label                                                     | `first(body('IndMeta'))?['Label']`                                                                                  |
 | First Name / Last Name / Email / Client Timestamp / Questionnaire Version | `triggerBody()?['firstName']` / `['lastName']` / `['email']` / `['timestamp']` / `['questionnaireVersion']` |
-| Answers JSON | `outputs('AnswersJsonString')` |
-| Registered Interest | `if(greater(length(body('FilterSignupMatch')), 0), 'Yes', 'No')` |
-| Cancelled | leave completely untouched |
+| Answers JSON                                                              | `outputs('AnswersJsonString')`                                                                                      |
+| Registered Interest                                                       | `if(greater(length(body('FilterSignupMatch')), 0), 'Yes', 'No')`                                                    |
+| Cancelled                                                                 | leave completely untouched                                                                                            |
 
 Then **Response** `200`: `result` (plain text) `success`; `slotId` = `triggerBody()?['slotId']`; `label` = `first(body('CrowdMeta'))?['Label']`; `individualLabel` = `first(body('IndMeta'))?['Label']`; `cohort` = `outputs('Cohort')`.
 
@@ -397,6 +404,7 @@ replace(concat('BEGIN:VCALENDAR~VERSION:2.0~PRODID:-//UCL//Minds in Motion//EN~C
 const AVAILABILITY_URL = 'PASTE_YOUR_EEG_AVAILABILITY_URL_HERE';
 const CONFIRM_URL      = 'PASTE_YOUR_EEG_CONFIRM_URL_HERE';
 ```
+
 in `booking_eeg.html`, plus fill `[PLACEHOLDER: study email address]` and `[PLACEHOLDER: crowd booking URL]` (the note pointing ineligible people at the crowd-only page). Host as a third Netlify site — Part 5. Put the address into `email/outreach-template.html`'s `[EEG_WEBSITE_URL]` placeholder.
 
 ### Test
@@ -418,19 +426,23 @@ For each of the two booking pages:
 
 1. Netlify → **Add new site → Import an existing project** → GitHub → the same repo.
 2. **Branch:** `main`. **Base directory:** empty. **Publish directory:** `dist`. **Build command:**
+
    ```
    mkdir -p dist && cp <file>.html dist/index.html && cp -r assets dist/assets && printf 'User-agent: *\nDisallow: /\n' > dist/robots.txt
    ```
+
    — `<file>` is `booking` or `booking_eeg`. This stages that page as the homepage, brings its one referenced asset (the UCL logo), and writes a `robots.txt` disallowing crawling — belt and braces alongside the page's own `noindex` meta tag, since these pages are meant to be reached only via the emailed link.
 3. Deploy, then **Site configuration → Site details → Change site name** to something readable but not guessable (avoid `minds-in-motion-booking`-type names if you want it to stay effectively unlisted).
 4. Put the resulting `https://<name>.netlify.app/` address into the matching placeholder in `email/outreach-template.html` (`[WEBSITE_URL]` or `[EEG_WEBSITE_URL]`).
 5. Confirm site 1 (the landing page) still loads unchanged and its build settings are still empty/root — a second site can't affect it, but costs nothing to check.
 
 **Loose end:** because site 1 publishes the whole repo, `booking.html`/`booking_eeg.html` are *also* reachable at `<landing-site>/booking.html` etc. — same page, same flows, just not the address you advertise. To close that off, add a repo-root file called `_redirects` (no extension) containing one line per page:
+
 ```
 /booking.html       /   301
 /booking_eeg.html    /   301
 ```
+
 This affects **only site 1** — Netlify reads `_redirects` from the directory a site publishes, and the booking sites publish `dist`, which never contains this file. Optional; skip it if the duplicate addresses don't matter to you.
 
 ---
@@ -441,12 +453,12 @@ This affects **only site 1** — Netlify reads `_redirects` from the directory a
 
 Both booking pages share one instrument, version `v1-bfi2`, **71 keys** per row:
 
-| Keys | What |
-| --- | --- |
-| `screeningPassed` | Always `true`. The individual eligibility answers are **never stored** — psychiatric history and pregnancy are special-category data under GDPR, and since only eligible people ever reach submit, every stored value would be identical anyway. This flag just records that the gate ran. |
-| `d_sex`, `d_age`, `d_handedness`, `d_education`, `d_sector`, `d_language` | Demographics |
-| `bfi1` … `bfi60` | Big Five Inventory-2, stored as the chosen label text (map to 1–5 via `BFI_SCALE`'s order when scoring: `Disagree strongly` = 1 … `Agree strongly` = 5). The domain/facet scoring key and the required copyright line (© 2015 Oliver P. John and Christopher J. Soto) are a comment directly above `BFI_ITEMS` in the page source. |
-| `c_read`, `c_voluntary`, `c_data`, `c_agree` | Consent, stored as `true` |
+| Keys                                                                                  | What                                                                                                                                                                                                                                                                                                                                         |
+| ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `screeningPassed`                                                                   | Always`true`. The individual eligibility answers are **never stored** — psychiatric history and pregnancy are special-category data under GDPR, and since only eligible people ever reach submit, every stored value would be identical anyway. This flag just records that the gate ran.                                           |
+| `d_sex`, `d_age`, `d_handedness`, `d_education`, `d_sector`, `d_language` | Demographics                                                                                                                                                                                                                                                                                                                                 |
+| `bfi1` … `bfi60`                                                                 | Big Five Inventory-2, stored as the chosen label text (map to 1–5 via`BFI_SCALE`'s order when scoring: `Disagree strongly` = 1 … `Agree strongly` = 5). The domain/facet scoring key and the required copyright line (© 2015 Oliver P. John and Christopher J. Soto) are a comment directly above `BFI_ITEMS` in the page source. |
+| `c_read`, `c_voluntary`, `c_data`, `c_agree`                                  | Consent, stored as`true`                                                                                                                                                                                                                                                                                                                   |
 
 ~3 KB per row — well inside Excel's ~32,000-character cell limit.
 
@@ -462,21 +474,21 @@ Pages are built **one section at a time** via `SECTION_PAGE_SIZE` (demographics 
 
 ### Troubleshooting
 
-| Symptom | Cause | Fix |
-| --- | --- | --- |
-| `401` on any flow | Trigger's "Who can trigger" is still "Any user in my tenant" | Set to **Anyone** |
-| Flow won't save: `InvalidConcurrencyConfiguration` | Concurrency Control switched on with Response actions present | Switch off — see Conventions |
-| Flow won't save: "contains invalid expression(s)" | An unquoted string literal, or an Expression box opened and left blank | Quote string literals (`'Crowd'`); leave truly-blank fields untouched, don't open-and-clear them |
-| "Invalid reference" to an action | Typed the action's name with a space | Rename the action to have no space, or reference it with the underscore form |
-| A Filter array always returns everything or nothing | Used basic mode, or typed a column name as plain text | Use **Edit in advanced mode**; see Conventions for the `item()` rules |
-| Attachment has the wrong extension or garbled content | Attachment Name was a token instead of typed text, or Attachment Content points at the wrong action's output | Type the filename literally; point Content at the actual CSV/ICS-producing action |
-| Signup/Booking form shows "Something went wrong" | Wrong or truncated endpoint URL pasted into the page | Re-copy via the copy icon, never by reading the field |
-| Duplicate email not caught | Filter Query syntax error (signup flow), or a Filter array condition typo (booking flows) | Rebuild the Filter Query by typing+clicking; re-check the advanced-mode expression |
-| A cancelled person still holds a place | `Cancelled` cell has a stray space, not truly blank | Clear the cell with Delete, not a keystroke |
-| All slots show Full when they're not | `Capacity` (or `EEG Per Cohort`) is empty or stored as text | Every such cell must be a plain number |
-| `Registered Interest` always `No` | `ListSignups` points at the wrong file/table | Must read the `Signups` table in `minds_in_motion_signups.xlsx` |
-| Two bookings landed in a slot with room for one | Two confirms within the same instant — the accepted race window | See Part 3's write-step note; not a bug |
-| EEG booking accepted for a 3rd person in one cohort on one session | `cohort_full` check missing or comparing the wrong cohort | Re-check `CrowdCohort`'s expression matches `outputs('Cohort')`, not a literal |
-| `.ics` only shows one of two EEG events | Both `VEVENT`s used the same `UID` | Give them different suffixes (`-ind` / `-grp`) |
-| Netlify site 2/3 shows the wrong page | Publish directory isn't `dist`, or the build command's `cp` target is wrong | Check the deploy log; confirm Publish directory is exactly `dist` |
-| Changes to a booking page don't appear live | Netlify only rebuilds on push | Commit and push; check the site's Deploys tab |
+| Symptom                                                            | Cause                                                                                                        | Fix                                                                                                |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| `401` on any flow                                                | Trigger's "Who can trigger" is still "Any user in my tenant"                                                 | Set to**Anyone**                                                                             |
+| Flow won't save:`InvalidConcurrencyConfiguration`                | Concurrency Control switched on with Response actions present                                                | Switch off — see Conventions                                                                      |
+| Flow won't save: "contains invalid expression(s)"                  | An unquoted string literal, or an Expression box opened and left blank                                       | Quote string literals (`'Crowd'`); leave truly-blank fields untouched, don't open-and-clear them |
+| "Invalid reference" to an action                                   | Typed the action's name with a space                                                                         | Rename the action to have no space, or reference it with the underscore form                       |
+| A Filter array always returns everything or nothing                | Used basic mode, or typed a column name as plain text                                                        | Use**Edit in advanced mode**; see Conventions for the `item()` rules                       |
+| Attachment has the wrong extension or garbled content              | Attachment Name was a token instead of typed text, or Attachment Content points at the wrong action's output | Type the filename literally; point Content at the actual CSV/ICS-producing action                  |
+| Signup/Booking form shows "Something went wrong"                   | Wrong or truncated endpoint URL pasted into the page                                                         | Re-copy via the copy icon, never by reading the field                                              |
+| Duplicate email not caught                                         | Filter Query syntax error (signup flow), or a Filter array condition typo (booking flows)                    | Rebuild the Filter Query by typing+clicking; re-check the advanced-mode expression                 |
+| A cancelled person still holds a place                             | `Cancelled` cell has a stray space, not truly blank                                                        | Clear the cell with Delete, not a keystroke                                                        |
+| All slots show Full when they're not                               | `Capacity` (or `EEG Per Cohort`) is empty or stored as text                                              | Every such cell must be a plain number                                                             |
+| `Registered Interest` always `No`                              | `ListSignups` points at the wrong file/table                                                               | Must read the`Signups` table in `minds_in_motion_signups.xlsx`                                 |
+| Two bookings landed in a slot with room for one                    | Two confirms within the same instant — the accepted race window                                             | See Part 3's write-step note; not a bug                                                            |
+| EEG booking accepted for a 3rd person in one cohort on one session | `cohort_full` check missing or comparing the wrong cohort                                                  | Re-check`CrowdCohort`'s expression matches `outputs('Cohort')`, not a literal                  |
+| `.ics` only shows one of two EEG events                          | Both`VEVENT`s used the same `UID`                                                                        | Give them different suffixes (`-ind` / `-grp`)                                                 |
+| Netlify site 2/3 shows the wrong page                              | Publish directory isn't`dist`, or the build command's `cp` target is wrong                               | Check the deploy log; confirm Publish directory is exactly`dist`                                 |
+| Changes to a booking page don't appear live                        | Netlify only rebuilds on push                                                                                | Commit and push; check the site's Deploys tab                                                      |
