@@ -354,6 +354,7 @@
     }
     /* A section header opening a page shouldn't be crowded by the rule above it. */
     .q:first-child .q-sect { margin-top: 0; }
+    .q-sect-desc { font-size: .92rem; color: var(--body); line-height: 1.6; margin: 0 0 18px; }
     .q-hint { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
 
     /* Consent checkboxes */
@@ -601,24 +602,24 @@
         <p class="lede reveal">
           A study at UCL PEARL, led by Professor Hugo Spiers and Dr Fiona Zisch,
           University College London. This page is for the <b>EEG strand</b>, which
-          involves two visits and has extra requirements.
+          involves <b>two visits</b> and has extra requirements.
         </p>
 
         <ul class="facts">
           <li class="reveal">
             <span class="k">Visit 1</span>
-            <span><b>An individual session</b>
-              <span class="sub">9&ndash;14 or 18&ndash;23 September &middot; about 90 minutes, just you</span></span>
+            <span><b>One individual session</b>
+              <span class="sub">Between 9th&ndash;14th or 18th&ndash;23rd September &middot; about 90 minutes, just you</span></span>
           </li>
           <li class="reveal">
             <span class="k">Visit 2</span>
-            <span><b>A group session</b>
-              <span class="sub">15&ndash;17 September &middot; about 2 hours, with other participants</span></span>
+            <span><b>One group session</b>
+              <span class="sub">Between 15th&ndash;17th September &middot; about 2 hours, with other participants</span></span>
           </li>
           <li class="reveal">
             <span class="k">Where</span>
             <span><b>UCL PEARL, Dagenham</b>
-              <span class="sub">District line to Dagenham&nbsp;Heathway</span></span>
+              <span class="sub">District line to Dagenham East</span></span>
           </li>
           <li class="reveal">
             <span class="k">Compensation</span>
@@ -629,11 +630,6 @@
             <span class="k">Equipment</span>
             <span><b>EEG cap and eye-tracker</b>
               <span class="sub">Which is why there are extra requirements below</span></span>
-          </li>
-          <li class="reveal">
-            <span class="k">Details</span>
-            <span><button type="button" class="sheet-open" id="sheetOpenBtn">Read the information sheet</button>
-              <span class="sub">Everything about the session, your data and your rights</span></span>
           </li>
         </ul>
 
@@ -658,7 +654,13 @@
           Please book only if you are confident you can make both dates.
         </div>
 
-        <button type="button" class="btn reveal" id="startBtn">
+        <div class="pull reveal" id="sheetPrompt">
+          <b>Please read the information sheet before continuing.</b>
+          <span class="sub" style="display:block;margin-top:6px;">Everything about the session, your data and your rights.</span>
+          <button type="button" class="sheet-open" id="sheetOpenBtn" style="margin-top:10px;">Read the information sheet</button>
+        </div>
+
+        <button type="button" class="btn reveal" id="startBtn" disabled>
           <span class="btn-label">Continue</span>
           <span class="arrow" aria-hidden="true">&rarr;</span>
         </button>
@@ -682,9 +684,10 @@
           on the day. That is a limitation of the equipment, not of you, and it
           is one the field is actively trying to fix. If you are unsure whether
           any of the questions below apply to you, please email
-          [PLACEHOLDER: study email address] rather than ruling yourself out
+          <a href="mailto:james.moultrie.25@ucl.ac.uk">james.moultrie.25@ucl.ac.uk</a>
+           rather than ruling yourself out
           &mdash; and do consider the
-          <a href="[PLACEHOLDER: crowd booking URL]">group-only sessions</a>,
+          <a href="https://mindsinmotioncrowd.netlify.app/">group-only sessions</a>,
           which have none of these requirements.
         </div>
 
@@ -784,7 +787,7 @@
       <div class="col">
         <h2 id="head-questions" tabindex="-1">About you</h2>
         <p class="lede">
-          A short questionnaire, around 15 minutes. It must be complete before
+          A short questionnaire, around 8 minutes. It must be complete before
           your place can be confirmed.
         </p>
 
@@ -878,13 +881,13 @@
     <div class="sheet-head">
       <div>
         <h2 id="sheetTitle" tabindex="-1">Participant information sheet</h2>
-        <p class="sub">Minds in Motion &middot; Version [PLACEHOLDER: version], [PLACEHOLDER: date]
-          &middot; Ethics ref [ethics reference]</p>
+        <p class="sub">Minds in Motion &middot; Version 1, 08/08/2026
+          &middot; Ethics ref EP/2024/020</p>
       </div>
       <button type="button" class="sheet-close" id="sheetCloseBtn" aria-label="Close">&times;</button>
     </div>
 
-    <div class="sheet-body">
+    <div class="sheet-body" id="sheetBody">
       <h3>You are being invited to take part</h3>
       <p>
         Before you decide, it is important you understand why the research is
@@ -937,12 +940,12 @@
           electrical activity at the scalp, and an <b>eye-tracker</b>, which
           records where you look. You then move through a configured space on
           your own.</li>
-        <li><b>Visit 2 &mdash; group session, about 2 hours.</b> The same
+        <li><b>Visit 2 &mdash; group session, about 90 minutes.</b> The same
           equipment, but this time you move through the space at the same time
           as around thirty other participants. Overhead cameras record movement
           paths across the group.</li>
         <li>Depending on which dates you choose, the individual visit comes
-          either before or after the group visit. Both are needed.</li>
+          either before or after the group visit.</li>
         <li>There are breaks, and you can sit down, pause or leave at any
           time.</li>
       </ul>
@@ -962,14 +965,17 @@
         The sensors have to make direct contact with the scalp, so hair that
         cannot be parted &mdash; braided, locked, extended, or very thick
         &mdash; prevents a usable recording, as does a head covering worn
-        during the session. The eye-tracker sits in front of the eyes and
-        cannot see through glasses, though contact lenses are completely fine.
+        during the session. The eye-trackers are a special pair of wearable glasses
+        and therefore would be tricky to wear on top of an existing pair of 
+        glasses, though contact lenses are completely fine.
       </p>
       <p>
         We want to be straightforward about this: these are limitations of
         current EEG and eye-tracking equipment, not judgements about
         participants, and they exclude some people unfairly &mdash; a problem
-        the field is actively working on. The <b>group-only sessions</b> have
+        the field is actively working on. The 
+        <a href="https://mindsinmotioncrowd.netlify.app/ "
+           target="_blank" rel="noopener">group-only sessions</a> have
         none of these requirements and are open to far more people. If you are
         unsure whether the requirements apply to you, please email us rather
         than ruling yourself out.
@@ -997,9 +1003,8 @@
 
       <h3>Are there any benefits?</h3>
       <p>
-        You will receive <b>&pound;60</b> for taking part, paid by
-        [PLACEHOLDER: payment method] <b>after your second session</b>. If you
-        complete only the first visit, contact us and we will arrange a partial
+        You will receive <b>&pound;60</b> for taking part <b>after your second session</b>. If you
+        complete only the first visit, contact us and we may arrange a partial
         payment for the time you gave. You will also be contributing to
         research on how buildings can be designed to work better for the people
         who use them.
@@ -1019,16 +1024,17 @@
         Data is stored on UCL systems. Your responses are separated from your
         name and <b>anonymised before analysis</b>, and results are only ever
         reported at group level &mdash; never in a way that identifies you.
-        Research data is retained for [PLACEHOLDER: retention period].
+        Research data is retained for 10 years.
       </p>
       <p>
         University College London is the data controller. We process your data
         on the legal basis of a <b>task carried out in the public interest</b>.
         You have the right to ask what data we hold about you, to have it
         corrected, and to ask us to delete it. To do so, or to raise a concern,
-        contact UCL's Data Protection Officer at
-        [PLACEHOLDER: data protection officer email]. Full details are in the
-        <a href="https://www.ucl.ac.uk/legal-services/privacy/ucl-general-privacy-notice"
+        contact UCL's Data Protection team at
+        <a href="mailto:data-protection@ucl.ac.uk" target="_blank" rel="noopener">
+          data-protection@ucl.ac.uk</a>. Full details are in the
+        <a href="https://www.ucl.ac.uk/legal-services/privacy/general-privacy-notice"
            target="_blank" rel="noopener">UCL General Privacy Notice</a>.
       </p>
 
@@ -1042,21 +1048,23 @@
       <h3>Who has reviewed this study?</h3>
       <p>
         The study has been approved by the UCL Research Ethics Committee,
-        reference <b>[ethics reference]</b>.
+        reference <b>EP/2024/020</b>.
       </p>
 
       <h3>What if something goes wrong?</h3>
       <p>
         If you have a concern about any aspect of the study, please speak to us
         first and we will do our best to answer you. If you remain unhappy and
-        wish to complain formally, contact the Chair of the UCL Research Ethics
-        Committee at [PLACEHOLDER: ethics committee email].
+        wish to complain formally, contact the Chair of the
+        <a href="https://www.ucl.ac.uk/research-innovation-services/compliance-and-assurance/research-ethics-service/committees-and-governance/life-and-medical-sciences"
+           target="_blank" rel="noopener"> UCL Research Ethics Committee</a>.
       </p>
 
       <h3>Contact</h3>
       <p>
         Questions about anything on this page? Email
-        [PLACEHOLDER: study email address].
+        <a href="mailto:james.moultrie.25@ucl.ac.uk"
+           target="_blank" rel="noopener"> james.moultrie.25@ucl.ac.uk</a>.
       </p>
       <p style="color:var(--muted);font-size:.85rem;margin-top:14px;">
         Please keep a copy of this page for your records. You will also be
@@ -1108,12 +1116,12 @@
   const SCREENING = [
     {
       title: 'Please confirm all of these apply to you',
-      hint: 'All six need to be "Yes".',
+      hint:'',
       expect: 'Yes',
       questions: [
         { id: 's_age',      label: 'Are you 18 or over?' },
         { id: 's_both',     label: 'Can you attend two separate visits \u2014 one individual session and one group session on a different date?' },
-        { id: 's_unaided',  label: 'Can you move around a large indoor space unaided for up to an hour, without the support of another person or a mobility aid?' },
+        { id: 's_unaided',  label: 'Can you move around a large indoor space unaided for up to 70 minutes, without the support of another person or a mobility aid?' },
         { id: 's_lenses',   label: 'Is your vision either normal, or corrected with contact lenses? (The eye-tracker cannot be used over glasses.)' },
         { id: 's_hair',     label: 'Can your hair be parted so that sensors touch the scalp \u2014 that is, it is not braided, locked, extended, or very thick or voluminous on the day?' },
         { id: 's_uncovered',label: 'Are you able to take part with your head uncovered for the duration of the session?' }
@@ -1121,7 +1129,7 @@
     },
     {
       title: 'Please confirm none of these apply to you',
-      hint: 'All seven need to be "No".',
+      hint:'',
       expect: 'No',
       questions: [
         { id: 's_psych',     label: 'Have you ever been diagnosed with a psychiatric or psychological condition?' },
@@ -1153,7 +1161,9 @@
 
   const DEMOGRAPHIC_QUESTIONS = [
     { id: 'd_sex', section: 'About you', type: 'single', required: true,
-      label: 'What is your sex?', options: ['Male', 'Female'] },
+      label: 'What is your sex?', options: ['Male', 'Female','Prefer not to say'] },
+    { id: 'd_gender', section: 'About you', type: 'single', required: true,
+      label: 'How would you describe your gender identity?', options: ['Man', 'Woman','Other'] },
     { id: 'd_age', section: 'About you', type: 'number', required: true,
       label: 'How old are you?', min: 18, max: 120, hint: 'In years.' },
     { id: 'd_handedness', section: 'About you', type: 'single', required: true,
@@ -1165,9 +1175,7 @@
     { id: 'd_sector', section: 'About you', type: 'single', required: true,
       label: 'Which best describes what you do?',
       options: ['Architecture or design', 'Science or research', 'Technology',
-                'Healthcare', 'Education', 'Student', 'Other'] },
-    { id: 'd_language', section: 'About you', type: 'text', required: true,
-      label: 'What is your first language?' }
+                'Healthcare', 'Education', 'Student', 'Other'] }
   ];
 
   // ── Big Five Inventory-2 ───────────────────────────────────────────────
@@ -1193,7 +1201,7 @@
   //   Intellectual Curiosity 10,25R,40,55R | Aesthetic Sensitivity 5R,20,35,50R |
   //   Creative Imagination 15,30R,45R,60
   // ───────────────────────────────────────────────────────────────────────
-  const BFI_SCALE = ['Disagree strongly', 'Disagree a little', 'Neutral; no opinion',
+  const BFI_SCALE = ['Disagree strongly', 'Disagree a little', 'Neutral',
                      'Agree a little', 'Agree strongly'];
 
   const BFI_ITEMS = [
@@ -1270,14 +1278,14 @@
   // required: true so each statement must be ticked individually.
   const CONSENT_QUESTIONS = [
     { id: 'c_read', section: 'Consent', type: 'consent', required: true,
-      label: '[PLACEHOLDER] I have read and understood the participant information sheet.',
+      label: 'I have read and understood the participant information sheet.',
       sheet: 'Read it again' },
     { id: 'c_voluntary', section: 'Consent', type: 'consent', required: true,
-      label: '[PLACEHOLDER] I understand that taking part is voluntary and that I may withdraw at any time, without giving a reason.' },
+      label: 'I understand that taking part is voluntary and that I may withdraw at any time, without giving a reason.' },
     { id: 'c_data', section: 'Consent', type: 'consent', required: true,
-      label: '[PLACEHOLDER] I understand how my data will be stored and used, and that it will be anonymised before analysis.' },
+      label: 'I understand how my data will be stored and used, and that it will be anonymised before analysis.' },
     { id: 'c_agree', section: 'Consent', type: 'consent', required: true,
-      label: '[PLACEHOLDER] I agree to take part in this study.' }
+      label: 'I agree to take part in this study.' }
   ];
 
   const QUESTIONS = DEMOGRAPHIC_QUESTIONS
@@ -1336,6 +1344,19 @@
   function clearState() {
     try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
   }
+
+  // Kick off the availability fetch (Flow A) immediately, before the rest of
+  // the script (screening/questionnaire data, DOM wiring, event listeners)
+  // finishes setting up. `loadSlots`/`fetchAvailability` are declared further
+  // down but are function declarations, so they're hoisted and safe to call
+  // here — restoreState() has just run, so this still picks up a returning
+  // visitor's email for the alreadyBooked check. This lets the multi-second
+  // Power Automate round trip overlap with the visitor reading the study
+  // info and eligibility steps instead of starting only once they reach the
+  // slot picker. See Boot at the bottom of this script for the rest of the
+  // page-load sequence.
+  restoreState();
+  loadSlots();
 
   // ═══════════════════════════════════════════════════════════════════════
   // Steps + rail
@@ -1426,13 +1447,33 @@
   // Information sheet dialog
   // ═══════════════════════════════════════════════════════════════════════
   const backdrop = $('sheetBackdrop');
+  const sheetBody = $('sheetBody');
   let sheetOpener = null;   // element to hand focus back to on close
+
+  // Continue on step 1 stays disabled until this is true — see checkSheetScrolled.
+  let hasReadSheet = false;
+  function markSheetRead() {
+    if (hasReadSheet) return;
+    hasReadSheet = true;
+    $('startBtn').disabled = false;
+  }
+  function checkSheetScrolled() {
+    // 4px slack absorbs sub-pixel rounding some browsers introduce; also
+    // covers the case where the sheet's content is short enough on a given
+    // viewport that there's nothing to scroll in the first place.
+    if (sheetBody.scrollTop + sheetBody.clientHeight >= sheetBody.scrollHeight - 4) markSheetRead();
+  }
+  sheetBody.addEventListener('scroll', checkSheetScrolled);
 
   function openSheet(trigger) {
     sheetOpener = trigger || document.activeElement;
     backdrop.classList.add('open');
     document.body.classList.add('locked');
+    // Always start from the top, even on a reopen, so it can't be skimmed
+    // by opening once, scrolling to the bottom, then reopening at the end.
+    sheetBody.scrollTop = 0;
     $('sheetTitle').focus({ preventScroll: true });
+    checkSheetScrolled();
   }
   function closeSheet() {
     if (!backdrop.classList.contains('open')) return;
@@ -1814,6 +1855,17 @@
         s.textContent = q.section;
         block.appendChild(s);
         lastSection = q.section;
+
+        // Shown once, on the section's first page only — later pages of the
+        // same section (it's paginated in chunks of SECTION_PAGE_SIZE) just
+        // repeat the heading above.
+        if (q.id === 'bfi1') {
+          const d = document.createElement('p');
+          d.className = 'q-sect-desc';
+          d.textContent = 'Here are a number of characteristics that may or may not apply to you. ' +
+            'Please indicate the extent to which you agree or disagree with that statement.';
+          block.appendChild(d);
+        }
       }
 
       const saved = state.answers[q.id];
@@ -2134,14 +2186,14 @@
   // ═══════════════════════════════════════════════════════════════════════
   // Boot
   // ═══════════════════════════════════════════════════════════════════════
-  restoreState();
+  // restoreState() and the initial loadSlots() already ran above, as early
+  // in the script as possible — see the comment near clearState().
   $('firstName').value = state.firstName;
   $('lastName').value  = state.lastName;
   $('email').value     = state.email;
   showStep('info');
   renderScreening();
   renderSlots();          // shows the "pick an individual session first" hint
-  loadSlots();
 
   // A tab left open for an hour shouldn't offer a slot that filled long ago.
   document.addEventListener('visibilitychange', () => {

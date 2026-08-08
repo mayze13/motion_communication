@@ -346,6 +346,7 @@
     }
     /* A section header opening a page shouldn't be crowded by the rule above it. */
     .q:first-child .q-sect { margin-top: 0; }
+    .q-sect-desc { font-size: .92rem; color: var(--body); line-height: 1.6; margin: 0 0 18px; }
     .q-hint { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
 
     /* Consent checkboxes */
@@ -540,7 +541,7 @@
          onerror="this.outerHTML='<div class=&quot;logo-placeholder&quot;>UCL</div>'">
     <span class="brand-name">Minds in Motion</span>
   </div>
-  <span class="head-note">15&ndash;17 September 2026</span>
+  <span class="head-note">15th&ndash;17th September 2026</span>
 </header>
 
 <div class="shell">
@@ -592,7 +593,7 @@
         <ul class="facts">
           <li class="reveal">
             <span class="k">When</span>
-            <span><b>15&ndash;17 September 2026</b>
+            <span><b>15th&ndash;17th September 2026</b>
               <span class="sub">2 hours, a single visit</span></span>
           </li>
           <li class="reveal">
@@ -604,11 +605,6 @@
             <span class="k">Compensation</span>
             <span><b>&pound;30</b>
               <span class="sub">For your time</span></span>
-          </li>
-          <li class="reveal">
-            <span class="k">Details</span>
-            <span><button type="button" class="sheet-open" id="sheetOpenBtn">Read the information sheet</button>
-              <span class="sub">Everything about the session, your data and your rights</span></span>
           </li>
         </ul>
 
@@ -633,7 +629,13 @@
           Please book only if you are confident you can attend.
         </div>
 
-        <button type="button" class="btn reveal" id="startBtn">
+        <div class="pull reveal" id="sheetPrompt">
+          <b>Please read the information sheet before continuing.</b>
+          <span class="sub" style="display:block;margin-top:6px;">Everything about the session, your data and your rights.</span>
+          <button type="button" class="sheet-open" id="sheetOpenBtn" style="margin-top:10px;">Read the information sheet</button>
+        </div>
+
+        <button type="button" class="btn reveal" id="startBtn" disabled>
           <span class="btn-label">Continue</span>
           <span class="arrow" aria-hidden="true">&rarr;</span>
         </button>
@@ -662,7 +664,7 @@
           </p>
           <p style="margin-top:8px;">
             If you think this is a mistake, or you would like to ask about it,
-            email us at [PLACEHOLDER: study email address].
+            email us at <a href="mailto:james.moultrie.25@ucl.ac.uk">james.moultrie.25@ucl.ac.uk</a>.
           </p>
         </div>
 
@@ -735,7 +737,7 @@
       <div class="col">
         <h2 id="head-questions" tabindex="-1">About you</h2>
         <p class="lede">
-          A short questionnaire, around 15 minutes. It must be complete before
+          A short questionnaire, around 8 minutes. It must be complete before
           your place can be confirmed.
         </p>
 
@@ -827,13 +829,13 @@
     <div class="sheet-head">
       <div>
         <h2 id="sheetTitle" tabindex="-1">Participant information sheet</h2>
-        <p class="sub">Minds in Motion &middot; Version [PLACEHOLDER: version], [PLACEHOLDER: date]
-          &middot; Ethics ref [ethics reference]</p>
+        <p class="sub">Minds in Motion &middot; Version 1, 08/08/2026
+          &middot; Ethics ref EP/2024/020</p>
       </div>
       <button type="button" class="sheet-close" id="sheetCloseBtn" aria-label="Close">&times;</button>
     </div>
 
-    <div class="sheet-body">
+    <div class="sheet-body" id="sheetBody">
       <h3>You are being invited to take part</h3>
       <p>
         Before you decide, it is important you understand why the research is
@@ -876,7 +878,7 @@
       <h3>What will happen if I take part?</h3>
       <ul>
         <li>You come to <b>UCL PEARL in Dagenham</b> for one visit. Please
-          allow <b>2 hours</b> in total.</li>
+          allow <b>2 hours</b> on site.</li>
         <li>A researcher will greet you, brief you in person, and go through a
           consent form with you before anything begins.</li>
         <li>You will walk through a large indoor space that has been arranged
@@ -909,10 +911,9 @@
 
       <h3>Are there any benefits?</h3>
       <p>
-        You will receive <b>&pound;30</b> for taking part, paid by
-        [PLACEHOLDER: payment method]. You will also be contributing to
-        research on how buildings can be designed to work better for the people
-        who use them.
+        You will receive <b>&pound;30</b> for taking part, after your session.
+        You will also be contributing to research on how buildings can be
+        designed to work better for the people who use them.
       </p>
 
       <h3>What data do you collect, and what happens to it?</h3>
@@ -929,16 +930,17 @@
         Data is stored on UCL systems. Your responses are separated from your
         name and <b>anonymised before analysis</b>, and results are only ever
         reported at group level &mdash; never in a way that identifies you.
-        Research data is retained for [PLACEHOLDER: retention period].
+        Research data is retained for 10 years.
       </p>
       <p>
         University College London is the data controller. We process your data
         on the legal basis of a <b>task carried out in the public interest</b>.
         You have the right to ask what data we hold about you, to have it
         corrected, and to ask us to delete it. To do so, or to raise a concern,
-        contact UCL's Data Protection Officer at
-        [PLACEHOLDER: data protection officer email]. Full details are in the
-        <a href="https://www.ucl.ac.uk/legal-services/privacy/ucl-general-privacy-notice"
+        contact UCL's Data Protection team at
+        <a href="mailto:data-protection@ucl.ac.uk" target="_blank" rel="noopener">
+          data-protection@ucl.ac.uk</a>. Full details are in the
+        <a href="https://www.ucl.ac.uk/legal-services/privacy/general-privacy-notice"
            target="_blank" rel="noopener">UCL General Privacy Notice</a>.
       </p>
 
@@ -952,21 +954,23 @@
       <h3>Who has reviewed this study?</h3>
       <p>
         The study has been approved by the UCL Research Ethics Committee,
-        reference <b>[ethics reference]</b>.
+        reference <b>EP/2024/020</b>.
       </p>
 
       <h3>What if something goes wrong?</h3>
       <p>
         If you have a concern about any aspect of the study, please speak to us
         first and we will do our best to answer you. If you remain unhappy and
-        wish to complain formally, contact the Chair of the UCL Research Ethics
-        Committee at [PLACEHOLDER: ethics committee email].
+        wish to complain formally, contact the Chair of the
+        <a href="https://www.ucl.ac.uk/research-innovation-services/compliance-and-assurance/research-ethics-service/committees-and-governance/life-and-medical-sciences"
+           target="_blank" rel="noopener"> UCL Research Ethics Committee</a>.
       </p>
 
       <h3>Contact</h3>
       <p>
         Questions about anything on this page? Email
-        [PLACEHOLDER: study email address].
+        <a href="mailto:james.moultrie.25@ucl.ac.uk"
+           target="_blank" rel="noopener"> james.moultrie.25@ucl.ac.uk</a>.
       </p>
       <p style="color:var(--muted);font-size:.85rem;margin-top:14px;">
         Please keep a copy of this page for your records. You will also be
@@ -1017,7 +1021,7 @@
   const SCREENING = [
     {
       title: 'Please confirm all of these apply to you',
-      hint: 'All three need to be "Yes".',
+      hint: '',
       expect: 'Yes',
       questions: [
         { id: 's_age',      label: 'Are you 18 or over?' },
@@ -1027,7 +1031,7 @@
     },
     {
       title: 'Please confirm none of these apply to you',
-      hint: 'All five need to be "No".',
+      hint: '',
       expect: 'No',
       questions: [
         { id: 's_psych',     label: 'Have you ever been diagnosed with a psychiatric or psychological condition?' },
@@ -1068,9 +1072,7 @@
     { id: 'd_sector', section: 'About you', type: 'single', required: true,
       label: 'Which best describes what you do?',
       options: ['Architecture or design', 'Science or research', 'Technology',
-                'Healthcare', 'Education', 'Student', 'Other'] },
-    { id: 'd_language', section: 'About you', type: 'text', required: true,
-      label: 'What is your first language?' }
+                'Healthcare', 'Education', 'Student', 'Other'] }
   ];
 
   // ── Big Five Inventory-2 ───────────────────────────────────────────────
@@ -1096,7 +1098,7 @@
   //   Intellectual Curiosity 10,25R,40,55R | Aesthetic Sensitivity 5R,20,35,50R |
   //   Creative Imagination 15,30R,45R,60
   // ───────────────────────────────────────────────────────────────────────
-  const BFI_SCALE = ['Disagree strongly', 'Disagree a little', 'Neutral; no opinion',
+  const BFI_SCALE = ['Disagree strongly', 'Disagree a little', 'Neutral',
                      'Agree a little', 'Agree strongly'];
 
   const BFI_ITEMS = [
@@ -1173,14 +1175,14 @@
   // required: true so each statement must be ticked individually.
   const CONSENT_QUESTIONS = [
     { id: 'c_read', section: 'Consent', type: 'consent', required: true,
-      label: '[PLACEHOLDER] I have read and understood the participant information sheet.',
+      label: 'I have read and understood the participant information sheet.',
       sheet: 'Read it again' },
     { id: 'c_voluntary', section: 'Consent', type: 'consent', required: true,
-      label: '[PLACEHOLDER] I understand that taking part is voluntary and that I may withdraw at any time, without giving a reason.' },
+      label: 'I understand that taking part is voluntary and that I may withdraw at any time, without giving a reason.' },
     { id: 'c_data', section: 'Consent', type: 'consent', required: true,
-      label: '[PLACEHOLDER] I understand how my data will be stored and used, and that it will be anonymised before analysis.' },
+      label: 'I understand how my data will be stored and used, and that it will be anonymised before analysis.' },
     { id: 'c_agree', section: 'Consent', type: 'consent', required: true,
-      label: '[PLACEHOLDER] I agree to take part in this study.' }
+      label: 'I agree to take part in this study.' }
   ];
 
   const QUESTIONS = DEMOGRAPHIC_QUESTIONS
@@ -1328,13 +1330,33 @@
   // Information sheet dialog
   // ═══════════════════════════════════════════════════════════════════════
   const backdrop = $('sheetBackdrop');
+  const sheetBody = $('sheetBody');
   let sheetOpener = null;   // element to hand focus back to on close
+
+  // Continue on step 1 stays disabled until this is true — see checkSheetScrolled.
+  let hasReadSheet = false;
+  function markSheetRead() {
+    if (hasReadSheet) return;
+    hasReadSheet = true;
+    $('startBtn').disabled = false;
+  }
+  function checkSheetScrolled() {
+    // 4px slack absorbs sub-pixel rounding some browsers introduce; also
+    // covers the case where the sheet's content is short enough on a given
+    // viewport that there's nothing to scroll in the first place.
+    if (sheetBody.scrollTop + sheetBody.clientHeight >= sheetBody.scrollHeight - 4) markSheetRead();
+  }
+  sheetBody.addEventListener('scroll', checkSheetScrolled);
 
   function openSheet(trigger) {
     sheetOpener = trigger || document.activeElement;
     backdrop.classList.add('open');
     document.body.classList.add('locked');
+    // Always start from the top, even on a reopen, so it can't be skimmed
+    // by opening once, scrolling to the bottom, then reopening at the end.
+    sheetBody.scrollTop = 0;
     $('sheetTitle').focus({ preventScroll: true });
+    checkSheetScrolled();
   }
   function closeSheet() {
     if (!backdrop.classList.contains('open')) return;
@@ -1612,6 +1634,17 @@
         s.textContent = q.section;
         block.appendChild(s);
         lastSection = q.section;
+
+        // Shown once, on the section's first page only — later pages of the
+        // same section (it's paginated in chunks of SECTION_PAGE_SIZE) just
+        // repeat the heading above.
+        if (q.id === 'bfi1') {
+          const d = document.createElement('p');
+          d.className = 'q-sect-desc';
+          d.textContent = 'Here are a number of characteristics that may or may not apply to you. ' +
+            'Please indicate the extent to which you agree or disagree with that statement.';
+          block.appendChild(d);
+        }
       }
 
       const saved = state.answers[q.id];
