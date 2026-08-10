@@ -65,6 +65,13 @@
       letter-spacing: -.01em;
     }
     .head-note { font-size: 12px; color: var(--muted); }
+    .back-link {
+      font-size: 12px; color: var(--muted); text-decoration: none;
+      margin-right: 18px; white-space: nowrap; flex-shrink: 0;
+    }
+    .back-link:hover { color: var(--purple); }
+    @media (max-width: 640px) { .head-note { display: none; } }
+    @media (max-width: 420px) { .back-link__text { display: none; } }
 
     /* ── Shell ──────────────────────────────────────────────────────────── */
     .shell { display: flex; align-items: flex-start; }
@@ -550,10 +557,13 @@
 <body>
 
 <header class="site-header">
-  <div class="brand">
-    <img src="assets/UCL_Logo,_plain_background.svg" alt="UCL" style="height:26px;"
-         onerror="this.outerHTML='<div class=&quot;logo-placeholder&quot;>UCL</div>'">
-    <span class="brand-name">Minds in Motion</span>
+  <div style="display:flex;align-items:center;">
+    <a class="back-link" href="landing_page.html" aria-label="Back to Minds in Motion">&larr; <span class="back-link__text">Back to Minds in Motion</span></a>
+    <div class="brand">
+      <img src="assets/UCL_Logo,_plain_background.svg" alt="UCL" style="height:26px;"
+           onerror="this.outerHTML='<div class=&quot;logo-placeholder&quot;>UCL</div>'">
+      <span class="brand-name">Minds in Motion</span>
+    </div>
   </div>
   <span class="head-note">15&ndash;17 September 2026</span>
 </header>

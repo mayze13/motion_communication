@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Minds in Motion: a UCL neuroarchitecture study at UCL PEARL, September 2026. Choose a Crowd session or EEG session and book your place.">
+  <title>Minds in Motion | UCL Research Study — September 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --purple:   #361a54;
+      --white:    #fafafa;
+      --text:     #1a1228;
+      --muted:    #6b5c88;
+      --border:   #d8cfe8;
+      --light:    #f5f1fa;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      font-family: 'DM Sans', Arial, Helvetica, sans-serif;
+      background: var(--white);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────────── */
+    .site-header {
+      background: var(--purple);
+      padding: 28px 20px 24px;
+      text-align: center;
+    }
+    .logo-placeholder {
+      width: 68px; height: 32px; margin: 0 auto;
+      border: 1.5px dashed rgba(255,255,255,0.3); border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.4);
+      font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+    }
+
+    /* ── Main content ───────────────────────────────────────────────────── */
+    .page-inner { max-width: 760px; margin: 0 auto; padding: 32px 20px 40px; }
+
+    .page-eyebrow {
+      font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 8px; font-weight: 700;
+    }
+    .page-inner h1 {
+      font-size: clamp(2.2rem, 7vw, 2.8rem);
+      font-weight: 700; line-height: 1.05; letter-spacing: -0.025em;
+      color: var(--purple); margin-bottom: 12px;
+    }
+    .page-tagline { font-size: 1rem; color: #3a2f52; line-height: 1.6; margin-bottom: 26px; }
+
+    .lede { font-size: 0.95rem; color: #3a2f52; line-height: 1.7; margin-bottom: 24px; }
+
+    .section-heading {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+    }
+
+    .pitch-bullets { list-style: none; margin: 0 0 30px; }
+    .pitch-bullets li {
+      font-size: 0.9rem; color: #3a2f52; line-height: 1.5;
+      padding: 8px 0; border-top: 1px solid var(--border);
+    }
+    .pitch-bullets li:first-child { border-top: none; padding-top: 0; }
+
+    .tracks-intro { font-size: 0.95rem; color: #3a2f52; line-height: 1.7; margin-bottom: 18px; }
+
+    /* ── Track cards ────────────────────────────────────────────────────── */
+    .tracks-grid {
+      display: grid; grid-template-columns: 1fr; gap: 16px;
+      max-width: 460px; margin: 0 auto;
+    }
+    .track-card {
+      display: flex; flex-direction: column;
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 18px 20px;
+    }
+    .track-card__title { font-size: 1rem; font-weight: 700; color: var(--purple); margin-bottom: 6px; }
+    .track-card__title .note { font-weight: 500; color: var(--muted); font-size: 0.85rem; }
+    .track-card__body { font-size: 0.88rem; color: #3a2f52; line-height: 1.55; margin-bottom: 16px; flex: 1; }
+    .track-card__btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; padding: 14px; min-height: 48px;
+      background: var(--purple); color: #fff;
+      border-radius: 8px; text-decoration: none;
+      font-size: 15px; font-weight: 700;
+      transition: background 0.15s;
+    }
+    .track-card__btn:hover { background: #4a2570; }
+
+    /* ── Footer ─────────────────────────────────────────────────────────── */
+    .site-footer {
+      background: var(--purple); color: rgba(255,255,255,0.55);
+      padding: 28px 20px 24px; text-align: center; font-size: 12px; line-height: 1.7;
+    }
+    .site-footer img { height: 44px; margin-bottom: 18px; }
+    .site-footer a { color: rgba(255,255,255,0.75); }
+    .site-footer .ethics { color: rgba(255,255,255,0.4); font-size: 11px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────────── -->
+<header class="site-header">
+  <img src="assets/UCL_Logo_white.svg" alt="UCL, University College London" style="height:56px;"
+       onerror="this.outerHTML='<div class=&quot;logo-placeholder&quot;>UCL</div>'">
+</header>
+
+
+<!-- ── Body copy ───────────────────────────────────────────────────────── -->
+<main class="page-inner">
+  <p class="page-eyebrow">UCL Research Study · September 2026</p>
+  <h1>Join the Minds in Motion study</h1>
+  <p class="page-tagline">We are now opening recruitment for this research running in September 2026 in London. Take part and get compensated for your time.</p>
+
+  <p class="lede">
+    Minds in Motion is a neuroarchitecture study exploring how buildings shape the way people think and move. It takes place at <strong>UCL PEARL</strong>, and is led by
+    <strong>Professor Hugo Spiers</strong> (UCL Experimental Psychology) and
+    <strong>Dr Fiona Zisch</strong> (UCL Bartlett School of Architecture).
+  </p>
+
+<p style="margin:0 0 8px;font-size:15px;line-height:1.68;
+        color:#3a2f52;font-family:Arial,Helvetica,sans-serif;">
+<strong>What participation involves:</strong>
+</p>
+<tr>
+            <td style="padding:0 40px 0;background-color:#ffffff;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0"
+                     width="100%" style="border-collapse:collapse;">
+                <tr>
+                  <td style="padding:12px 0;border-top:1px solid #ede7f7;">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0"
+                           style="border-collapse:collapse;">
+                      <tr>
+                        <td width="20" valign="top"
+                            style="font-size:12px;color:#361a54;font-weight:bold;
+                                   padding-top:2px;font-family:Arial,Helvetica,sans-serif;">
+                          ▸
+                        </td>
+                        <td style="font-size:14px;color:#3a2f52;line-height:1.55;
+                                   font-family:Arial,Helvetica,sans-serif;">
+                          <strong>Location:</strong> UCL PEARL, Dagenham, London.
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;border-top:1px solid #ede7f7;">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0"
+                           style="border-collapse:collapse;">
+                      <tr>
+                        <td width="20" valign="top"
+                            style="font-size:12px;color:#361a54;font-weight:bold;
+                                   padding-top:2px;font-family:Arial,Helvetica,sans-serif;">
+                          ▸
+                        </td>
+                        <td style="font-size:14px;color:#3a2f52;line-height:1.55;
+                                   font-family:Arial,Helvetica,sans-serif;">
+                          Navigate a specially configured architectural space while wearing
+                          <strong>lightweight, non-invasive biosensors</strong>. No specialist
+                          knowledge or fitness level required.
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;border-top:1px solid #ede7f7;">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0"
+                           style="border-collapse:collapse;">
+                      <tr>
+                        <td width="20" valign="top"
+                            style="font-size:12px;color:#361a54;font-weight:bold;
+                                   padding-top:2px;font-family:Arial,Helvetica,sans-serif;">
+                          ▸
+                        </td>
+                        <td style="font-size:14px;color:#3a2f52;line-height:1.55;
+                                   font-family:Arial,Helvetica,sans-serif;">
+                          Open to <strong>adults aged 18+</strong> who can move around a
+                          large indoor space unaided. A few eligibility questions are
+                          asked when you book. Full details on duration and scheduling
+                          provided on confirmation.
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:32px 40px 8px;background-color:#ffffff;">
+              <p style="margin:0 0 18px;font-size:15px;line-height:1.6;color:#3a2f52;
+                        font-family:Arial,Helvetica,sans-serif;">
+                <strong>There are two ways to take part.</strong> Pick whichever
+                suits you and book a place:
+              </p>
+            </td>
+          </tr>
+
+  <div class="tracks-grid">
+    <!-- Track 1: Crowd session -->
+    <div class="track-card">
+      <p class="track-card__title">Crowd session &nbsp;&middot;&nbsp; £30</p>
+      <p class="track-card__body">
+        <strong>One visit</strong>, up to 2 hours, 15th&ndash;17th September.
+        No equipment worn. Open to adults 18+ who can move around a large
+        indoor space unaided.
+      </p>
+      <a class="track-card__btn" href="booking.html">Book a Crowd session</a>
+    </div>
+
+    <!-- Track 2: EEG sessions -->
+    <div class="track-card">
+      <p class="track-card__title">
+        EEG sessions &nbsp;&middot;&nbsp; £60 &nbsp;&middot;&nbsp;
+        <span class="note">only 32 places</span>
+      </p>
+      <p class="track-card__body">
+        <strong>Two visits</strong> on different dates in September, wearing
+        an EEG cap and eye-tracker. Some extra requirements apply to be
+        eligible.
+      </p>
+      <a class="track-card__btn" href="booking_eeg.html">Book EEG sessions</a>
+    </div>
+  </div>
+</main>
+
+
+<!-- ── Footer ──────────────────────────────────────────────────────────── -->
+<footer class="site-footer">
+  <img src="assets/UCL_Logo_white.svg" alt="UCL, University College London"
+       onerror="this.outerHTML='<div class=&quot;logo-placeholder&quot;>UCL</div>'">
+  <p>
+    <strong style="color:rgba(255,255,255,0.85);">Minds in Motion</strong>
+    is a research study conducted by UCL Experimental Psychology &amp; UCL
+    Bartlett School of Architecture.<br>
+    University College London &nbsp;&middot;&nbsp; Gower Street &nbsp;&middot;&nbsp; London WC1E 6BT
+  </p>
+  <p class="ethics">
+    Ethics approval reference: EP/2024/020<br>
+    Questions? &nbsp;<a href="mailto:james.moultrie.25@ucl.ac.uk">james.moultrie.25@ucl.ac.uk</a>
+  </p>
+</footer>
+
+</body>
+</html>
