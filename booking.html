@@ -309,6 +309,11 @@
     }
     .btn.loading .spinner { display: block; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    .state .loading-row { display: inline-flex; align-items: center; gap: 8px; }
+    .state .spinner {
+      display: block;
+      border-color: rgba(54,26,84,.15); border-top-color: var(--purple);
+    }
 
     /* ── Messaging ──────────────────────────────────────────────────────── */
     .error {
@@ -719,7 +724,9 @@
 
         <div class="notice" id="slotNotice" role="status" aria-live="polite"></div>
 
-        <div class="state" id="slotsLoading"><p>Loading available times&hellip;</p></div>
+        <div class="state" id="slotsLoading">
+          <p class="loading-row"><span class="spinner" aria-hidden="true"></span>Loading available times&hellip;</p>
+        </div>
         <div class="state" id="slotsError">
           <p>We couldn't load the available times.</p>
           <button type="button" class="btn ghost" id="slotsRetryBtn">Try again</button>
@@ -1469,15 +1476,60 @@
     return data;
   }
 
-  async function loadSlots() {
-    $('slotsLoading').style.display = 'block';
-    $('slotsError').style.display = 'none';
-    $('slotsContainer').innerHTML = '';
+  const MONTH_INDEX = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7,
+                         sep:8, sept:8, oct:9, nov:10, dec:11 };
+
+  // Parses the server's "Tue 15 Sept, 10:00" label into a sortable key (no
+  // year is sent, so slots are ordered by month/day/time only — fine for a
+  // single-year recruitment window).
+  function slotSortKey(slot) {
+    const parts = (slot.label || '').split(',');
+    const dateMatch = (parts[0] || '').match(/(\d{1,2})\s+([A-Za-z]+)/);
+    const day = dateMatch ? parseInt(dateMatch[1], 10) : 0;
+    const month = dateMatch ? (MONTH_INDEX[dateMatch[2].slice(0, 3).toLowerCase()] ?? 0) : 0;
+    const timeMatch = (parts[1] || '').match(/(\d{1,2}):(\d{2})/);
+    const minutes = timeMatch ? parseInt(timeMatch[1], 10) * 60 + parseInt(timeMatch[2], 10) : 0;
+    return month * 100000 + day * 1440 + minutes;
+  }
+  function bySlotDate(a, b) { return slotSortKey(a) - slotSortKey(b); }
+
+  const AVAILABILITY_CACHE_KEY = 'mim_crowd_availability_v1';
+  const AVAILABILITY_CACHE_MAX_AGE_MS = 5 * 60 * 1000;
+
+  function readAvailabilityCache() {
     try {
-      slots = (await fetchAvailability(state.email)).slots;
+      const raw = localStorage.getItem(AVAILABILITY_CACHE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed.ts !== 'number' || !parsed.data) return null;
+      if (Date.now() - parsed.ts > AVAILABILITY_CACHE_MAX_AGE_MS) return null;
+      return parsed.data;
+    } catch (e) { return null; }
+  }
+  function writeAvailabilityCache(data) {
+    try { localStorage.setItem(AVAILABILITY_CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); }
+    catch (e) { /* storage disabled/full — cache is a pure optimization */ }
+  }
+
+  async function loadSlots() {
+    $('slotsError').style.display = 'none';
+    const cached = readAvailabilityCache();
+    if (cached && Array.isArray(cached.slots)) {
+      slots = cached.slots;
+      slots.sort(bySlotDate);
+      renderSlots();
+    } else {
+      $('slotsLoading').style.display = 'block';
+      $('slotsContainer').innerHTML = '';
+    }
+    try {
+      const fresh = await fetchAvailability(state.email);
+      writeAvailabilityCache(fresh);
+      slots = fresh.slots;
+      slots.sort(bySlotDate);
       renderSlots();
     } catch (e) {
-      $('slotsError').style.display = 'block';
+      if (!cached) $('slotsError').style.display = 'block';
     } finally {
       $('slotsLoading').style.display = 'none';
     }

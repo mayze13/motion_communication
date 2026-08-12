@@ -87,7 +87,7 @@
     .track-card__title .note { font-weight: 500; color: var(--muted); font-size: 0.85rem; }
     .track-card__body { font-size: 0.88rem; color: #3a2f52; line-height: 1.55; margin-bottom: 16px; flex: 1; }
     .track-card__btn {
-      display: flex; align-items: center; justify-content: center;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
       width: 100%; padding: 14px; min-height: 48px;
       background: var(--purple); color: #fff;
       border-radius: 8px; text-decoration: none;
@@ -95,6 +95,20 @@
       transition: background 0.15s;
     }
     .track-card__btn:hover { background: #4a2570; }
+    .track-card--full { opacity: 0.72; }
+    .track-card__btn--disabled {
+      background: var(--muted);
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .track-card__btn--disabled:hover { background: var(--muted); }
+    .track-card__btn .spinner {
+      display: none; width: 16px; height: 16px; flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,.35); border-top-color: #fff;
+      border-radius: 50%; animation: spin .65s linear infinite;
+    }
+    .track-card__btn.loading .spinner { display: block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ── Footer ─────────────────────────────────────────────────────────── */
     .site-footer {
@@ -221,17 +235,20 @@
     </div>
 
     <!-- Track 2: EEG sessions -->
-    <div class="track-card">
+    <div class="track-card" id="eegTrackCard">
       <p class="track-card__title">
         EEG sessions &nbsp;&middot;&nbsp; £60 &nbsp;&middot;&nbsp;
-        <span class="note">only 32 places</span>
+        <span class="note" id="eegSlotsNote">only 32 places</span>
       </p>
       <p class="track-card__body">
         <strong>Two visits</strong> on different dates in September, wearing
         an EEG cap and eye-tracker. Some extra requirements apply to be
         eligible.
       </p>
-      <a class="track-card__btn" href="booking_eeg.html">Book EEG sessions</a>
+      <a class="track-card__btn" id="eegBookBtn" href="booking_eeg.html">
+        <span class="track-card__btn-label">Book EEG sessions</span>
+        <span class="spinner" aria-hidden="true"></span>
+      </a>
     </div>
   </div>
 </main>
@@ -252,6 +269,71 @@
     Questions? &nbsp;<a href="mailto:james.moultrie.25@ucl.ac.uk">james.moultrie.25@ucl.ac.uk</a>
   </p>
 </footer>
+
+<script>
+(async () => {
+  // Same "EEG Availability" Power Automate endpoint booking_eeg.html itself
+  // calls — treat as a secret per CLAUDE.md, don't log or alter it.
+  const AVAILABILITY_URL = 'https://default1faf88fea9984c5b93c9210a11d9a5.c2.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/28/workflows/f1d6c2fb11ce4770ab2227a585af187e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=3Nvhhvsucv9npCRv7qf4LVURrfsvVXK3PcNtCTEQQu4';
+
+  const noteEl = document.getElementById('eegSlotsNote');
+  const cardEl = document.getElementById('eegTrackCard');
+  const btnEl = document.getElementById('eegBookBtn');
+
+  const btnLabelEl = btnEl.querySelector('.track-card__btn-label');
+  const originalBtnHref = btnEl.getAttribute('href');
+  const originalBtnText = btnLabelEl.textContent;
+
+  function setBtnDisabled(text, spinning) {
+    btnLabelEl.textContent = text;
+    btnEl.classList.add('track-card__btn--disabled');
+    btnEl.classList.toggle('loading', !!spinning);
+    btnEl.removeAttribute('href');
+    btnEl.setAttribute('aria-disabled', 'true');
+  }
+  function setBtnEnabled() {
+    btnLabelEl.textContent = originalBtnText;
+    btnEl.classList.remove('track-card__btn--disabled', 'loading');
+    btnEl.setAttribute('href', originalBtnHref);
+    btnEl.removeAttribute('aria-disabled');
+  }
+
+  // Don't let anyone book while we don't yet know if places remain.
+  setBtnDisabled('Checking slots...', true);
+
+  try {
+    const res = await fetch(AVAILABILITY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: '' }),
+      redirect: 'follow'
+    });
+    const data = await res.json();
+    if (!data || !Array.isArray(data.individual)) { setBtnEnabled(); return; } // leave static fallback
+
+    // Doubles as a prefetch: booking_eeg.html reads this same cache key, so
+    // clicking through renders instantly instead of waiting on its own fetch.
+    try {
+      localStorage.setItem('mim_eeg_availability_v1', JSON.stringify({ ts: Date.now(), data }));
+    } catch (e) { /* storage disabled/full — non-critical */ }
+
+    const remaining = data.individual.filter(s => !s.full).length;
+
+    if (remaining <= 0) {
+      noteEl.textContent = 'No slots remaining';
+      cardEl.classList.add('track-card--full');
+      setBtnDisabled('No slots remaining', false);
+    } else {
+      noteEl.textContent = 'Slots remaining: ' + remaining;
+      setBtnEnabled();
+    }
+  } catch (e) {
+    // Endpoint unreachable — fall back to the original clickable state
+    // rather than leaving visitors stuck on "Checking slots...".
+    setBtnEnabled();
+  }
+})();
+</script>
 
 </body>
 </html>
