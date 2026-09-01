@@ -1,0 +1,10 @@
+# Real SharePoint link (grants read access to participant data) — never commit.
+admin/config.local.js
+
+# Participant PII (names, emails, questionnaire answers) — never commit.
+minds_in_motion_bookings.xlsx
+minds_in_motion_cohort_demographics.ipynb
+answers.json
+
+# Generated per-participant handouts — regenerable from generate.py, bulky.
+participant-instructions/output/

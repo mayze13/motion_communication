@@ -74,6 +74,16 @@ change before editing either.
   `assets/images/people/`. `assets/README.txt` documents the expected filenames and
   provenance — check it before adding/replacing branding assets. Missing a headshot
   file falls back to showing the person's initials on the site.
+- `admin/dashboard.html` — internal, local-only calendar view of booking slots
+  (crowd + EEG individual), read-only, for the study coordinator. Not linked from any
+  public page. Reads live from the "List Bookings" Power Automate flow (see
+  `microsoft/powerautomate-setup.md`, Part 6) — a dedicated read-only flow, since the
+  existing Availability flows deliberately return only aggregate counts, never names or
+  emails. Falls back to a manual xlsx file-drop (parsed client-side with vendored
+  SheetJS in `admin/vendor/`) if the live fetch fails. The flow's URL lives in
+  `admin/config.local.js` (gitignored — this repo is public, and unlike the Availability
+  endpoints, this one returns full participant PII); `admin/config.example.js` is the
+  committed placeholder template. See `admin/README.txt` for setup.
 
 ### Branding
 

@@ -1,0 +1,1300 @@
+{
+  "SurveyEntry": {
+    "SurveyID": "SV_MindsInMotionConsent",
+    "SurveyName": "Minds in Motion consent form",
+    "SurveyDescription": "Consent form for the Minds in Motion study, UCL REC EP/2024/020.",
+    "SurveyOwnerID": "UR_placeholder",
+    "SurveyBrandID": "ucl",
+    "DivisionID": null,
+    "SurveyLanguage": "EN-GB",
+    "SurveyActiveResponseSet": "RS_default",
+    "SurveyStatus": "Inactive",
+    "SurveyStartDate": "0000-00-00 00:00:00",
+    "SurveyExpirationDate": "0000-00-00 00:00:00",
+    "SurveyCreationDate": "2026-08-19 03:45:49",
+    "CreatorID": "UR_placeholder",
+    "LastModified": "2026-08-19 03:45:49",
+    "LastAccessed": "0000-00-00 00:00:00",
+    "LastActivated": "0000-00-00 00:00:00",
+    "Deleted": null
+  },
+  "SurveyElements": [
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID1",
+      "SecondaryAttribute": "<h3>Minds in Motion consent form</h3><p>UCL Research Ethics Committee, Project ID EP/2024/020. Minds",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "<h3>Minds in Motion consent form</h3><p>UCL Research Ethics Committee, Project ID EP/2024/020. Minds in Motion is a sub-study under that approval.</p><p><b>Please complete this form after you have read the Information Sheet, or listened to an explanation about the research.</b> The person organising the research must explain the project to you before you agree to take part. If you have any questions arising from the Information Sheet or the explanation already given to you, please ask the researcher before you decide whether to join in.</p><p>You will be emailed a copy of this completed form to keep and refer to at any time.</p><p style='font-size:0.9em'>Researcher: James Moultrie (james.moultrie.25@ucl.ac.uk) &middot; Principal researcher: Prof Hugo Spiers (h.spiers@ucl.ac.uk) &middot; UCL Data Protection Officer: Lee Shailer (data-protection@ucl.ac.uk)</p>",
+        "QuestionType": "DB",
+        "Selector": "TB",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Validation": {
+          "Settings": {
+            "Type": "None"
+          }
+        },
+        "QuestionID": "QID1",
+        "DataExportTag": "intro",
+        "QuestionDescription": "<h3>Minds in Motion consent form</h3><p>UCL Research Ethics Committee, Project ID EP/2024/020. Minds",
+        "Language": [],
+        "NextChoiceId": 1,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID2",
+      "SecondaryAttribute": "Please enter the participant ID printed on the card you were given.",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "Please enter the participant ID printed on the card you were given.",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Validation": {
+          "Settings": {
+            "ForceResponse": "ON",
+            "ForceResponseType": "ON",
+            "Type": "None"
+          }
+        },
+        "QuestionID": "QID2",
+        "DataExportTag": "participant_id",
+        "QuestionDescription": "Please enter the participant ID printed on the card you were given.",
+        "Language": [],
+        "NextChoiceId": 1,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID3",
+      "SecondaryAttribute": "Which type of session are you taking part in?",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "Which type of session are you taking part in?",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "TX",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Choices": {
+          "1": {
+            "Display": "EEG sessions (one individual session and one crowd session)"
+          },
+          "2": {
+            "Display": "Crowd session only (no EEG or eye-tracking worn)"
+          }
+        },
+        "ChoiceOrder": [
+          "1",
+          "2"
+        ],
+        "Validation": {
+          "Settings": {
+            "ForceResponse": "ON",
+            "ForceResponseType": "ON",
+            "Type": "None"
+          }
+        },
+        "QuestionID": "QID3",
+        "DataExportTag": "session_type",
+        "QuestionDescription": "Which type of session are you taking part in?",
+        "Language": [],
+        "NextChoiceId": 3,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID4",
+      "SecondaryAttribute": "<p><b>By ticking each statement below, you are consenting to that element of the study.</b> Any stat",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "<p><b>By ticking each statement below, you are consenting to that element of the study.</b> Any statement left blank will be taken to mean that you <b>do not</b> consent to that part of the study, and withholding consent for any one of these may make you ineligible to take part.</p>",
+        "QuestionType": "Matrix",
+        "Selector": "Likert",
+        "SubSelector": "SingleAnswer",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText",
+          "TextPosition": "LeftRight",
+          "ChoiceColumnWidth": 18,
+          "RepeatHeaders": "none",
+          "WhiteSpace": "OFF",
+          "MobileFirst": true
+        },
+        "Choices": {
+          "1": {
+            "Display": "I confirm that I have read and understood the Information Sheet for the above study. I have had an opportunity to consider the information and what will be expected of me. I have also had the opportunity to ask questions, which have been answered to my satisfaction."
+          },
+          "2": {
+            "Display": "I consent to take part in the study. I understand that my personal information, including my age and gender, will be used only for the purposes explained to me, that my consent is the lawful basis for processing it, and that my data will be stored securely on UCL systems and accessed only by the research team."
+          },
+          "3": {
+            "Display": "I understand that my information may be subject to review by responsible individuals from the University (Division of Psychology and Language Sciences, UCL) for monitoring and audit purposes."
+          },
+          "4": {
+            "Display": "I understand the potential risks of taking part, and the support that will be available to me should I become distressed during the course of the research."
+          },
+          "5": {
+            "Display": "I understand that taking part will not bring me any direct clinical, medical or personal benefit, and that no such benefit has been promised to me in order to encourage me to take part."
+          },
+          "6": {
+            "Display": "I understand that my individual data will not be made available to any commercial organisation. The study is funded by Autodesk, who receive group-level findings only. Responsibility for the study rests solely with the researchers undertaking it."
+          },
+          "7": {
+            "Display": "I understand that, beyond the £60 participation compensation, I will not receive any further financial benefit from this study or from any commercial outcome that may arise from it in the future, including any intellectual property."
+          },
+          "8": {
+            "Display": "I understand that I will be compensated £60 in total for taking part in both of my sessions. If I stop part-way through a session, or do not complete it, I will be compensated in proportion to the amount of that session I completed."
+          },
+          "9": {
+            "Display": "I agree that my anonymised research data may be used by others for future research. No one will be able to identify me from the anonymised data when it is shared."
+          },
+          "10": {
+            "Display": "I consent to wearing EEG and eye-tracking equipment during both of my sessions. I understand that the eye-tracking glasses record video and audio continuously while worn, and that these recordings will be stored securely using password-protected software and used for training, quality control, audit and specific research purposes. (Please note: the equipment records continuously while worn, so it is not possible to take part in the EEG sessions without being recorded.)"
+          },
+          "11": {
+            "Display": "I understand that, during a crowd session, I will move through the layout alongside other participants who are wearing eye-tracking glasses that record video and audio continuously. I understand that my image and my voice will therefore be captured by equipment worn by other participants, that faces are not blurred in this footage, and that this footage may be viewed by people outside the immediate research team, such as external collaborators. (Please note: because crowd sessions take place in a shared space, it is not possible to take part in this study without being recorded in this way.)"
+          },
+          "12": {
+            "Display": "I consent to wearing a tracking hat throughout the session, which records where I move within the layout."
+          },
+          "13": {
+            "Display": "I confirm that I understand the inclusion criteria as detailed in the Information Sheet and explained to me by the researcher."
+          },
+          "14": {
+            "Display": "I confirm that (a) I understand the exclusion criteria as detailed in the Information Sheet and explained to me by the researcher, and (b) I do not fall under the exclusion criteria."
+          },
+          "15": {
+            "Display": "I understand that I may withdraw at any point during a session without giving a reason. I understand that I may also ask for my data to be withdrawn up until one week after my final session, and that I must do so in writing, for example by email to the researcher. After that point my data will have been anonymised and combined with other participants’ data, so it can no longer be identified or removed."
+          },
+          "16": {
+            "Display": "I would be happy for the data I provide to be archived at the Division of Psychology and Language Sciences, UCL. I understand that other authenticated researchers, including those outside the EEA, will have access to my anonymised data."
+          }
+        },
+        "ChoiceOrder": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16"
+        ],
+        "Answers": {
+          "1": {
+            "Display": "I agree"
+          }
+        },
+        "AnswerOrder": [
+          "1"
+        ],
+        "Validation": {
+          "Settings": {
+            "ForceResponse": "ON",
+            "ForceResponseType": "ON",
+            "Type": "None"
+          }
+        },
+        "QuestionID": "QID4",
+        "DataExportTag": "eeg_consent",
+        "QuestionDescription": "<p><b>By ticking each statement below, you are consenting to that element of the study.</b> Any stat",
+        "Language": [],
+        "NextChoiceId": 17,
+        "NextAnswerId": 2
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID5",
+      "SecondaryAttribute": "<p>I agree that promotional footage of the experiment may be recorded, and that I may appear in it. ",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "<p>I agree that promotional footage of the experiment may be recorded, and that I may appear in it. I understand that this footage may be used by UCL in presentations, publications, and public-facing and promotional material.</p><p><i>This item is optional. Your answer will not affect your participation, your compensation, or how you are treated during the session.</i></p>",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "TX",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Choices": {
+          "1": {
+            "Display": "I agree"
+          },
+          "2": {
+            "Display": "I do not agree"
+          }
+        },
+        "ChoiceOrder": [
+          "1",
+          "2"
+        ],
+        "Validation": {
+          "Settings": {
+            "ForceResponse": "ON",
+            "ForceResponseType": "ON",
+            "Type": "None"
+          }
+        },
+        "QuestionID": "QID5",
+        "DataExportTag": "eeg_promo",
+        "QuestionDescription": "<p>I agree that promotional footage of the experiment may be recorded, and that I may appear in it. ",
+        "Language": [],
+        "NextChoiceId": 3,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID6",
+      "SecondaryAttribute": "<p><b>By ticking each statement below, you are consenting to that element of the study.</b> Any stat",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "<p><b>By ticking each statement below, you are consenting to that element of the study.</b> Any statement left blank will be taken to mean that you <b>do not</b> consent to that part of the study, and withholding consent for any one of these may make you ineligible to take part.</p>",
+        "QuestionType": "Matrix",
+        "Selector": "Likert",
+        "SubSelector": "SingleAnswer",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText",
+          "TextPosition": "LeftRight",
+          "ChoiceColumnWidth": 18,
+          "RepeatHeaders": "none",
+          "WhiteSpace": "OFF",
+          "MobileFirst": true
+        },
+        "Choices": {
+          "1": {
+            "Display": "I confirm that I have read and understood the Information Sheet for the above study. I have had an opportunity to consider the information and what will be expected of me. I have also had the opportunity to ask questions, which have been answered to my satisfaction."
+          },
+          "2": {
+            "Display": "I consent to take part in the study. I understand that my personal information, including my age and gender, will be used only for the purposes explained to me, that my consent is the lawful basis for processing it, and that my data will be stored securely on UCL systems and accessed only by the research team."
+          },
+          "3": {
+            "Display": "I understand that my information may be subject to review by responsible individuals from the University (Division of Psychology and Language Sciences, UCL) for monitoring and audit purposes."
+          },
+          "4": {
+            "Display": "I understand the potential risks of taking part, and the support that will be available to me should I become distressed during the course of the research."
+          },
+          "5": {
+            "Display": "I understand that taking part will not bring me any direct clinical, medical or personal benefit, and that no such benefit has been promised to me in order to encourage me to take part."
+          },
+          "6": {
+            "Display": "I understand that my individual data will not be made available to any commercial organisation. The study is funded by Autodesk, who receive group-level findings only. Responsibility for the study rests solely with the researchers undertaking it."
+          },
+          "7": {
+            "Display": "I understand that, beyond the £30 participation compensation, I will not receive any further financial benefit from this study or from any commercial outcome that may arise from it in the future, including any intellectual property."
+          },
+          "8": {
+            "Display": "I understand that I will be compensated £30 for taking part in this session. If I stop part-way through the session, or do not complete it, I will be compensated in proportion to the amount of the session I completed."
+          },
+          "9": {
+            "Display": "I agree that my anonymised research data may be used by others for future research. No one will be able to identify me from the anonymised data when it is shared."
+          },
+          "10": {
+            "Display": "I consent to wearing a tracking hat throughout the session, which records where I move within the layout."
+          },
+          "11": {
+            "Display": "I understand that, during a crowd session, I will move through the layout alongside other participants who are wearing eye-tracking glasses that record video and audio continuously. I understand that my image and my voice will therefore be captured by equipment worn by other participants, that faces are not blurred in this footage, and that this footage may be viewed by people outside the immediate research team, such as external collaborators. (Please note: because crowd sessions take place in a shared space, it is not possible to take part in this study without being recorded in this way.)"
+          },
+          "12": {
+            "Display": "I confirm that I understand the inclusion criteria as detailed in the Information Sheet and explained to me by the researcher."
+          },
+          "13": {
+            "Display": "I confirm that (a) I understand the exclusion criteria as detailed in the Information Sheet and explained to me by the researcher, and (b) I do not fall under the exclusion criteria."
+          },
+          "14": {
+            "Display": "I understand that I may withdraw at any point during the session without giving a reason. I understand that I may also ask for my data to be withdrawn up until one week after the session, and that I must do so in writing, for example by email to the researcher. After that point my data will have been anonymised and combined with other participants’ data, so it can no longer be identified or removed."
+          },
+          "15": {
+            "Display": "I would be happy for the data I provide to be archived at the Division of Psychology and Language Sciences, UCL. I understand that other authenticated researchers, including those outside the EEA, will have access to my anonymised data."
+          }
+        },
+        "ChoiceOrder": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15"
+        ],
+        "Answers": {
+          "1": {
+            "Display": "I agree"
+          }
+        },
+        "AnswerOrder": [
+          "1"
+        ],
+        "Validation": {
+          "Settings": {
+            "ForceResponse": "ON",
+            "ForceResponseType": "ON",
+            "Type": "None"
+          }
+        },
+        "QuestionID": "QID6",
+        "DataExportTag": "crowd_consent",
+        "QuestionDescription": "<p><b>By ticking each statement below, you are consenting to that element of the study.</b> Any stat",
+        "Language": [],
+        "NextChoiceId": 16,
+        "NextAnswerId": 2
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID7",
+      "SecondaryAttribute": "<p>I agree that promotional footage of the experiment may be recorded, and that I may appear in it. ",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "<p>I agree that promotional footage of the experiment may be recorded, and that I may appear in it. I understand that this footage may be used by UCL in presentations, publications, and public-facing and promotional material.</p><p><i>This item is optional. Your answer will not affect your participation, your compensation, or how you are treated during the session.</i></p>",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "TX",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Choices": {
+          "1": {
+            "Display": "I agree"
+          },
+          "2": {
+            "Display": "I do not agree"
+          }
+        },
+        "ChoiceOrder": [
+          "1",
+          "2"
+        ],
+        "Validation": {
+          "Settings": {
+            "ForceResponse": "ON",
+            "ForceResponseType": "ON",
+            "Type": "None"
+          }
+        },
+        "QuestionID": "QID7",
+        "DataExportTag": "crowd_promo",
+        "QuestionDescription": "<p>I agree that promotional footage of the experiment may be recorded, and that I may appear in it. ",
+        "Language": [],
+        "NextChoiceId": 3,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID8",
+      "SecondaryAttribute": "If you would like your contact details to be retained so that UCL researchers can invite you to take",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "If you would like your contact details to be retained so that UCL researchers can invite you to take part in follow-up studies to this project, or in future studies of a similar nature, please choose an option below.",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "TX",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Choices": {
+          "1": {
+            "Display": "Yes, I would be happy to be contacted in this way."
+          },
+          "2": {
+            "Display": "No, I would not like to be contacted."
+          }
+        },
+        "ChoiceOrder": [
+          "1",
+          "2"
+        ],
+        "Validation": {
+          "Settings": {
+            "ForceResponse": "ON",
+            "ForceResponseType": "ON",
+            "Type": "None"
+          }
+        },
+        "QuestionID": "QID8",
+        "DataExportTag": "future_contact",
+        "QuestionDescription": "If you would like your contact details to be retained so that UCL researchers can invite you to take",
+        "Language": [],
+        "NextChoiceId": 3,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID9",
+      "SecondaryAttribute": "<h4>Signature</h4><p>Typing your full name below acts as your signature on this form.</p>",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "<h4>Signature</h4><p>Typing your full name below acts as your signature on this form.</p>",
+        "QuestionType": "DB",
+        "Selector": "TB",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Validation": {
+          "Settings": {
+            "Type": "None"
+          }
+        },
+        "QuestionID": "QID9",
+        "DataExportTag": "sig_intro",
+        "QuestionDescription": "<h4>Signature</h4><p>Typing your full name below acts as your signature on this form.</p>",
+        "Language": [],
+        "NextChoiceId": 1,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID10",
+      "SecondaryAttribute": "Your full name",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "Your full name",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Validation": {
+          "Settings": {
+            "ForceResponse": "ON",
+            "ForceResponseType": "ON",
+            "Type": "None"
+          }
+        },
+        "QuestionID": "QID10",
+        "DataExportTag": "participant_name",
+        "QuestionDescription": "Your full name",
+        "Language": [],
+        "NextChoiceId": 1,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID11",
+      "SecondaryAttribute": "Your email address, so we can send you a copy of this form",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "Your email address, so we can send you a copy of this form",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Validation": {
+          "Settings": {
+            "ForceResponse": "ON",
+            "ForceResponseType": "ON",
+            "Type": "ValidEmailType"
+          }
+        },
+        "QuestionID": "QID11",
+        "DataExportTag": "participant_email",
+        "QuestionDescription": "Your email address, so we can send you a copy of this form",
+        "Language": [],
+        "NextChoiceId": 1,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID12",
+      "SecondaryAttribute": "I confirm that the name above is my own, that I am signing this form myself, and that I understand t",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "I confirm that the name above is my own, that I am signing this form myself, and that I understand typing my name acts as my signature.",
+        "QuestionType": "MC",
+        "Selector": "MAVR",
+        "SubSelector": "TX",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Choices": {
+          "1": {
+            "Display": "I confirm"
+          }
+        },
+        "ChoiceOrder": [
+          "1"
+        ],
+        "Validation": {
+          "Settings": {
+            "ForceResponse": "ON",
+            "ForceResponseType": "ON",
+            "Type": "None"
+          }
+        },
+        "QuestionID": "QID12",
+        "DataExportTag": "signature_declaration",
+        "QuestionDescription": "I confirm that the name above is my own, that I am signing this form myself, and that I understand t",
+        "Language": [],
+        "NextChoiceId": 2,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID13",
+      "SecondaryAttribute": "<h4>To be completed by the researcher</h4><p>Complete this section on the day of the session, after ",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "<h4>To be completed by the researcher</h4><p>Complete this section on the day of the session, after briefing the participant. If the participant completed the rest of this form in advance, use this section to record that you have since briefed them in person, given them the opportunity to ask questions, and re-checked the exclusion criteria with them.</p>",
+        "QuestionType": "DB",
+        "Selector": "TB",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Validation": {
+          "Settings": {
+            "Type": "None"
+          }
+        },
+        "QuestionID": "QID13",
+        "DataExportTag": "researcher_intro",
+        "QuestionDescription": "<h4>To be completed by the researcher</h4><p>Complete this section on the day of the session, after ",
+        "Language": [],
+        "NextChoiceId": 1,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID14",
+      "SecondaryAttribute": "Researcher name",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "Researcher name",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Validation": {
+          "Settings": {
+            "ForceResponse": "ON",
+            "ForceResponseType": "ON",
+            "Type": "None"
+          }
+        },
+        "QuestionID": "QID14",
+        "DataExportTag": "researcher_name",
+        "QuestionDescription": "Researcher name",
+        "Language": [],
+        "NextChoiceId": 1,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID15",
+      "SecondaryAttribute": "I confirm that I have explained the study to this participant, given them the opportunity to ask que",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "I confirm that I have explained the study to this participant, given them the opportunity to ask questions, answered those questions, and confirmed with them that they still wish to take part.",
+        "QuestionType": "MC",
+        "Selector": "MAVR",
+        "SubSelector": "TX",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Choices": {
+          "1": {
+            "Display": "I confirm"
+          }
+        },
+        "ChoiceOrder": [
+          "1"
+        ],
+        "Validation": {
+          "Settings": {
+            "ForceResponse": "ON",
+            "ForceResponseType": "ON",
+            "Type": "None"
+          }
+        },
+        "QuestionID": "QID15",
+        "DataExportTag": "researcher_declaration",
+        "QuestionDescription": "I confirm that I have explained the study to this participant, given them the opportunity to ask que",
+        "Language": [],
+        "NextChoiceId": 2,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID16",
+      "SecondaryAttribute": "Date of session (DD/MM/YYYY)",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "Date of session (DD/MM/YYYY)",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Validation": {
+          "Settings": {
+            "ForceResponse": "ON",
+            "ForceResponseType": "ON",
+            "Type": "None"
+          }
+        },
+        "QuestionID": "QID16",
+        "DataExportTag": "session_date",
+        "QuestionDescription": "Date of session (DD/MM/YYYY)",
+        "Language": [],
+        "NextChoiceId": 1,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID17",
+      "SecondaryAttribute": "<h4>How you would like to be compensated</h4><p>We use these details only to pay you for taking part",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "<h4>How you would like to be compensated</h4><p>We use these details only to pay you for taking part. They are held separately from your research data, are never used for any other purpose, and are deleted once your payment has cleared. They are not part of the research record and are not retained with it.</p>",
+        "QuestionType": "DB",
+        "Selector": "TB",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Validation": {
+          "Settings": {
+            "Type": "None"
+          }
+        },
+        "QuestionID": "QID17",
+        "DataExportTag": "payment_intro",
+        "QuestionDescription": "<h4>How you would like to be compensated</h4><p>We use these details only to pay you for taking part",
+        "Language": [],
+        "NextChoiceId": 1,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID18",
+      "SecondaryAttribute": "How would you like to receive your compensation?",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "How would you like to receive your compensation?",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "TX",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Choices": {
+          "1": {
+            "Display": "Cash, handed to me on the day of my final session"
+          },
+          "2": {
+            "Display": "Bank transfer (we can only pay into a UK bank account)"
+          }
+        },
+        "ChoiceOrder": [
+          "1",
+          "2"
+        ],
+        "Validation": {
+          "Settings": {
+            "ForceResponse": "ON",
+            "ForceResponseType": "ON",
+            "Type": "None"
+          }
+        },
+        "QuestionID": "QID18",
+        "DataExportTag": "payment_method",
+        "QuestionDescription": "How would you like to receive your compensation?",
+        "Language": [],
+        "NextChoiceId": 3,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID19",
+      "SecondaryAttribute": "<p>Please enter the details of the UK bank account you would like to be paid into. Check them carefu",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "<p>Please enter the details of the UK bank account you would like to be paid into. Check them carefully, as an incorrect sort code or account number will delay your payment.</p>",
+        "QuestionType": "DB",
+        "Selector": "TB",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Validation": {
+          "Settings": {
+            "Type": "None"
+          }
+        },
+        "QuestionID": "QID19",
+        "DataExportTag": "bank_intro",
+        "QuestionDescription": "<p>Please enter the details of the UK bank account you would like to be paid into. Check them carefu",
+        "Language": [],
+        "NextChoiceId": 1,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID20",
+      "SecondaryAttribute": "Name on the account",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "Name on the account",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Validation": {
+          "Settings": {
+            "ForceResponse": "ON",
+            "ForceResponseType": "ON",
+            "Type": "None"
+          }
+        },
+        "QuestionID": "QID20",
+        "DataExportTag": "bank_account_name",
+        "QuestionDescription": "Name on the account",
+        "Language": [],
+        "NextChoiceId": 1,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID21",
+      "SecondaryAttribute": "Sort code (six digits, no spaces or dashes)",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "Sort code (six digits, no spaces or dashes)",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Validation": {
+          "Settings": {
+            "ForceResponse": "ON",
+            "ForceResponseType": "ON",
+            "Type": "ValidNumber"
+          }
+        },
+        "QuestionID": "QID21",
+        "DataExportTag": "bank_sort_code",
+        "QuestionDescription": "Sort code (six digits, no spaces or dashes)",
+        "Language": [],
+        "NextChoiceId": 1,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID22",
+      "SecondaryAttribute": "Account number (eight digits, no spaces)",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "Account number (eight digits, no spaces)",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Validation": {
+          "Settings": {
+            "ForceResponse": "ON",
+            "ForceResponseType": "ON",
+            "Type": "ValidNumber"
+          }
+        },
+        "QuestionID": "QID22",
+        "DataExportTag": "bank_account_number",
+        "QuestionDescription": "Account number (eight digits, no spaces)",
+        "Language": [],
+        "NextChoiceId": 1,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID23",
+      "SecondaryAttribute": "<h4>Thank you</h4><p>Your responses have been recorded. A copy of this completed form will be emaile",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "QuestionText": "<h4>Thank you</h4><p>Your responses have been recorded. A copy of this completed form will be emailed to the address you gave. If you have any questions later, contact james.moultrie.25@ucl.ac.uk.</p>",
+        "QuestionType": "DB",
+        "Selector": "TB",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText"
+        },
+        "Validation": {
+          "Settings": {
+            "Type": "None"
+          }
+        },
+        "QuestionID": "QID23",
+        "DataExportTag": "outro",
+        "QuestionDescription": "<h4>Thank you</h4><p>Your responses have been recorded. A copy of this completed form will be emaile",
+        "Language": [],
+        "NextChoiceId": 1,
+        "NextAnswerId": 1
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "BL",
+      "PrimaryAttribute": "Survey Blocks",
+      "SecondaryAttribute": null,
+      "TertiaryAttribute": null,
+      "Payload": [
+        {
+          "Type": "Default",
+          "SubType": "",
+          "Description": "Start",
+          "ID": "BL_start",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID1"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID2"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID3"
+            }
+          ],
+          "Options": {
+            "BlockLocking": "false",
+            "RandomizeQuestions": "false",
+            "BlockVisibility": "Collapsed"
+          }
+        },
+        {
+          "Type": "Standard",
+          "SubType": null,
+          "Description": "EEG session statements",
+          "ID": "BL_eeg",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID4"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID5"
+            }
+          ],
+          "Options": {
+            "BlockLocking": "false",
+            "RandomizeQuestions": "false",
+            "BlockVisibility": "Collapsed"
+          }
+        },
+        {
+          "Type": "Standard",
+          "SubType": null,
+          "Description": "Crowd session statements",
+          "ID": "BL_crowd",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID6"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID7"
+            }
+          ],
+          "Options": {
+            "BlockLocking": "false",
+            "RandomizeQuestions": "false",
+            "BlockVisibility": "Collapsed"
+          }
+        },
+        {
+          "Type": "Standard",
+          "SubType": null,
+          "Description": "Signature and researcher confirmation",
+          "ID": "BL_common",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID8"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID9"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID10"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID11"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID12"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID13"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID14"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID15"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID16"
+            }
+          ],
+          "Options": {
+            "BlockLocking": "false",
+            "RandomizeQuestions": "false",
+            "BlockVisibility": "Collapsed"
+          }
+        },
+        {
+          "Type": "Standard",
+          "SubType": null,
+          "Description": "Payment method",
+          "ID": "BL_payment",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID17"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID18"
+            }
+          ],
+          "Options": {
+            "BlockLocking": "false",
+            "RandomizeQuestions": "false",
+            "BlockVisibility": "Collapsed"
+          }
+        },
+        {
+          "Type": "Standard",
+          "SubType": null,
+          "Description": "UK bank details",
+          "ID": "BL_bank",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID19"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID20"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID21"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID22"
+            }
+          ],
+          "Options": {
+            "BlockLocking": "false",
+            "RandomizeQuestions": "false",
+            "BlockVisibility": "Collapsed"
+          }
+        },
+        {
+          "Type": "Standard",
+          "SubType": null,
+          "Description": "Close",
+          "ID": "BL_end",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID23"
+            }
+          ],
+          "Options": {
+            "BlockLocking": "false",
+            "RandomizeQuestions": "false",
+            "BlockVisibility": "Collapsed"
+          }
+        }
+      ]
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "FL",
+      "PrimaryAttribute": "Survey Flow",
+      "SecondaryAttribute": null,
+      "TertiaryAttribute": null,
+      "Payload": {
+        "Flow": [
+          {
+            "Type": "Standard",
+            "ID": "BL_start",
+            "FlowID": "FL_2",
+            "Autofill": []
+          },
+          {
+            "Type": "Branch",
+            "FlowID": "FL_3",
+            "Description": "EEG participants",
+            "BranchLogic": {
+              "0": {
+                "0": {
+                  "LogicType": "Question",
+                  "QuestionID": "QID3",
+                  "QuestionIsInLoop": "no",
+                  "ChoiceLocator": "q://QID3/SelectableChoice/1",
+                  "Operator": "Selected",
+                  "QuestionIDFromLocator": "QID3",
+                  "LeftOperand": "q://QID3/SelectableChoice/1",
+                  "Type": "Expression",
+                  "Description": "EEG participants"
+                },
+                "Type": "If"
+              },
+              "Type": "BooleanExpression"
+            },
+            "Flow": [
+              {
+                "Type": "Standard",
+                "ID": "BL_eeg",
+                "FlowID": "FL_4",
+                "Autofill": []
+              }
+            ]
+          },
+          {
+            "Type": "Branch",
+            "FlowID": "FL_5",
+            "Description": "Crowd-only participants",
+            "BranchLogic": {
+              "0": {
+                "0": {
+                  "LogicType": "Question",
+                  "QuestionID": "QID3",
+                  "QuestionIsInLoop": "no",
+                  "ChoiceLocator": "q://QID3/SelectableChoice/2",
+                  "Operator": "Selected",
+                  "QuestionIDFromLocator": "QID3",
+                  "LeftOperand": "q://QID3/SelectableChoice/2",
+                  "Type": "Expression",
+                  "Description": "Crowd-only participants"
+                },
+                "Type": "If"
+              },
+              "Type": "BooleanExpression"
+            },
+            "Flow": [
+              {
+                "Type": "Standard",
+                "ID": "BL_crowd",
+                "FlowID": "FL_6",
+                "Autofill": []
+              }
+            ]
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL_common",
+            "FlowID": "FL_7",
+            "Autofill": []
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL_payment",
+            "FlowID": "FL_8",
+            "Autofill": []
+          },
+          {
+            "Type": "Branch",
+            "FlowID": "FL_9",
+            "Description": "Bank transfer chosen",
+            "BranchLogic": {
+              "0": {
+                "0": {
+                  "LogicType": "Question",
+                  "QuestionID": "QID18",
+                  "QuestionIsInLoop": "no",
+                  "ChoiceLocator": "q://QID18/SelectableChoice/2",
+                  "Operator": "Selected",
+                  "QuestionIDFromLocator": "QID18",
+                  "LeftOperand": "q://QID18/SelectableChoice/2",
+                  "Type": "Expression",
+                  "Description": "Bank transfer chosen"
+                },
+                "Type": "If"
+              },
+              "Type": "BooleanExpression"
+            },
+            "Flow": [
+              {
+                "Type": "Standard",
+                "ID": "BL_bank",
+                "FlowID": "FL_10",
+                "Autofill": []
+              }
+            ]
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL_end",
+            "FlowID": "FL_11",
+            "Autofill": []
+          }
+        ],
+        "Properties": {
+          "Count": 11
+        },
+        "FlowID": "FL_1",
+        "Type": "Root"
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SO",
+      "PrimaryAttribute": "Survey Options",
+      "SecondaryAttribute": null,
+      "TertiaryAttribute": null,
+      "Payload": {
+        "BackButton": "true",
+        "SaveAndContinue": "true",
+        "SurveyProtection": "PublicSurvey",
+        "BallotBoxStuffingPrevention": "false",
+        "NoIndex": "Yes",
+        "SecureResponseFiles": "true",
+        "SurveyExpiration": "None",
+        "SurveyTermination": "DefaultMessage",
+        "Header": "",
+        "Footer": "",
+        "ProgressBarDisplay": "Text",
+        "PartialData": "+1 week",
+        "ValidationMessage": "",
+        "PreviousButton": " ← ",
+        "NextButton": " → ",
+        "SurveyTitle": "Minds in Motion consent form",
+        "SkinLibrary": "ucl",
+        "SkinType": "templated",
+        "Skin": {
+          "brandingId": null,
+          "templateId": null,
+          "overrides": null
+        },
+        "NewScoring": 1,
+        "SurveyMetaDescription": "Consent form for the Minds in Motion study, UCL REC EP/2024/020."
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "SCO",
+      "PrimaryAttribute": "Scoring",
+      "SecondaryAttribute": null,
+      "TertiaryAttribute": null,
+      "Payload": {
+        "ScoringCategories": [],
+        "ScoringCategoryGroups": [],
+        "ScoringSummaryCategory": null,
+        "ScoringSummaryAfterQuestions": 0,
+        "ScoringSummaryAfterSurvey": 0,
+        "DefaultScoringCategory": null,
+        "AutoScoringCategory": null
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "PROJ",
+      "PrimaryAttribute": "CORE",
+      "SecondaryAttribute": "1.1.0",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "ProjectCategory": "CORE",
+        "SchemaVersion": "3.0"
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "STAT",
+      "PrimaryAttribute": "Survey Statistics",
+      "SecondaryAttribute": null,
+      "TertiaryAttribute": null,
+      "Payload": {
+        "MobileCompatible": true,
+        "ID": "Survey Statistics"
+      }
+    },
+    {
+      "SurveyID": "SV_MindsInMotionConsent",
+      "Element": "QC",
+      "PrimaryAttribute": "Survey Question Count",
+      "SecondaryAttribute": null,
+      "TertiaryAttribute": null,
+      "Payload": "23"
+    }
+  ]
+}

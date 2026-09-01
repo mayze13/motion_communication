@@ -2,13 +2,14 @@
 
 ## Overview
 
-Three pages, three data destinations, seven flows:
+Four pages, three data destinations, eight flows:
 
 | Page                 | Purpose                                                            | Writes to          | Flows                                                     |
 | -------------------- | ------------------------------------------------------------------ | ------------------ | --------------------------------------------------------- |
 | `index.html`       | Register interest (live, public, Netlify site 1)                   | `Signups` table  | Signup Receiver, Export New Signups, Mark Batch as Mailed |
 | `booking.html`     | Book a crowd session, 1 visit, £30 (Netlify site 2)               | `Bookings` table | Booking Availability, Booking Confirm                     |
 | `booking_eeg.html` | Book EEG sessions, 2 visits, £60, 32 places only (Netlify site 3) | `Bookings` table | EEG Availability, EEG Confirm                             |
+| `admin/dashboard.html` | Internal bookings-overview calendar, read-only, local use only (not a Netlify site) | *(reads only)* `Bookings` table | List Bookings |
 
 Two workbooks, both on SharePoint, same document library:
 
@@ -447,6 +448,61 @@ This affects **only site 1** — Netlify reads `_redirects` from the directory a
 
 ---
 
+## Part 6 — Bookings dashboard (`admin/dashboard.html`)
+
+Internal, read-only calendar view of every booking slot for the study coordinator — see `admin/README.txt`. Not a Netlify site, never linked from anywhere public, opened locally. One new flow; nothing here writes anything.
+
+### Flow — List Bookings
+
+**Instant cloud flow** → trigger **When an HTTP request is received** → name **Minds in Motion List Bookings**.
+
+1. Configure the trigger per Conventions. Request Body JSON Schema: `{"type":"object","properties":{}}` — the dashboard POSTs an empty body; nothing is read from it, the schema just exists so the trigger has one.
+2. **Excel Online (Business) → List rows present in a table** — File `minds_in_motion_bookings.xlsx`, Table `Bookings`, renamed `ListBookings`. No filter — every row, cancelled or not; the dashboard's own "Show cancelled" toggle handles that client-side, same as it already does for a manually-loaded file.
+3. **Select**, renamed `SelectBookingFields` — From: `ListBookings`'s **value**. Switch Map to key/value mode (per Conventions' `item()` rule — Select's Map is one of the few places `item()` is valid outside a loop), one row per field below, key typed literally:
+
+   | Key (type literally)     | Value                               |
+   | ------------------------ | ------------------------------------ |
+   | `Booking ID`            | `item()?['Booking ID']`            |
+   | `Session Type`          | `item()?['Session Type']`          |
+   | `Slot ID`               | `item()?['Slot ID']`               |
+   | `Slot Label`            | `item()?['Slot Label']`            |
+   | `First Name`            | `item()?['First Name']`            |
+   | `Last Name`             | `item()?['Last Name']`             |
+   | `Email`                 | `item()?['Email']`                 |
+   | `Cohort`                | `item()?['Cohort']`                |
+   | `Individual Slot ID`    | `item()?['Individual Slot ID']`    |
+   | `Individual Slot Label` | `item()?['Individual Slot Label']` |
+   | `Cancelled`             | `item()?['Cancelled']`             |
+   | `Registered Interest`   | `item()?['Registered Interest']`   |
+
+   Deliberately excludes `Answers JSON`, `Server Timestamp`, `Client Timestamp`, `Questionnaire Version` — the dashboard never uses them, and there's no reason to put the 71-key questionnaire blob on the wire for a tool whose whole job is a slot overview. The key names match the Excel headers exactly (not camelCase) because the dashboard's `normalizeBookings()` already does a tolerant lookup against those exact strings — reusing it is what lets a live Power Automate response and a manually-loaded xlsx export go through the same code path.
+4. **Compose**, renamed `BookingsResponseBody` (JSON editor, per Conventions — computed here, not typed into the Response body directly): `result` = `'success'`; `bookings` = **Add dynamic content** → `SelectBookingFields`'s **Output**.
+5. **Response** `200`, headers `Access-Control-Allow-Origin: *` + `Content-Type: application/json`, body = `BookingsResponseBody`'s **Output**.
+6. Leave Concurrency Control off (Conventions — a Response action is present).
+7. Save. Copy the trigger's HTTP URL (copy icon, per Conventions).
+
+**Handle this URL with more care than the Availability endpoints.** Booking/EEG Availability return only aggregate counts; this one returns every participant's name, email and cohort to anyone who has the URL, no sign-in required — the `sig=` parameter is the only thing protecting it, same mechanism as every other flow here, but a much larger blast radius if it leaks. Never commit it: paste it into `admin/config.local.js`, which is gitignored (this repo is public), not into a file that gets pushed — see `admin/README.txt`.
+
+### Connect and test
+
+```js
+window.DASHBOARD_CONFIG = {
+  listBookingsUrl: '<the URL>'
+};
+```
+
+in `admin/config.local.js` (copy `admin/config.example.js` to that filename first if it doesn't exist yet). Open `admin/dashboard.html` — it should load live automatically on open and show a booking count in the header, with a "Refresh from Power Automate" button for afterwards.
+
+Test the flow directly per Conventions:
+
+```bash
+curl -sS -X POST '<HTTP URL>' -H 'Content-Type: application/json' -d '{}'
+```
+
+should return `{"result":"success","bookings":[{"Booking ID":"...", ...}, ...]}`, one object per row in `Bookings`. If the dashboard's banner says the response was malformed, this is the first thing to check — it means `bookings` wasn't an array, usually because step 4's Compose wasn't wired to `SelectBookingFields`'s Output.
+
+---
+
 ## Reference
 
 ### What lands in `Answers JSON`
@@ -492,3 +548,5 @@ Pages are built **one section at a time** via `SECTION_PAGE_SIZE` (demographics 
 | `.ics` only shows one of two EEG events                          | Both`VEVENT`s used the same `UID`                                                                        | Give them different suffixes (`-ind` / `-grp`)                                                 |
 | Netlify site 2/3 shows the wrong page                              | Publish directory isn't`dist`, or the build command's `cp` target is wrong                               | Check the deploy log; confirm Publish directory is exactly`dist`                                 |
 | Changes to a booking page don't appear live                        | Netlify only rebuilds on push                                                                                | Commit and push; check the site's Deploys tab                                                      |
+| Dashboard banner: "Not configured yet"                             | `admin/config.local.js` doesn't exist or still has the placeholder URL                                    | Copy `admin/config.example.js` → `config.local.js`, paste the List Bookings URL in            |
+| Dashboard banner: "malformed response"                             | `BookingsResponseBody`'s `bookings` field isn't wired to `SelectBookingFields`'s Output                | Re-check step 4 of List Bookings; test with `curl` per that section                              |

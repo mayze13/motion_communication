@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Bookings dashboard | Minds in Motion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --purple:    #361a54;
+      --purple-600:#4a2570;
+      --purple-300:#8f6fc0;
+      --accent:    #7c4dbe;
+      --ink:       #16101f;
+      --body:      #4a4058;
+      --muted:     #7d6f95;
+      --line:      #e7e0f0;
+      --line-soft: #f1ecf7;
+      --surface:   #ffffff;
+      --bg:        #faf8fc;
+      --tint:      #f5f1fa;
+      --ok-bg:     #e9f5ec; --ok-fg:   #2c6b3f;
+      --warn-bg:   #fdf1e3; --warn-fg: #8a5220;
+      --err-bg:    #fdecea; --err-br:  #f3bdb8; --err-fg: #8e1c12;
+      --r:         14px;
+      --shadow:    0 1px 2px rgba(22,16,31,.04), 0 8px 24px -12px rgba(54,26,84,.18);
+      --head-h:    60px;
+      --ease:      cubic-bezier(.22,.8,.3,1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: 'DM Sans', Arial, Helvetica, sans-serif;
+      background: var(--bg); color: var(--ink);
+      line-height: 1.5; -webkit-font-smoothing: antialiased;
+    }
+    button { font: inherit; cursor: pointer; }
+
+    /* ── Header ─────────────────────────────────────────────────────────── */
+    .site-header {
+      min-height: var(--head-h);
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 10px 20px;
+      padding: 12px 24px;
+      background: rgba(250,248,252,.92);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+      position: sticky; top: 0; z-index: 60;
+    }
+    .brand { display: flex; align-items: baseline; gap: 10px; }
+    .brand-name { font-size: 15px; font-weight: 700; color: var(--purple); }
+    .brand-sub { font-size: 12px; color: var(--muted); }
+    .header-controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .status-line { font-size: 12px; color: var(--muted); }
+    .btn {
+      border: 1px solid var(--line); background: var(--surface); color: var(--purple);
+      border-radius: 999px; padding: 7px 16px; font-size: 13px; font-weight: 600;
+      transition: background .15s var(--ease), border-color .15s var(--ease);
+    }
+    .btn:hover { background: var(--tint); border-color: var(--purple-300); }
+    .btn-primary { background: var(--purple); color: #fff; border-color: var(--purple); }
+    .btn-primary:hover { background: var(--purple-600); }
+    label.check { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--body); }
+
+    /* ── Banner ─────────────────────────────────────────────────────────── */
+    .banner {
+      display: none;
+      margin: 16px 24px 0; padding: 12px 16px; border-radius: var(--r);
+      background: var(--err-bg); border: 1px solid var(--err-br); color: var(--err-fg);
+      font-size: 13px;
+    }
+    .banner.show { display: block; }
+    .banner.info { background: var(--warn-bg); border-color: #f0d9b5; color: var(--warn-fg); }
+
+    /* ── Load zone ──────────────────────────────────────────────────────── */
+    .loadzone {
+      margin: 16px 24px 0; padding: 14px 18px; border-radius: var(--r);
+      border: 1.5px dashed var(--line); background: var(--surface);
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+      font-size: 13px; color: var(--body);
+    }
+    .loadzone.drag-over { border-color: var(--accent); background: var(--tint); }
+    .loadzone input[type=file] { font-size: 12px; }
+
+    /* ── Toolbar: search + warnings chip ──────────────────────────────── */
+    .toolbar {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 14px; margin: 16px 24px 0; flex-wrap: wrap;
+    }
+    .search-wrap { position: relative; flex: 1; min-width: 240px; max-width: 420px; }
+    .search-input {
+      width: 100%; border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px;
+      font: inherit; font-size: 13px; background: var(--surface); color: var(--ink);
+    }
+    .search-input:focus { outline: none; border-color: var(--purple-300); }
+    .search-results {
+      display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+      background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
+      box-shadow: var(--shadow); max-height: 320px; overflow-y: auto; z-index: 70;
+    }
+    .search-results.show { display: block; }
+    .search-result { padding: 10px 14px; border-bottom: 1px solid var(--line-soft); }
+    .search-result:last-child { border-bottom: none; }
+    .search-result .p-name { display: block; font-size: 13px; }
+    .search-result .p-email { margin: 2px 0 6px; }
+    .search-jumps { display: flex; gap: 12px; flex-wrap: wrap; }
+    .search-empty { padding: 12px 14px; font-size: 12.5px; color: var(--muted); }
+    .link-btn {
+      border: none; background: none; color: var(--accent); font-size: 12px; font-weight: 600;
+      padding: 0; text-align: left;
+    }
+    .link-btn:hover { text-decoration: underline; }
+    .chip {
+      border: 1px solid var(--err-br); background: var(--err-bg); color: var(--err-fg);
+      border-radius: 999px; padding: 7px 14px; font-size: 12.5px; font-weight: 700;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .chip:hover { filter: brightness(0.97); }
+
+    /* ── Layout ─────────────────────────────────────────────────────────── */
+    main { padding: 24px; max-width: 1180px; margin: 0 auto; }
+    .empty-note { font-size: 13px; color: var(--muted); padding: 20px 0; }
+
+    /* ── Vertical calendar grid ────────────────────────────────────────── */
+    .cal-wrap { overflow-x: auto; }
+    .cal-grid {
+      display: grid; grid-template-columns: repeat(5, minmax(150px, 1fr));
+      gap: 10px; min-width: 800px;
+    }
+    .cal-head-cell {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--muted); text-align: center; padding-bottom: 2px;
+    }
+    .cal-day {
+      border: 1px solid var(--line); background: var(--surface); border-radius: var(--r);
+      padding: 10px; box-shadow: var(--shadow);
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .cal-day.empty { border: none; background: none; box-shadow: none; }
+    .cal-date { font-size: 12.5px; font-weight: 700; color: var(--purple); }
+    .cal-track-label {
+      font-size: 10px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+      color: var(--muted); margin-top: -4px;
+    }
+
+    /* ── Slot ───────────────────────────────────────────────────────────── */
+    .cal-slot {
+      text-align: left; border: 1px solid var(--line-soft); background: var(--tint);
+      border-radius: 10px; padding: 7px 9px;
+      display: flex; flex-direction: column; gap: 3px;
+      transition: border-color .12s var(--ease);
+    }
+    .cal-slot:hover { border-color: var(--purple-300); }
+    .cal-slot-time { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+    .badge {
+      align-self: flex-start; font-size: 10.5px; font-weight: 700; letter-spacing: .03em;
+      padding: 3px 9px; border-radius: 999px; text-transform: uppercase;
+    }
+    .badge.available { background: var(--ok-bg); color: var(--ok-fg); }
+    .badge.filling    { background: var(--warn-bg); color: var(--warn-fg); }
+    .badge.full       { background: var(--err-bg); color: var(--err-fg); }
+    .badge.unknown    { background: var(--line-soft); color: var(--muted); }
+    .cohort-breakdown { font-size: 10.5px; color: var(--muted); }
+    .cal-slot-names { display: flex; flex-direction: column; gap: 2px; }
+    .cal-slot-name { font-size: 11.5px; font-weight: 600; color: var(--ink); }
+    .cal-slot-name.cancelled { text-decoration: line-through; font-weight: 400; color: var(--muted); }
+    .slot-note { font-size: 10px; color: var(--muted); font-style: italic; }
+    .cap-bar { height: 4px; border-radius: 2px; background: var(--line-soft); overflow: hidden; }
+    .cap-fill { height: 100%; border-radius: 2px; }
+    .cap-fill.available { background: var(--ok-fg); }
+    .cap-fill.filling    { background: var(--warn-fg); }
+    .cap-fill.full        { background: var(--err-fg); }
+
+    /* ── Detail panel ───────────────────────────────────────────────────── */
+    .overlay {
+      display: none; position: fixed; inset: 0; background: rgba(22,16,31,.35);
+      z-index: 90;
+    }
+    .overlay.show { display: block; }
+    .panel {
+      position: fixed; top: 0; right: 0; height: 100%; width: min(420px, 100%);
+      background: var(--surface); box-shadow: -12px 0 32px -12px rgba(22,16,31,.3);
+      z-index: 91; transform: translateX(100%); transition: transform .2s var(--ease);
+      display: flex; flex-direction: column;
+    }
+    .panel.show { transform: translateX(0); }
+    .panel-head {
+      padding: 20px 22px 16px; border-bottom: 1px solid var(--line);
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+    }
+    .panel-head h2 { font-size: 16px; color: var(--purple); }
+    .panel-head .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .panel-close {
+      border: none; background: none; font-size: 20px; line-height: 1; color: var(--muted);
+      padding: 2px 6px;
+    }
+    .panel-close:hover { color: var(--purple); }
+    .panel-body { padding: 14px 22px 22px; overflow-y: auto; flex: 1; }
+    .participant {
+      padding: 12px 0; border-bottom: 1px solid var(--line-soft);
+    }
+    .participant:last-child { border-bottom: none; }
+    .participant.cancelled { opacity: .5; }
+    .participant.cancelled .p-name { text-decoration: line-through; }
+    .p-row-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .p-name { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+    .p-email {
+      display: inline-block; margin-top: 4px;
+      font-size: 12.5px; color: var(--accent); text-decoration: none;
+    }
+    .p-email:hover { text-decoration: underline; }
+    .cohort-badge {
+      font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 999px;
+      letter-spacing: .02em;
+    }
+    .cohort-badge.c1  { background: var(--tint); color: var(--purple); }
+    .cohort-badge.c2  { background: var(--ok-bg); color: var(--ok-fg); }
+    .cohort-badge.c30 { background: var(--line-soft); color: var(--muted); }
+    .cross-link {
+      margin-top: 5px; font-size: 12px; color: var(--body);
+      padding-left: 14px; border-left: 2px solid var(--purple-300);
+    }
+    .panel-empty { font-size: 13px; color: var(--muted); padding: 20px 0; }
+    .warn-icon { color: var(--err-fg); font-size: 12px; cursor: help; }
+    .panel-actions {
+      display: flex; align-items: center; gap: 14px; padding: 0 22px 16px;
+      border-bottom: 1px solid var(--line); flex-wrap: wrap;
+    }
+    .copy-confirm { font-size: 11.5px; color: var(--ok-fg); font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="brand">
+      <span class="brand-name">Minds in Motion</span>
+      <span class="brand-sub">Bookings dashboard (internal, local use only)</span>
+    </div>
+    <div class="header-controls">
+      <span class="status-line" id="statusLine">Not loaded yet.</span>
+      <label class="check"><input type="checkbox" id="showCancelled"> Show cancelled</label>
+      <button class="btn" id="exportExcelBtn" type="button">Export to Excel</button>
+      <button class="btn btn-primary" id="refreshBtn" type="button">Refresh from Power Automate</button>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <input type="search" id="searchInput" class="search-input" placeholder="Search participant name or email…" autocomplete="off">
+      <div class="search-results" id="searchResults"></div>
+    </div>
+    <button class="chip" id="warningsChip" type="button" style="display:none;">⚠ <span id="warningsCount">0</span> data warning(s)</button>
+  </div>
+
+  <div class="banner" id="banner"></div>
+
+  <div class="loadzone" id="loadzone">
+    <strong>Load a file manually:</strong>
+    <input type="file" id="fileInput" accept=".xlsx,.xls">
+    <span>— download <code>minds_in_motion_bookings.xlsx</code> from SharePoint and pick it here, or drag it onto this box.</span>
+  </div>
+
+  <main>
+    <div class="cal-wrap">
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+  </main>
+
+  <div class="overlay" id="overlay"></div>
+  <aside class="panel" id="panel" aria-hidden="true">
+    <div class="panel-head">
+      <div>
+        <h2 id="panelTitle"></h2>
+        <div class="sub" id="panelSub"></div>
+      </div>
+      <button class="panel-close" id="panelClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="panel-actions" id="panelActions" style="display:none;">
+      <button type="button" class="link-btn" id="copyRosterBtn">Copy roster</button>
+      <button type="button" class="link-btn" id="copyEmailsBtn">Copy emails</button>
+      <span class="copy-confirm" id="copyConfirm"></span>
+    </div>
+    <div class="panel-body" id="panelBody"></div>
+  </aside>
+
+  <script src="vendor/xlsx.full.min.js"></script>
+  <script src="config.example.js"></script>
+  <script src="config.local.js"></script>
+
+  <script>
+    const CONFIG = window.DASHBOARD_CONFIG || {};
+    const PLACEHOLDER_URL = 'PASTE_LIST_BOOKINGS_URL_HERE';
+    const FILLING_FAST_RATIO = 0.8;
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Static slot schedule — copied from microsoft/powerautomate-setup.md
+    // (the `Slots` table), since there is no live read endpoint for it.
+    // A booking whose Slot ID/Individual Slot ID isn't listed here still
+    // shows up (buildCalendarModel synthesizes an ad-hoc entry), so a
+    // stale copy of this list never hides a real booking — it just loses
+    // the capacity/"full" indicator for that one slot.
+    // ═══════════════════════════════════════════════════════════════════
+    const SLOTS_DEFINITION = {
+      crowd: [
+        { slotId: 'S1', label: 'Tue 15 Sept, 10:00', capacity: 40, eegPerCohort: 2 },
+        { slotId: 'S2', label: 'Tue 15 Sept, 14:00', capacity: 40, eegPerCohort: 2 },
+        { slotId: 'S3', label: 'Tue 15 Sept, 16:00', capacity: 40, eegPerCohort: 2 },
+        { slotId: 'S4', label: 'Wed 16 Sept, 10:00', capacity: 40, eegPerCohort: 2 },
+        { slotId: 'S5', label: 'Wed 16 Sept, 14:00', capacity: 40, eegPerCohort: 2 },
+        { slotId: 'S6', label: 'Wed 16 Sept, 16:00', capacity: 40, eegPerCohort: 2 },
+        { slotId: 'S7', label: 'Thu 17 Sept, 10:00', capacity: 40, eegPerCohort: 2 },
+        { slotId: 'S8', label: 'Thu 17 Sept, 14:00', capacity: 40, eegPerCohort: 2 },
+        { slotId: 'S9', label: 'Thu 17 Sept, 16:00', capacity: 40, eegPerCohort: 0 }
+      ],
+      individual: [
+        { slotId: 'I01', cohort: 'C1', label: 'Wednesday 9 Sept, 09:30', capacity: 1 },
+        { slotId: 'I02', cohort: 'C1', label: 'Wednesday 9 Sept, 11:00', capacity: 1 },
+        { slotId: 'I03', cohort: 'C1', label: 'Wednesday 9 Sept, 13:30', capacity: 1 },
+        { slotId: 'I04', cohort: 'C1', label: 'Wednesday 9 Sept, 15:00', capacity: 1 },
+        { slotId: 'I05', cohort: 'C1', label: 'Thursday 10 Sept, 09:30', capacity: 1 },
+        { slotId: 'I06', cohort: 'C1', label: 'Thursday 10 Sept, 11:00', capacity: 1 },
+        { slotId: 'I07', cohort: 'C1', label: 'Thursday 10 Sept, 13:30', capacity: 1 },
+        { slotId: 'I08', cohort: 'C1', label: 'Thursday 10 Sept, 15:00', capacity: 1 },
+        { slotId: 'I09', cohort: 'C1', label: 'Friday 11 Sept, 09:30', capacity: 1 },
+        { slotId: 'I10', cohort: 'C1', label: 'Friday 11 Sept, 11:00', capacity: 1 },
+        { slotId: 'I11', cohort: 'C1', label: 'Friday 11 Sept, 13:30', capacity: 1 },
+        { slotId: 'I12', cohort: 'C1', label: 'Friday 11 Sept, 15:00', capacity: 1 },
+        { slotId: 'I13', cohort: 'C1', label: 'Monday 14 Sept, 09:30', capacity: 1 },
+        { slotId: 'I14', cohort: 'C1', label: 'Monday 14 Sept, 11:00', capacity: 1 },
+        { slotId: 'I15', cohort: 'C1', label: 'Monday 14 Sept, 13:30', capacity: 1 },
+        { slotId: 'I16', cohort: 'C1', label: 'Monday 14 Sept, 15:00', capacity: 1 },
+        { slotId: 'I17', cohort: 'C2', label: 'Friday 18 Sept, 09:30', capacity: 1 },
+        { slotId: 'I18', cohort: 'C2', label: 'Friday 18 Sept, 11:00', capacity: 1 },
+        { slotId: 'I19', cohort: 'C2', label: 'Friday 18 Sept, 13:30', capacity: 1 },
+        { slotId: 'I20', cohort: 'C2', label: 'Friday 18 Sept, 15:00', capacity: 1 },
+        { slotId: 'I21', cohort: 'C2', label: 'Monday 21 Sept, 09:30', capacity: 1 },
+        { slotId: 'I22', cohort: 'C2', label: 'Monday 21 Sept, 11:00', capacity: 1 },
+        { slotId: 'I23', cohort: 'C2', label: 'Monday 21 Sept, 13:30', capacity: 1 },
+        { slotId: 'I24', cohort: 'C2', label: 'Monday 21 Sept, 15:00', capacity: 1 },
+        { slotId: 'I25', cohort: 'C2', label: 'Tuesday 22 Sept, 09:30', capacity: 1 },
+        { slotId: 'I26', cohort: 'C2', label: 'Tuesday 22 Sept, 11:00', capacity: 1 },
+        { slotId: 'I27', cohort: 'C2', label: 'Tuesday 22 Sept, 13:30', capacity: 1 },
+        { slotId: 'I28', cohort: 'C2', label: 'Tuesday 22 Sept, 15:00', capacity: 1 },
+        { slotId: 'I29', cohort: 'C2', label: 'Wednesday 23 Sept, 09:30', capacity: 1 },
+        { slotId: 'I30', cohort: 'C2', label: 'Wednesday 23 Sept, 11:00', capacity: 1 },
+        { slotId: 'I31', cohort: 'C2', label: 'Wednesday 23 Sept, 13:30', capacity: 1 },
+        { slotId: 'I32', cohort: 'C2', label: 'Wednesday 23 Sept, 15:00', capacity: 1 }
+      ]
+    };
+
+    // Durations aren't stored per-slot in SLOTS_DEFINITION (only start times
+    // are) — per microsoft/powerautomate-setup.md's Start/End UTC columns,
+    // every crowd slot is 120 min and every individual EEG slot is 90 min.
+    const CROWD_DURATION_MIN = 120;
+    const INDIVIDUAL_DURATION_MIN = 90;
+
+    // Same brand hexes as the :root CSS vars above, duplicated as literals
+    // since SpreadsheetML styles (used by the Excel export) can't reference
+    // CSS custom properties.
+    const XLS_COLORS = {
+      headerBg: '#361A54', headerFg: '#FFFFFF',
+      crowdFill: '#F5F1FA', crowdAccent: '#8F6FC0',
+      individualFill: '#FDF1E3', individualAccent: '#8A5220',
+      weekendFill: '#ECE7F2',
+      gridLine: '#E7E0F0', timeLabelFill: '#F1ECF7'
+    };
+
+    let state = { bookings: [], sourceLabel: null, lastModel: null, warnings: [], exportWarnings: [], currentPanelSlot: null, loadSeq: 0 };
+
+    // ── DOM refs ──────────────────────────────────────────────────────────
+    const $ = id => document.getElementById(id);
+    const statusLine = $('statusLine');
+    const banner = $('banner');
+    const loadzone = $('loadzone');
+    const fileInput = $('fileInput');
+    const refreshBtn = $('refreshBtn');
+    const showCancelled = $('showCancelled');
+    const exportExcelBtn = $('exportExcelBtn');
+    const overlay = $('overlay');
+    const panel = $('panel');
+    const searchInput = $('searchInput');
+    const searchResults = $('searchResults');
+    const warningsChip = $('warningsChip');
+    const panelActions = $('panelActions');
+    const copyRosterBtn = $('copyRosterBtn');
+    const copyEmailsBtn = $('copyEmailsBtn');
+    const copyConfirm = $('copyConfirm');
+
+    function escapeHtml(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, c => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+      ));
+    }
+    // Distinct from escapeHtml: SpreadsheetML cell text needs newlines encoded
+    // as &#10; (a literal line break inside the cell) rather than dropped/&#39;-escaped.
+    function escapeXml(s) {
+      return String(s == null ? '' : s)
+        .replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
+        .replace(/\n/g, '&#10;');
+    }
+
+    // ── Status / banner ──────────────────────────────────────────────────
+    function formatTime(d) {
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    function setStatus(text) { statusLine.textContent = text; }
+    function showBanner(text, cls) {
+      banner.textContent = text;
+      banner.className = 'banner show' + (cls ? ' ' + cls : '');
+    }
+    function hideBanner() { banner.className = 'banner'; }
+
+    // ── Parsing ───────────────────────────────────────────────────────────
+    function parseWorkbookRows(workbook) {
+      const sheet = workbook.Sheets['Bookings'] || workbook.Sheets[workbook.SheetNames[0]];
+      if (!sheet) throw new Error('workbook has no sheets');
+      return XLSX.utils.sheet_to_json(sheet, { defval: '' });
+    }
+
+    function normalizeBookings(rawRows) {
+      function get(row, key) {
+        if (row[key] !== undefined) return row[key];
+        const found = Object.keys(row).find(k => k.trim().toLowerCase() === key.toLowerCase());
+        return found ? row[found] : '';
+      }
+      return rawRows
+        .map(row => ({
+          bookingId: String(get(row, 'Booking ID') || '').trim(),
+          sessionType: String(get(row, 'Session Type') || '').trim(),
+          slotId: String(get(row, 'Slot ID') || '').trim(),
+          slotLabel: String(get(row, 'Slot Label') || '').trim(),
+          firstName: String(get(row, 'First Name') || '').trim(),
+          lastName: String(get(row, 'Last Name') || '').trim(),
+          email: String(get(row, 'Email') || '').trim(),
+          cohort: String(get(row, 'Cohort') || '').trim(),
+          individualSlotId: String(get(row, 'Individual Slot ID') || '').trim(),
+          individualSlotLabel: String(get(row, 'Individual Slot Label') || '').trim(),
+          cancelled: String(get(row, 'Cancelled') || '').trim(),
+          registeredInterest: String(get(row, 'Registered Interest') || '').trim()
+        }))
+        .filter(b => b.bookingId);
+    }
+
+    // ── Day-grouping / sorting — same convention as booking.html ────────
+    const MONTH_INDEX = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7,
+                           sep:8, sept:8, oct:9, nov:10, dec:11 };
+    function labelSortKey(label) {
+      const parts = (label || '').split(',');
+      const dateMatch = (parts[0] || '').match(/(\d{1,2})\s+([A-Za-z]+)/);
+      const day = dateMatch ? parseInt(dateMatch[1], 10) : 0;
+      const month = dateMatch ? (MONTH_INDEX[dateMatch[2].slice(0, 3).toLowerCase()] ?? 0) : 0;
+      const timeMatch = (parts[1] || '').match(/(\d{1,2}):(\d{2})/);
+      const minutes = timeMatch ? parseInt(timeMatch[1], 10) * 60 + parseInt(timeMatch[2], 10) : 0;
+      return month * 100000 + day * 1440 + minutes;
+    }
+    // Sessions only ever fall on weekdays, so the grid assumes 5 columns
+    // (Mon-Fri); a slot's real calendar date is derived from its label
+    // rather than hardcoded, so the week/weekday layout below stays
+    // correct even if the schedule's actual dates change.
+    function dateFromLabel(label) {
+      const datePart = (label || '').split(',')[0] || '';
+      const m = datePart.match(/(\d{1,2})\s+([A-Za-z]+)/);
+      if (!m) return null;
+      const day = parseInt(m[1], 10);
+      const month = MONTH_INDEX[m[2].slice(0, 3).toLowerCase()] ?? 0;
+      return new Date(2026, month, day);
+    }
+
+    // Groups slots into day entries, then buckets those into week-rows of
+    // 5 columns (Mon=0 … Fri=4), starting a new row whenever a day's
+    // weekday doesn't come after the previous day placed in the current
+    // row — this is what produces "Wed/Thu/Fri, then Mon-Fri, then
+    // Mon-Wed" purely from the real dates, with no row count hardcoded.
+    function buildWeekRows(crowdSlots, individualSlots) {
+      const allSlots = crowdSlots.map(s => Object.assign({ kind: 'crowd' }, s))
+        .concat(individualSlots.map(s => Object.assign({ kind: 'individual' }, s)));
+
+      const dayMap = new Map();
+      allSlots.forEach(slot => {
+        const dayLabel = (slot.label || '').split(',')[0] || 'Session';
+        if (!dayMap.has(dayLabel)) {
+          dayMap.set(dayLabel, { dayLabel: dayLabel, date: dateFromLabel(slot.label), kind: slot.kind, slots: [] });
+        }
+        dayMap.get(dayLabel).slots.push(slot);
+      });
+
+      const days = Array.from(dayMap.values());
+      days.forEach(d => d.slots.sort((a, b) => labelSortKey(a.label) - labelSortKey(b.label)));
+      days.sort((a, b) => (a.date && b.date) ? (a.date - b.date) : 0);
+
+      const rows = [];
+      let currentRow = null;
+      let lastWeekday = -1;
+      days.forEach(d => {
+        const weekday = d.date ? (d.date.getDay() + 6) % 7 : 0; // Mon=0 … Sun=6
+        if (weekday > 4) return; // no weekend sessions in this schedule
+        if (!currentRow || weekday <= lastWeekday) {
+          currentRow = [null, null, null, null, null];
+          rows.push(currentRow);
+        }
+        currentRow[weekday] = d;
+        lastWeekday = weekday;
+      });
+      return rows;
+    }
+
+    // ── Model ─────────────────────────────────────────────────────────────
+    function buildCalendarModel(bookings, includeCancelled) {
+      const visible = bookings.filter(b => includeCancelled || !b.cancelled);
+
+      const crowd = {};
+      SLOTS_DEFINITION.crowd.forEach(s => { crowd[s.slotId] = Object.assign({}, s, { bookings: [] }); });
+      const individual = {};
+      SLOTS_DEFINITION.individual.forEach(s => { individual[s.slotId] = Object.assign({}, s, { bookings: [] }); });
+
+      visible.forEach(b => {
+        if (b.slotId) {
+          if (!crowd[b.slotId]) {
+            crowd[b.slotId] = { slotId: b.slotId, label: b.slotLabel || b.slotId, capacity: null, eegPerCohort: null, bookings: [] };
+          }
+          crowd[b.slotId].bookings.push(b);
+        }
+        if (b.individualSlotId) {
+          if (!individual[b.individualSlotId]) {
+            individual[b.individualSlotId] = { slotId: b.individualSlotId, label: b.individualSlotLabel || b.individualSlotId, capacity: null, cohort: b.cohort, bookings: [] };
+          }
+          individual[b.individualSlotId].bookings.push(b);
+        }
+      });
+
+      return {
+        crowd: Object.values(crowd),
+        individual: Object.values(individual)
+      };
+    }
+
+    // ── Rendering ─────────────────────────────────────────────────────────
+    function badgeFor(count, capacity) {
+      if (capacity == null) return { cls: 'unknown', text: count + ' booked' };
+      if (count >= capacity) return { cls: 'full', text: 'Full' };
+      if (capacity > 0 && count / capacity >= FILLING_FAST_RATIO) return { cls: 'filling', text: 'Filling fast' };
+      return { cls: 'available', text: 'Available' };
+    }
+
+    function renderCalendar(model) {
+      const rows = buildWeekRows(model.crowd, model.individual);
+      const grid = $('calGrid');
+      grid.innerHTML = '';
+
+      ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].forEach(name => {
+        const h = document.createElement('div');
+        h.className = 'cal-head-cell';
+        h.textContent = name;
+        grid.appendChild(h);
+      });
+
+      if (!rows.length) {
+        const empty = document.createElement('p');
+        empty.className = 'empty-note';
+        empty.style.gridColumn = '1 / -1';
+        empty.textContent = 'No sessions to show.';
+        grid.appendChild(empty);
+        return;
+      }
+
+      rows.forEach(row => {
+        row.forEach(dayEntry => {
+          if (!dayEntry) {
+            const blank = document.createElement('div');
+            blank.className = 'cal-day empty';
+            grid.appendChild(blank);
+            return;
+          }
+
+          const cell = document.createElement('div');
+          cell.className = 'cal-day';
+
+          const dateEl = document.createElement('div');
+          dateEl.className = 'cal-date';
+          dateEl.textContent = dayEntry.dayLabel;
+          cell.appendChild(dateEl);
+
+          const trackEl = document.createElement('div');
+          trackEl.className = 'cal-track-label';
+          trackEl.textContent = dayEntry.kind === 'crowd' ? 'Crowd session' : 'Individual (EEG)';
+          cell.appendChild(trackEl);
+
+          dayEntry.slots.forEach(slot => {
+            const count = slot.bookings.length;
+            const badge = badgeFor(count, slot.capacity);
+            const time = (slot.label || '').split(',').slice(1).join(',').trim() || slot.label;
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'cal-slot';
+
+            let inner =
+              '<span class="cal-slot-time">' + escapeHtml(time) + '</span>' +
+              '<span class="badge ' + badge.cls + '">' + escapeHtml(badge.text) +
+                (slot.capacity != null ? ' &middot; ' + count + '/' + slot.capacity : '') + '</span>';
+
+            if (slot.capacity != null) {
+              const pct = slot.capacity > 0 ? Math.min(100, Math.round(count / slot.capacity * 100)) : 100;
+              inner += '<div class="cap-bar"><div class="cap-fill ' + badge.cls + '" style="width:' + pct + '%"></div></div>';
+            }
+
+            if (dayEntry.kind === 'crowd' && slot.eegPerCohort != null) {
+              const c1 = slot.bookings.filter(b => b.cohort === 'C1').length;
+              const c2 = slot.bookings.filter(b => b.cohort === 'C2').length;
+              const c30 = slot.bookings.filter(b => b.cohort !== 'C1' && b.cohort !== 'C2').length;
+              inner += '<span class="cohort-breakdown">C1 ' + c1 + '/' + slot.eegPerCohort +
+                       ' &middot; C2 ' + c2 + '/' + slot.eegPerCohort +
+                       ' &middot; C30 ' + c30 + '</span>';
+            } else if (dayEntry.kind === 'individual' && slot.cohort) {
+              inner += '<span class="cohort-breakdown">Cohort ' + escapeHtml(slot.cohort) + '</span>';
+            }
+
+            if (dayEntry.kind === 'individual' && slot.bookings.length) {
+              const names = sortParticipants(slot.bookings).map(b =>
+                '<span class="cal-slot-name' + (b.cancelled ? ' cancelled' : '') + '">' +
+                  escapeHtml(b.firstName) + ' ' + escapeHtml(b.lastName) +
+                  (b.cancelled ? ' (cancelled)' : '') +
+                '</span>'
+              ).join('');
+              inner += '<div class="cal-slot-names">' + names + '</div>';
+            }
+
+            if (slot.capacity == null) {
+              inner += '<span class="slot-note">Not in the standard schedule</span>';
+            }
+
+            btn.innerHTML = inner;
+            btn.addEventListener('click', () => openDetailPanel(slot, dayEntry.kind));
+            cell.appendChild(btn);
+          });
+
+          grid.appendChild(cell);
+        });
+      });
+    }
+
+    function findSlotInModel(kind, slotId) {
+      const list = state.lastModel ? state.lastModel[kind] : null;
+      return (list || []).find(s => s.slotId === slotId) || null;
+    }
+
+    // EEG participants (C1/C2) first, crowd-only (C30) after; alphabetical within each group.
+    function sortParticipants(bookings) {
+      return bookings.slice().sort((a, b) => {
+        const rankA = (a.cohort === 'C1' || a.cohort === 'C2') ? 0 : 1;
+        const rankB = (b.cohort === 'C1' || b.cohort === 'C2') ? 0 : 1;
+        if (rankA !== rankB) return rankA - rankB;
+        return (a.lastName || '').localeCompare(b.lastName || '') || (a.firstName || '').localeCompare(b.firstName || '');
+      });
+    }
+
+    // ── Cohort integrity warnings ────────────────────────────────────────
+    function computeIntegrityWarnings(bookings) {
+      const indDefById = {};
+      SLOTS_DEFINITION.individual.forEach(s => { indDefById[s.slotId] = s; });
+
+      const warnings = [];
+      bookings.forEach(b => {
+        if (b.cancelled) return;
+        const hasIndividual = !!b.individualSlotId;
+        const cohortIsEeg = b.cohort === 'C1' || b.cohort === 'C2';
+        const isEegSession = b.sessionType === 'EEG';
+
+        if (hasIndividual) {
+          const def = indDefById[b.individualSlotId];
+          if (def && def.cohort !== b.cohort) {
+            warnings.push({
+              bookingId: b.bookingId, booking: b,
+              message: 'Cohort is "' + (b.cohort || 'blank') + '" but individual slot ' + b.individualSlotId + ' belongs to ' + def.cohort + '.',
+              jumpKind: 'individual', jumpSlotId: b.individualSlotId, jumpLabel: b.individualSlotLabel
+            });
+          }
+        }
+
+        if (isEegSession && !hasIndividual) {
+          warnings.push({
+            bookingId: b.bookingId, booking: b,
+            message: 'Session Type is EEG but no individual session is set.',
+            jumpKind: 'crowd', jumpSlotId: b.slotId, jumpLabel: b.slotLabel
+          });
+        } else if (!isEegSession && (cohortIsEeg || hasIndividual)) {
+          warnings.push({
+            bookingId: b.bookingId, booking: b,
+            message: 'Session Type is "' + (b.sessionType || 'blank') + '" but Cohort/individual session look like an EEG booking.',
+            jumpKind: hasIndividual ? 'individual' : 'crowd',
+            jumpSlotId: hasIndividual ? b.individualSlotId : b.slotId,
+            jumpLabel: hasIndividual ? b.individualSlotLabel : b.slotLabel
+          });
+        }
+      });
+      return warnings;
+    }
+
+    function updateWarningsChip() {
+      const count = state.warnings.length;
+      $('warningsCount').textContent = count;
+      warningsChip.style.display = count > 0 ? 'inline-flex' : 'none';
+    }
+
+    function renderAll() {
+      const model = buildCalendarModel(state.bookings, showCancelled.checked);
+      state.lastModel = model;
+      state.warnings = computeIntegrityWarnings(state.bookings);
+      updateWarningsChip();
+      renderCalendar(model);
+    }
+
+    // ── Detail panel ─────────────────────────────────────────────────────
+    function cohortBadgeHtml(cohort) {
+      const cls = cohort === 'C1' ? 'c1' : cohort === 'C2' ? 'c2' : 'c30';
+      return '<span class="cohort-badge ' + cls + '">' + escapeHtml(cohort || 'C30') + '</span>';
+    }
+
+    function openPanelChrome(titleText, subText) {
+      $('panelTitle').textContent = titleText;
+      $('panelSub').textContent = subText;
+      overlay.className = 'overlay show';
+      panel.className = 'panel show';
+      panel.setAttribute('aria-hidden', 'false');
+    }
+
+    function participantRowHtml(b, kind) {
+      let crossLink = '';
+      if (kind === 'crowd' && b.individualSlotId) {
+        crossLink = '<div class="cross-link">Individual session ' +
+          escapeHtml(b.individualSlotId) + ' — ' + escapeHtml(b.individualSlotLabel) + '</div>';
+      } else if (kind === 'individual' && b.slotId) {
+        crossLink = '<div class="cross-link">Crowd session ' +
+          escapeHtml(b.slotId) + ' — ' + escapeHtml(b.slotLabel) + '</div>';
+      }
+
+      const bWarnings = (state.warnings || []).filter(w => w.bookingId === b.bookingId);
+      const warnMarker = bWarnings.length
+        ? '<span class="warn-icon" title="' + escapeHtml(bWarnings.map(w => w.message).join(' ')) + '">⚠</span>'
+        : '';
+
+      const row = document.createElement('div');
+      row.className = 'participant' + (b.cancelled ? ' cancelled' : '');
+      row.innerHTML =
+        '<div class="p-row-top">' +
+          cohortBadgeHtml(b.cohort) + warnMarker +
+          '<span class="p-name">' + escapeHtml(b.lastName) + ', ' + escapeHtml(b.firstName) +
+            (b.cancelled ? ' (cancelled)' : '') + '</span>' +
+        '</div>' +
+        '<a class="p-email" href="mailto:' + encodeURIComponent(b.email) + '">' + escapeHtml(b.email) + '</a>' +
+        crossLink;
+      return row;
+    }
+
+    function openDetailPanel(slot, kind) {
+      const time = (slot.label || '').split(',').slice(1).join(',').trim() || slot.label;
+      const day = (slot.label || '').split(',')[0] || '';
+      openPanelChrome(slot.slotId + ' — ' + time, day +
+        (slot.capacity != null ? ' · ' + slot.bookings.length + '/' + slot.capacity + ' booked' : ' · ' + slot.bookings.length + ' booked'));
+
+      state.currentPanelSlot = { slot: slot, kind: kind };
+      panelActions.style.display = slot.bookings.length ? 'flex' : 'none';
+      copyConfirm.textContent = '';
+
+      const body = $('panelBody');
+      body.innerHTML = '';
+
+      if (!slot.bookings.length) {
+        body.innerHTML = '<p class="panel-empty">No one booked into this slot yet.</p>';
+      } else {
+        sortParticipants(slot.bookings).forEach(b => body.appendChild(participantRowHtml(b, kind)));
+      }
+    }
+
+    function openWarningsPanel() {
+      state.currentPanelSlot = null;
+      panelActions.style.display = 'none';
+
+      const warnings = state.warnings || [];
+      openPanelChrome('Data warnings', warnings.length + ' issue(s) found');
+
+      const body = $('panelBody');
+      body.innerHTML = '';
+      if (!warnings.length) {
+        body.innerHTML = '<p class="panel-empty">No data warnings.</p>';
+        return;
+      }
+      warnings.forEach(w => {
+        const b = w.booking;
+        const row = document.createElement('div');
+        row.className = 'participant';
+        row.innerHTML =
+          '<div class="p-row-top">' + cohortBadgeHtml(b.cohort) +
+            '<span class="p-name">' + escapeHtml(b.lastName) + ', ' + escapeHtml(b.firstName) + '</span></div>' +
+          '<div class="cross-link">' + escapeHtml(w.message) + '</div>';
+        const jumpBtn = document.createElement('button');
+        jumpBtn.type = 'button';
+        jumpBtn.className = 'link-btn';
+        jumpBtn.style.marginTop = '6px';
+        jumpBtn.textContent = 'Jump to ' + w.jumpSlotId + ' — ' + w.jumpLabel;
+        jumpBtn.addEventListener('click', () => {
+          const slot = findSlotInModel(w.jumpKind, w.jumpSlotId);
+          if (slot) openDetailPanel(slot, w.jumpKind);
+        });
+        row.appendChild(jumpBtn);
+        body.appendChild(row);
+      });
+    }
+    warningsChip.addEventListener('click', openWarningsPanel);
+
+    // ── Copy roster / emails ─────────────────────────────────────────────
+    function rosterText(slot, kind) {
+      return sortParticipants(slot.bookings).map(b => {
+        let line = b.lastName + ', ' + b.firstName + ' <' + b.email + '> — ' + (b.cohort || 'C30') + (b.cancelled ? ' (cancelled)' : '');
+        if (kind === 'crowd' && b.individualSlotId) line += '\n    Individual session ' + b.individualSlotId + ' — ' + b.individualSlotLabel;
+        else if (kind === 'individual' && b.slotId) line += '\n    Crowd session ' + b.slotId + ' — ' + b.slotLabel;
+        return line;
+      }).join('\n');
+    }
+    function emailsText(slot) {
+      return slot.bookings.filter(b => !b.cancelled).map(b => b.email).filter(Boolean).join(', ');
+    }
+    function copyToClipboard(text) {
+      const confirm = () => {
+        copyConfirm.textContent = 'Copied!';
+        setTimeout(() => { copyConfirm.textContent = ''; }, 1500);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(confirm).catch(() => window.prompt('Copy this text:', text));
+      } else {
+        window.prompt('Copy this text:', text);
+      }
+    }
+    copyRosterBtn.addEventListener('click', () => {
+      if (state.currentPanelSlot) copyToClipboard(rosterText(state.currentPanelSlot.slot, state.currentPanelSlot.kind));
+    });
+    copyEmailsBtn.addEventListener('click', () => {
+      if (state.currentPanelSlot) copyToClipboard(emailsText(state.currentPanelSlot.slot));
+    });
+
+    function closePanel() {
+      overlay.className = 'overlay';
+      panel.className = 'panel';
+      panel.setAttribute('aria-hidden', 'true');
+    }
+    overlay.addEventListener('click', closePanel);
+    $('panelClose').addEventListener('click', closePanel);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+
+    // ── Participant search ────────────────────────────────────────────────
+    function matchesQuery(b, q) {
+      return (b.firstName + ' ' + b.lastName).toLowerCase().includes(q) || (b.email || '').toLowerCase().includes(q);
+    }
+
+    function renderSearchResults(query) {
+      const q = query.trim().toLowerCase();
+      if (q.length < 2) { searchResults.className = 'search-results'; searchResults.innerHTML = ''; return; }
+
+      const matches = state.bookings.filter(b => matchesQuery(b, q));
+      searchResults.innerHTML = matches.length
+        ? matches.map(b => {
+            const jumps = [];
+            if (b.slotId) jumps.push({ kind: 'crowd', id: b.slotId, label: b.slotLabel });
+            if (b.individualSlotId) jumps.push({ kind: 'individual', id: b.individualSlotId, label: b.individualSlotLabel });
+            const jumpButtons = jumps.map(j =>
+              '<button type="button" class="link-btn" data-jump-kind="' + j.kind + '" data-jump-slot="' + escapeHtml(j.id) + '">' +
+                escapeHtml(j.id) + ' — ' + escapeHtml(j.label) + '</button>'
+            ).join('');
+            return '<div class="search-result">' +
+              '<span class="p-name">' + escapeHtml(b.lastName) + ', ' + escapeHtml(b.firstName) +
+                (b.cancelled ? ' (cancelled)' : '') + '</span>' +
+              '<a class="p-email" href="mailto:' + encodeURIComponent(b.email) + '">' + escapeHtml(b.email) + '</a>' +
+              '<div class="search-jumps">' + jumpButtons + '</div>' +
+            '</div>';
+          }).join('')
+        : '<div class="search-empty">No matches.</div>';
+      searchResults.className = 'search-results show';
+
+      searchResults.querySelectorAll('[data-jump-slot]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const slot = findSlotInModel(btn.getAttribute('data-jump-kind'), btn.getAttribute('data-jump-slot'));
+          if (slot) {
+            openDetailPanel(slot, btn.getAttribute('data-jump-kind'));
+            searchResults.className = 'search-results';
+          }
+        });
+      });
+    }
+    searchInput.addEventListener('input', e => renderSearchResults(e.target.value));
+    searchInput.addEventListener('keydown', e => { if (e.key === 'Escape') { searchResults.className = 'search-results'; searchInput.blur(); } });
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.search-wrap')) searchResults.className = 'search-results';
+    });
+
+    // ── Loading raw rows (shared by both sources) ────────────────────────
+    // Both the Power Automate JSON response and a parsed xlsx sheet end up
+    // as an array of objects keyed by the same Excel-style header strings
+    // ('Booking ID', 'Slot ID', …), so normalizeBookings/renderAll are
+    // identical either way — only how rawRows is obtained differs.
+    function loadRows(rawRows, sourceLabel) {
+      state.bookings = normalizeBookings(rawRows);
+      state.sourceLabel = sourceLabel;
+      setStatus(sourceLabel + ' — ' + state.bookings.length + ' booking(s) loaded.');
+      renderAll();
+    }
+
+    // ── Live fetch from Power Automate ───────────────────────────────────
+    async function tryLiveFetch() {
+      const url = CONFIG.listBookingsUrl;
+      if (!url || url === PLACEHOLDER_URL) {
+        showBanner('Not configured yet — copy admin/config.example.js to admin/config.local.js and paste your List Bookings flow URL in (see microsoft/powerautomate-setup.md, "List Bookings"). Use "Load file" below in the meantime.', 'info');
+        return false;
+      }
+      const seq = ++state.loadSeq;
+      setStatus('Loading live from Power Automate…');
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+          redirect: 'follow'
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (!data || !Array.isArray(data.bookings)) throw new Error('malformed response — expected { bookings: [...] }');
+        if (seq !== state.loadSeq) return false; // a newer load started meanwhile — don't clobber it
+        loadRows(data.bookings, 'Live from Power Automate, refreshed ' + formatTime(new Date()));
+        hideBanner();
+        return true;
+      } catch (e) {
+        showBanner('Couldn’t load automatically (' + e.message + '). Check the List Bookings URL in config.local.js is correct and the flow is turned on. Use "Load file" below instead.');
+        setStatus('Live load failed — use "Load file" below.');
+        return false;
+      }
+    }
+
+    // ── Manual file load (fallback — an xlsx export, e.g. from SharePoint) ─
+    function handleFile(file) {
+      if (!file) return;
+      const seq = ++state.loadSeq;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const workbook = XLSX.read(new Uint8Array(reader.result), { type: 'array' });
+          const rawRows = parseWorkbookRows(workbook);
+          if (seq !== state.loadSeq) return; // a newer load started meanwhile — don't clobber it
+          loadRows(rawRows, 'Loaded from file: ' + file.name);
+          hideBanner();
+        } catch (e) {
+          showBanner('Could not read that file as an Excel workbook (' + e.message + ').');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+    fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+    loadzone.addEventListener('dragover', e => { e.preventDefault(); loadzone.classList.add('drag-over'); });
+    loadzone.addEventListener('dragleave', () => loadzone.classList.remove('drag-over'));
+    loadzone.addEventListener('drop', e => {
+      e.preventDefault();
+      loadzone.classList.remove('drag-over');
+      handleFile(e.dataTransfer.files[0]);
+    });
+
+    refreshBtn.addEventListener('click', tryLiveFetch);
+    showCancelled.addEventListener('change', renderAll);
+
+    // ── Excel export (SpreadsheetML) ─────────────────────────────────────
+    // Builds a calendar-view workbook (days as columns, half-hour slots as
+    // rows, session blocks merged across the rows they occupy) as hand-written
+    // SpreadsheetML — the Excel 2003 XML format. Chosen over the vendored
+    // SheetJS (Community Edition can write .xlsx but not cell fills or true
+    // merges — that's a Pro-only feature) so no new library is needed; the
+    // mso-application processing instruction lets Excel open it natively with
+    // no "format doesn't match extension" warning.
+
+    function minutesOfDayFromLabel(label) {
+      const timeMatch = ((label || '').split(',')[1] || '').match(/(\d{1,2}):(\d{2})/);
+      return timeMatch ? parseInt(timeMatch[1], 10) * 60 + parseInt(timeMatch[2], 10) : null;
+    }
+    function formatMinutesAsHHMM(totalMinutes) {
+      const h = Math.floor(totalMinutes / 60), m = totalMinutes % 60;
+      return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+    }
+    function sameCalendarDate(a, b) {
+      return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+    }
+
+    const EXPORT_MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+    const EXPORT_WEEKDAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    function formatColumnHeader(d) {
+      return EXPORT_WEEKDAY_NAMES[d.getDay()] + ' ' + d.getDate() + ' ' + EXPORT_MONTH_NAMES[d.getMonth()];
+    }
+
+    function computeExportDateRange() {
+      let minDate = null, maxDate = null;
+      SLOTS_DEFINITION.crowd.concat(SLOTS_DEFINITION.individual).forEach(s => {
+        const d = dateFromLabel(s.label);
+        if (!d) return;
+        if (!minDate || d < minDate) minDate = d;
+        if (!maxDate || d > maxDate) maxDate = d;
+      });
+      return { minDate, maxDate };
+    }
+
+    function buildExportDayColumns() {
+      const { minDate, maxDate } = computeExportDateRange();
+      const cols = [];
+      for (let d = new Date(minDate); d <= maxDate; d.setDate(d.getDate() + 1)) {
+        const day = d.getDay();
+        cols.push({ date: new Date(d), isWeekend: (day === 0 || day === 6), headerLabel: formatColumnHeader(d) });
+      }
+      return cols;
+    }
+
+    function computeExportTimeRange() {
+      let minStart = Infinity, maxEnd = -Infinity;
+      SLOTS_DEFINITION.crowd.forEach(s => {
+        const start = minutesOfDayFromLabel(s.label);
+        minStart = Math.min(minStart, start);
+        maxEnd = Math.max(maxEnd, start + CROWD_DURATION_MIN);
+      });
+      SLOTS_DEFINITION.individual.forEach(s => {
+        const start = minutesOfDayFromLabel(s.label);
+        minStart = Math.min(minStart, start);
+        maxEnd = Math.max(maxEnd, start + INDIVIDUAL_DURATION_MIN);
+      });
+      minStart = Math.floor(minStart / 30) * 30;
+      maxEnd = Math.ceil(maxEnd / 30) * 30;
+      return { minStart, maxEnd };
+    }
+
+    function buildExportTimeRows() {
+      const { minStart, maxEnd } = computeExportTimeRange();
+      const rows = [];
+      for (let t = minStart; t < maxEnd; t += 30) rows.push({ startMinutes: t, label: formatMinutesAsHHMM(t) });
+      return rows;
+    }
+
+    // Builds, for one day column, an ordered list of blocks that exactly
+    // partitions the full row range with no gaps/overlaps: real session slots
+    // (sorted by start time), 'blank' filler for any gap between/around them
+    // (e.g. the midday break on crowd days), or — for weekends — one block
+    // spanning the whole column. Because the partition is exact, the row
+    // emission loop never needs to ask "what covers this cell?" — each
+    // column's next block is guaranteed to start exactly at the current row.
+    function buildDayColumnBlocks(col, model, rowIndexByMinutes, totalBodyRows) {
+      if (col.isWeekend) return [{ startRow: 1, rowSpan: totalBodyRows, type: 'weekend' }];
+
+      const daySlots = [];
+      model.crowd.forEach(slot => {
+        const d = dateFromLabel(slot.label);
+        if (d && sameCalendarDate(d, col.date)) daySlots.push({ kind: 'crowd', slot, duration: CROWD_DURATION_MIN });
+      });
+      model.individual.forEach(slot => {
+        const d = dateFromLabel(slot.label);
+        if (d && sameCalendarDate(d, col.date)) daySlots.push({ kind: 'individual', slot, duration: INDIVIDUAL_DURATION_MIN });
+      });
+      daySlots.sort((a, b) => minutesOfDayFromLabel(a.slot.label) - minutesOfDayFromLabel(b.slot.label));
+
+      const blocks = [];
+      let cursor = 1;
+      daySlots.forEach(entry => {
+        const startMin = minutesOfDayFromLabel(entry.slot.label);
+        const startRow = rowIndexByMinutes.get(Math.floor(startMin / 30) * 30);
+        const rowSpan = entry.duration / 30;
+        if (startRow == null) {
+          state.exportWarnings.push({ slotId: entry.slot.slotId, label: entry.slot.label });
+          return;
+        }
+        if (startRow > cursor) blocks.push({ startRow: cursor, rowSpan: startRow - cursor, type: 'blank' });
+        blocks.push({ startRow, rowSpan, type: entry.kind, slot: entry.slot });
+        cursor = startRow + rowSpan;
+      });
+      if (cursor <= totalBodyRows) blocks.push({ startRow: cursor, rowSpan: totalBodyRows - cursor + 1, type: 'blank' });
+      if (!blocks.length) blocks.push({ startRow: 1, rowSpan: totalBodyRows, type: 'blank' });
+      return blocks;
+    }
+
+    // Excel doesn't reliably auto-fit wrap-text row height inside merged
+    // cells, so a fully-booked crowd slot's roster would get truncated under
+    // ss:AutoFitHeight. Instead, size each row band from its own content: for
+    // every crowd/individual block, estimate its line count, spread the
+    // resulting height evenly across the rows it spans, and take the max
+    // across every column touching a given row.
+    const EXPORT_LINE_HEIGHT_PT = 12.75;
+    const EXPORT_CELL_PADDING_PT = 6;
+    const EXPORT_MIN_ROW_HEIGHT_PT = 22;
+    function estimateLinesForBlock(block) {
+      const rosterCount = Math.max(block.slot.bookings.length, 1); // ≥1 for "No bookings yet"
+      return 2 + rosterCount; // slotId+time line, capacity/cohort line, then roster
+    }
+    function computeRowHeights(colBlocks, totalBodyRows) {
+      const heights = new Array(totalBodyRows + 1).fill(EXPORT_MIN_ROW_HEIGHT_PT);
+      colBlocks.forEach(blocks => {
+        blocks.forEach(block => {
+          if (block.type !== 'crowd' && block.type !== 'individual') return;
+          const totalHeight = estimateLinesForBlock(block) * EXPORT_LINE_HEIGHT_PT + EXPORT_CELL_PADDING_PT;
+          const perRow = totalHeight / block.rowSpan;
+          for (let r = block.startRow; r < block.startRow + block.rowSpan; r++) heights[r] = Math.max(heights[r], perRow);
+        });
+      });
+      return heights;
+    }
+
+    function formatTimeRangeForSlot(slot, durationMin) {
+      const start = minutesOfDayFromLabel(slot.label);
+      return formatMinutesAsHHMM(start) + '–' + formatMinutesAsHHMM(start + durationMin);
+    }
+
+    function crowdCellText(slot) {
+      const timeRange = formatTimeRangeForSlot(slot, CROWD_DURATION_MIN);
+      const bookedCount = slot.bookings.length;
+      const lines = [
+        slot.slotId + ' · ' + timeRange,
+        slot.capacity != null ? bookedCount + '/' + slot.capacity + ' booked' : bookedCount + ' booked'
+      ];
+      if (slot.capacity == null) lines.push('Not in the standard schedule');
+      const roster = sortParticipants(slot.bookings);
+      if (!roster.length) lines.push('No bookings yet');
+      else roster.forEach(b => lines.push(
+        b.firstName + ' ' + b.lastName + ' · ' + b.email + ' · ' + (b.cohort || 'C30') + (b.cancelled ? ' (cancelled)' : '')
+      ));
+      return lines.join('\n');
+    }
+
+    function individualCellText(slot) {
+      const timeRange = formatTimeRangeForSlot(slot, INDIVIDUAL_DURATION_MIN);
+      const lines = [slot.slotId + ' · ' + timeRange, 'Cohort ' + (slot.cohort || '—')];
+      if (slot.capacity == null) lines.push('Not in the standard schedule');
+      const roster = sortParticipants(slot.bookings);
+      if (!roster.length) lines.push('No bookings yet');
+      else roster.forEach(b => lines.push(
+        b.firstName + ' ' + b.lastName + ' · ' + b.email + (b.cancelled ? ' (cancelled)' : '')
+      ));
+      return lines.join('\n');
+    }
+
+    function buildStylesXml() {
+      const c = XLS_COLORS;
+      return '<Styles>'
+        + '<Style ss:ID="sHeader"><Font ss:Bold="1" ss:Color="' + c.headerFg + '"/>'
+          + '<Interior ss:Color="' + c.headerBg + '" ss:Pattern="Solid"/>'
+          + '<Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>'
+        + '<Style ss:ID="sTimeLabel"><Font ss:Bold="1" ss:Color="#361A54"/>'
+          + '<Interior ss:Color="' + c.timeLabelFill + '" ss:Pattern="Solid"/>'
+          + '<Alignment ss:Horizontal="Center" ss:Vertical="Center"/>'
+          + '<Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.gridLine + '"/></Borders></Style>'
+        + '<Style ss:ID="sCrowd"><Interior ss:Color="' + c.crowdFill + '" ss:Pattern="Solid"/>'
+          + '<Alignment ss:WrapText="1" ss:Vertical="Top"/>'
+          + '<Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.crowdAccent + '"/>'
+          + '<Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.crowdAccent + '"/>'
+          + '<Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.crowdAccent + '"/>'
+          + '<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.crowdAccent + '"/></Borders></Style>'
+        + '<Style ss:ID="sIndividual"><Interior ss:Color="' + c.individualFill + '" ss:Pattern="Solid"/>'
+          + '<Alignment ss:WrapText="1" ss:Vertical="Top"/>'
+          + '<Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.individualAccent + '"/>'
+          + '<Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.individualAccent + '"/>'
+          + '<Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.individualAccent + '"/>'
+          + '<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.individualAccent + '"/></Borders></Style>'
+        + '<Style ss:ID="sWeekend"><Interior ss:Color="' + c.weekendFill + '" ss:Pattern="Solid"/>'
+          + '<Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.gridLine + '"/>'
+          + '<Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.gridLine + '"/>'
+          + '<Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.gridLine + '"/>'
+          + '<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.gridLine + '"/></Borders></Style>'
+        + '<Style ss:ID="sBlank"><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.gridLine + '"/>'
+          + '<Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.gridLine + '"/>'
+          + '<Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.gridLine + '"/>'
+          + '<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.gridLine + '"/></Borders></Style>'
+        + '</Styles>';
+    }
+
+    function generateHeaderRowXml(exportModel) {
+      let xml = '<Row ss:Height="34"><Cell ss:StyleID="sHeader"><Data ss:Type="String">Time</Data></Cell>';
+      exportModel.dayColumns.forEach(col => {
+        xml += '<Cell ss:StyleID="sHeader"><Data ss:Type="String">' + escapeXml(col.headerLabel) + '</Data></Cell>';
+      });
+      return xml + '</Row>\n';
+    }
+
+    // SpreadsheetML declares a multi-row merge once, on the top cell, via
+    // ss:MergeDown="N" — later rows must NOT re-emit a cell for a still-covered
+    // column. Since every emitted <Cell> advances Excel's column cursor by
+    // exactly 1 (only vertical merges are used here, never ss:MergeAcross),
+    // skipping a covered column desyncs the cursor from the real column, so
+    // the next cell emitted in that row must carry an explicit ss:Index to
+    // resync. coveredUntil[] tracks how long each column stays covered;
+    // needsIndex is set on any skip and consumed by the next real cell.
+    function generateBodyRowsXml(exportModel) {
+      const { dayColumns, timeRows, colBlocks, rowHeights, totalBodyRows } = exportModel;
+      const coveredUntil = new Array(dayColumns.length + 2).fill(0);
+      const blockPtr = colBlocks.map(() => 0);
+      let xml = '';
+      for (let rowIndex = 1; rowIndex <= totalBodyRows; rowIndex++) {
+        xml += '<Row ss:Height="' + rowHeights[rowIndex].toFixed(1) + '">';
+        xml += '<Cell ss:StyleID="sTimeLabel"><Data ss:Type="String">' + escapeXml(timeRows[rowIndex - 1].label) + '</Data></Cell>';
+        let needsIndex = false;
+        for (let c = 0; c < dayColumns.length; c++) {
+          const sheetCol = c + 2; // col 1 = time label; day columns start at 2
+          if (coveredUntil[sheetCol] >= rowIndex) { needsIndex = true; continue; }
+          const block = colBlocks[c][blockPtr[c]++]; // guaranteed block.startRow === rowIndex
+          const styleId = { crowd: 'sCrowd', individual: 'sIndividual', weekend: 'sWeekend', blank: 'sBlank' }[block.type];
+          const text = block.type === 'crowd' ? crowdCellText(block.slot)
+                     : block.type === 'individual' ? individualCellText(block.slot) : '';
+          const mergeAttr = block.rowSpan > 1 ? ' ss:MergeDown="' + (block.rowSpan - 1) + '"' : '';
+          const indexAttr = needsIndex ? ' ss:Index="' + sheetCol + '"' : '';
+          xml += '<Cell' + indexAttr + mergeAttr + ' ss:StyleID="' + styleId + '"><Data ss:Type="String">' + escapeXml(text) + '</Data></Cell>';
+          needsIndex = false;
+          coveredUntil[sheetCol] = rowIndex + block.rowSpan - 1;
+        }
+        xml += '</Row>\n';
+      }
+      return xml;
+    }
+
+    function buildExportModel(model) {
+      const dayColumns = buildExportDayColumns();
+      const timeRows = buildExportTimeRows();
+      const rowIndexByMinutes = new Map(timeRows.map((r, i) => [r.startMinutes, i + 1]));
+      const totalBodyRows = timeRows.length;
+      state.exportWarnings = [];
+      const colBlocks = dayColumns.map(col => buildDayColumnBlocks(col, model, rowIndexByMinutes, totalBodyRows));
+      const rowHeights = computeRowHeights(colBlocks, totalBodyRows);
+      return { dayColumns, timeRows, colBlocks, rowHeights, totalBodyRows };
+    }
+
+    function generateSpreadsheetMLDocument(exportModel) {
+      const dayCount = exportModel.dayColumns.length;
+      const columnDefs = '<Column ss:Width="90"/><Column ss:Width="170" ss:Span="' + (dayCount - 1) + '"/>';
+      return '<?xml version="1.0" encoding="UTF-8"?>\n'
+        + '<?mso-application progid="Excel.Sheet"?>\n'
+        + '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" '
+          + 'xmlns:o="urn:schemas-microsoft-com:office:office" '
+          + 'xmlns:x="urn:schemas-microsoft-com:office:excel" '
+          + 'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">\n'
+        + buildStylesXml()
+        + '<Worksheet ss:Name="Booking Calendar">\n'
+        + '<Table ss:ExpandedColumnCount="' + (dayCount + 1) + '" ss:ExpandedRowCount="' + (exportModel.totalBodyRows + 1) + '" ss:DefaultRowHeight="22">\n'
+        + columnDefs
+        + generateHeaderRowXml(exportModel)
+        + generateBodyRowsXml(exportModel)
+        + '</Table>\n'
+        + '<WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">'
+          + '<FreezePanes/><FrozenNoSplit/>'
+          + '<SplitHorizontal>1</SplitHorizontal><TopRowBottomPane>1</TopRowBottomPane>'
+          + '<SplitVertical>1</SplitVertical><LeftColumnRightPane>1</LeftColumnRightPane>'
+          + '<ActivePane>0</ActivePane>'
+        + '</WorksheetOptions>\n'
+        + '</Worksheet>\n</Workbook>';
+    }
+
+    function downloadCalendarExport() {
+      const model = buildCalendarModel(state.bookings, showCancelled.checked);
+      const exportModel = buildExportModel(model);
+      const xml = generateSpreadsheetMLDocument(exportModel);
+
+      const parsed = new DOMParser().parseFromString(xml, 'application/xml');
+      if (parsed.querySelector('parsererror')) {
+        showBanner('Could not build the export (internal XML error) — please report this.');
+        return;
+      }
+
+      const blob = new Blob([xml], { type: 'application/vnd.ms-excel' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'minds-in-motion-booking-calendar-' + new Date().toISOString().slice(0, 10) + '.xls';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+      if (state.exportWarnings.length) {
+        const ids = state.exportWarnings.map(w => w.slotId).join(', ');
+        showBanner('Exported, but ' + state.exportWarnings.length + ' slot(s) could not be placed on the grid: ' + ids + '.', 'info');
+      }
+    }
+
+    exportExcelBtn.addEventListener('click', downloadCalendarExport);
+
+    // ── Init ──────────────────────────────────────────────────────────────
+    renderAll(); // show the empty schedule immediately
+    tryLiveFetch();
+  </script>
+</body>
+</html>

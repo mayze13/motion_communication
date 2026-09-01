@@ -60,7 +60,7 @@
     }
     .flyer-image img {
       width: 100%; height: 100%;
-      object-fit: cover; object-position: center 30%;
+      object-fit: cover; object-position: center;
       display: block;
     }
 
@@ -117,13 +117,18 @@
       font-size: 6.5pt; margin-top: 1.5px; flex-shrink: 0;
     }
 
-    /* Legacy callout */
-    .legacy-note {
-      font-size: 7.5pt; color: #4e3b70;
-      background: #ede7f7;
-      border-radius: 4px;
-      padding: 2mm 3mm; margin-bottom: 2mm;
-      line-height: 1.45; flex-shrink: 0;
+    /* Key-facts stat row */
+    .flyer-stats {
+      display: flex; margin-bottom: 3mm; flex-shrink: 0;
+      border-top: 0.5pt solid #e4daf0; border-bottom: 0.5pt solid #e4daf0;
+      padding: 2.5mm 0;
+    }
+    .stat { flex: 1; text-align: center; }
+    .stat + .stat { border-left: 0.5pt solid #e4daf0; }
+    .stat-value { font-size: 12.5pt; font-weight: 700; color: #361a54; line-height: 1.1; }
+    .stat-label {
+      font-size: 6.5pt; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      color: #9278b2; margin-top: 0.8mm;
     }
 
     /* ─── QR + short link CTA block ─────────────────────────────────────── */
@@ -143,7 +148,7 @@
       margin-bottom: 1mm;
     }
     .short-link {
-      font-size: 14pt; font-weight: 700;
+      font-size: 11pt; font-weight: 700;
       color: #fff; letter-spacing: -0.01em; line-height: 1.05;
       margin-bottom: 2.5mm;
       overflow-wrap: anywhere;
@@ -206,7 +211,7 @@
       .flyer-header,
       .flyer-image,
       .cta-block,
-      .legacy-note,
+      .flyer-stats,
       .flyer-footer {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
@@ -234,57 +239,56 @@
 
   <!-- Study image -->
   <div class="flyer-image">
-    <img src="../assets/images/100 Minds - wearables.jpg.webp"
-         alt="Participant wearing biosensors at UCL PEARL">
+    <img src="../assets/images/hero-doorways.svg"
+         alt="Abstract nested doorways receding toward a glowing center">
   </div>
 
   <!-- Body -->
   <div class="flyer-body">
 
-    <p class="flyer-eyebrow">UCL Research Study &nbsp;·&nbsp; September 2026</p>
+    <p class="flyer-eyebrow">UCL Research Study</p>
 
     <h1 class="flyer-title">Join the Minds in Motion study</h1>
 
-    <p class="flyer-hook">Participate in cutting edge scientific research</p>
+    <p class="flyer-hook">Explore. Contribute. Earn &pound;30.</p>
     <p class="flyer-desc">
-      What does space do to the mind? Help UCL researchers find out inside
-      a unique 4,000 m² state-of-the-art research facility.
+      What does space do to the mind? Help us find out inside a
+      4,000 m² UCL research facility.
     </p>
 
     <div class="flyer-researchers">
-      Led by <strong>Prof. Hugo Spiers</strong> (UCL) &amp; <strong>Dr Fiona Zisch </strong> (Bartlett), with <strong> Prof. Sean Hanna </strong> (Bartlett), and PhD students <strong> Daniel Tang </strong> (Autodesk, Bartlett) & <strong> James Moultrie </strong> (UCL)
+      Led by <strong>Prof. Hugo Spiers</strong>, <strong>Dr Fiona Zisch</strong> &amp; <strong>Prof. Sean Hanna</strong>, with PhD students <strong>Daniel Tang</strong> &amp; <strong>James Moultrie</strong> (UCL/Bartlett)
     </div>
 
     <ul class="flyer-bullets" aria-label="Study highlights">
-      <li>Explore purpose-built architectural spaces at UCL PEARL in Dagenham, East London</li>
-      <li>Wear EEG headsets, eye trackers, and biosensors, all fitted by the research team</li>
-      <li>One hour in total. No specialist knowledge needed. All adults aged 18 and over welcome.</li>
-      <li>Your data contributes to the design of more equitable and inclusive environments.</li>
+      <li>Explore purpose-built architectural spaces at UCL PEARL, Dagenham</li>
+      <li>No equipment worn &mdash; just walk, explore and reflect</li>
+      <li>All adults 18+ welcome, no experience needed</li>
+      <li>Your data helps design more equitable, inclusive spaces</li>
     </ul>
 
-    <div class="legacy-note" role="note">
-      ✦ &nbsp;Follow-up to <strong>100 Minds in Motion</strong> (Sept 2024),
-      as featured by <strong>MIT Technology Review</strong>, <strong>UCL News</strong>
-      and <strong>Autodesk Research</strong>
+    <div class="flyer-stats" aria-label="Key details">
+      <div class="stat"><p class="stat-value">15&ndash;17 Sept</p><p class="stat-label">When</p></div>
+      <div class="stat"><p class="stat-value">Up to 2 hrs</p><p class="stat-label">One visit</p></div>
+      <div class="stat"><p class="stat-value">&pound;30</p><p class="stat-label">You'll earn</p></div>
     </div>
 
     <!-- QR code + short link -->
     <div class="cta-wrapper">
       <p class="cta-prompt">
-        Read more and register interest here
+        Scan to book
         <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <polyline points="2,8 18,8 18,22" stroke="#361a54" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
           <polyline points="12,17 18,23 24,17" stroke="#361a54" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </p>
       <div class="cta-block" aria-label="Sign up">
-        <p class="short-link">bit.ly/motionucl</p>
+        <p class="short-link">mindsinmotioncrowd.netlify.app</p>
         <p class="link-sub">
-          Compensation and exact dates TBD &nbsp;·&nbsp; September 2026<br>
           UCL PEARL, Dagenham, East London
         </p>
         <div class="qr-box" aria-hidden="true">
-          <img src="../assets/QR_code.svg" alt="" width="92" height="92">
+          <img src="../assets/booking_qrcode.png" alt="" width="92" height="92">
         </div>
       </div>
     </div>
@@ -295,7 +299,7 @@
   <div class="flyer-footer">
     <div class="footer-text">
       Contact: &nbsp;james.moultrie.25@ucl.ac.uk<br>
-      Ethics approval: UCL Research Ethics Committee
+      Ethics approval: UCL Research Ethics Committee (ref EP/2024/020)
     </div>
     <img src="../assets/UCL_Logo,_plain_background.svg" alt="UCL"
          style="height:7mm; opacity:0.5;" onerror="this.style.display='none'">
