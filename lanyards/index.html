@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minds in Motion: Participant Lanyards (1&ndash;30)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', Arial, Helvetica, sans-serif;
+      background: #d8cfe8;
+      padding: 12mm;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Sheet (one per A4 page) ──────────────────────────────────────── */
+    .sheet-page {
+      width: 210mm;
+      min-height: 297mm;
+      background: #fff;
+      padding: 6mm;
+      box-sizing: border-box;
+      display: grid;
+      grid-template-columns: repeat(2, 86mm);
+      grid-auto-rows: 54mm;
+      gap: 4mm 6mm;
+      justify-content: center;
+      align-content: start;
+      margin: 0 auto 10mm;
+      box-shadow: 0 4px 20px rgba(54,26,84,0.25);
+    }
+
+    /* ─── Individual lanyard card: 86mm x 54mm (credit-card, landscape) ── */
+    .lanyard-card {
+      position: relative;
+      width: 86mm;
+      height: 54mm;
+      background: #fafafa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      outline: 0.75pt dashed #999;
+      outline-offset: 1.5mm;
+    }
+
+    .card-logo {
+      position: absolute;
+      top: 4mm;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 14mm;
+      height: auto;
+      opacity: 0.92;
+    }
+
+    .card-center {
+      text-align: center;
+    }
+
+    .card-label {
+      font-size: 7.5pt;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(54,26,84,0.6);
+      margin-bottom: 1.5mm;
+    }
+
+    .card-number {
+      font-size: 22mm;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: #361a54;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ════════════════════════════════════════════════════════════════════
+       PRINT STYLES
+       Chrome/Firefox: File > Print, Paper: A4, Margins: Default,
+       enable "Background graphics", save as PDF.
+       ════════════════════════════════════════════════════════════════════ */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 6mm;
+      }
+
+      body {
+        background: none;
+        padding: 0;
+      }
+
+      .sheet-page {
+        width: auto;
+        min-height: auto;
+        padding: 0;
+        margin: 0;
+        box-shadow: none;
+      }
+
+      .sheet-page:not(:last-child) {
+        page-break-after: always;
+        break-after: page;
+      }
+
+      .lanyard-card {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="sheet"></div>
+
+<script>
+  const container = document.getElementById('sheet');
+  const total = 30;
+  const perPage = 10;
+
+  for (let start = 1; start <= total; start += perPage) {
+    const page = document.createElement('div');
+    page.className = 'sheet-page';
+
+    for (let n = start; n <= Math.min(start + perPage - 1, total); n++) {
+      const card = document.createElement('div');
+      card.className = 'lanyard-card';
+      card.innerHTML = `
+        <img class="card-logo" src="../assets/UCL_Logo,_plain_background.svg" alt="" onerror="this.style.display='none'">
+        <div class="card-center">
+          <p class="card-label">Participant ID</p>
+          <p class="card-number">${String(n).padStart(2, '0')}</p>
+        </div>
+      `;
+      page.appendChild(card);
+    }
+
+    container.appendChild(page);
+  }
+</script>
+
+</body>
+</html>
