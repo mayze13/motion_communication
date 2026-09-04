@@ -156,6 +156,11 @@
       transition: border-color .12s var(--ease);
     }
     .cal-slot:hover { border-color: var(--purple-300); }
+    .cal-slot.flagged { border-color: #ff8c00; border-width: 1.5px; background: #fff4e8; }
+    .cal-slot.flagged .cal-slot-time { color: #a85600; }
+    .cal-slot.flagged .cal-slot-name { color: #a85600; }
+    .eego-flag { color: #a85600; font-weight: 700; }
+    .eego-tag { color: #a85600; font-weight: 700; }
     .cal-slot-time { font-size: 12.5px; font-weight: 600; color: var(--ink); }
     .badge {
       align-self: flex-start; font-size: 10.5px; font-weight: 700; letter-spacing: .03em;
@@ -297,6 +302,16 @@
     const PLACEHOLDER_URL = 'PASTE_LIST_BOOKINGS_URL_HERE';
     const FILLING_FAST_RATIO = 0.8;
 
+    // Individual (EEG) sessions flagged for special attention. On the calendar
+    // and in the Excel export these slots are drawn in Dark Orange; wherever
+    // their participant also appears in a crowd-session roster, their name is
+    // tagged "(EEGO)". Edit this list to change which sessions are flagged.
+    const FLAGGED_INDIVIDUAL_SLOTS = ['I13', 'I15', 'I17', 'I19'];
+    const EEGO_TAG = '(EEGO)';
+    function isFlaggedIndividualSlot(slotId) {
+      return !!slotId && FLAGGED_INDIVIDUAL_SLOTS.indexOf(slotId) !== -1;
+    }
+
     // ═══════════════════════════════════════════════════════════════════
     // Static slot schedule — copied from microsoft/powerautomate-setup.md
     // (the `Slots` table), since there is no live read endpoint for it.
@@ -366,6 +381,7 @@
       headerBg: '#361A54', headerFg: '#FFFFFF',
       crowdFill: '#F5F1FA', crowdAccent: '#8F6FC0',
       individualFill: '#FDF1E3', individualAccent: '#8A5220',
+      flaggedFill: '#FFEBD6', flaggedAccent: '#FF8C00',
       weekendFill: '#ECE7F2',
       gridLine: '#E7E0F0', timeLabelFill: '#F1ECF7'
     };
@@ -595,9 +611,11 @@
             const badge = badgeFor(count, slot.capacity);
             const time = (slot.label || '').split(',').slice(1).join(',').trim() || slot.label;
 
+            const flagged = dayEntry.kind === 'individual' && isFlaggedIndividualSlot(slot.slotId);
+
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'cal-slot';
+            btn.className = 'cal-slot' + (flagged ? ' flagged' : '');
 
             let inner =
               '<span class="cal-slot-time">' + escapeHtml(time) + '</span>' +
@@ -616,8 +634,11 @@
               inner += '<span class="cohort-breakdown">C1 ' + c1 + '/' + slot.eegPerCohort +
                        ' &middot; C2 ' + c2 + '/' + slot.eegPerCohort +
                        ' &middot; C30 ' + c30 + '</span>';
-            } else if (dayEntry.kind === 'individual' && slot.cohort) {
-              inner += '<span class="cohort-breakdown">Cohort ' + escapeHtml(slot.cohort) + '</span>';
+            } else if (dayEntry.kind === 'individual' && (slot.cohort || flagged)) {
+              inner += '<span class="cohort-breakdown">' +
+                (slot.cohort ? 'Cohort ' + escapeHtml(slot.cohort) : '') +
+                (slot.cohort && flagged ? ' &middot; ' : '') +
+                (flagged ? '<span class="eego-flag">EEGO</span>' : '') + '</span>';
             }
 
             if (dayEntry.kind === 'individual' && slot.bookings.length) {
@@ -744,13 +765,16 @@
         ? '<span class="warn-icon" title="' + escapeHtml(bWarnings.map(w => w.message).join(' ')) + '">⚠</span>'
         : '';
 
+      const eegoTag = (kind === 'crowd' && isFlaggedIndividualSlot(b.individualSlotId))
+        ? ' <span class="eego-tag">' + EEGO_TAG + '</span>' : '';
+
       const row = document.createElement('div');
       row.className = 'participant' + (b.cancelled ? ' cancelled' : '');
       row.innerHTML =
         '<div class="p-row-top">' +
           cohortBadgeHtml(b.cohort) + warnMarker +
           '<span class="p-name">' + escapeHtml(b.lastName) + ', ' + escapeHtml(b.firstName) +
-            (b.cancelled ? ' (cancelled)' : '') + '</span>' +
+            (b.cancelled ? ' (cancelled)' : '') + eegoTag + '</span>' +
         '</div>' +
         '<a class="p-email" href="mailto:' + encodeURIComponent(b.email) + '">' + escapeHtml(b.email) + '</a>' +
         crossLink;
@@ -816,7 +840,8 @@
     // ── Copy roster / emails ─────────────────────────────────────────────
     function rosterText(slot, kind) {
       return sortParticipants(slot.bookings).map(b => {
-        let line = b.lastName + ', ' + b.firstName + ' <' + b.email + '> — ' + (b.cohort || 'C30') + (b.cancelled ? ' (cancelled)' : '');
+        const eego = (kind === 'crowd' && isFlaggedIndividualSlot(b.individualSlotId)) ? ' ' + EEGO_TAG : '';
+        let line = b.lastName + ', ' + b.firstName + eego + ' <' + b.email + '> — ' + (b.cohort || 'C30') + (b.cancelled ? ' (cancelled)' : '');
         if (kind === 'crowd' && b.individualSlotId) line += '\n    Individual session ' + b.individualSlotId + ' — ' + b.individualSlotLabel;
         else if (kind === 'individual' && b.slotId) line += '\n    Crowd session ' + b.slotId + ' — ' + b.slotLabel;
         return line;
@@ -1123,14 +1148,19 @@
       const roster = sortParticipants(slot.bookings);
       if (!roster.length) lines.push('No bookings yet');
       else roster.forEach(b => lines.push(
-        b.firstName + ' ' + b.lastName + ' · ' + b.email + ' · ' + (b.cohort || 'C30') + (b.cancelled ? ' (cancelled)' : '')
+        b.firstName + ' ' + b.lastName +
+        (isFlaggedIndividualSlot(b.individualSlotId) ? ' ' + EEGO_TAG : '') +
+        ' · ' + b.email + ' · ' + (b.cohort || 'C30') + (b.cancelled ? ' (cancelled)' : '')
       ));
       return lines.join('\n');
     }
 
     function individualCellText(slot) {
       const timeRange = formatTimeRangeForSlot(slot, INDIVIDUAL_DURATION_MIN);
-      const lines = [slot.slotId + ' · ' + timeRange, 'Cohort ' + (slot.cohort || '—')];
+      const lines = [
+        slot.slotId + ' · ' + timeRange + (isFlaggedIndividualSlot(slot.slotId) ? ' · EEGO' : ''),
+        'Cohort ' + (slot.cohort || '—')
+      ];
       if (slot.capacity == null) lines.push('Not in the standard schedule');
       const roster = sortParticipants(slot.bookings);
       if (!roster.length) lines.push('No bookings yet');
@@ -1162,6 +1192,12 @@
           + '<Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.individualAccent + '"/>'
           + '<Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.individualAccent + '"/>'
           + '<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.individualAccent + '"/></Borders></Style>'
+        + '<Style ss:ID="sIndividualFlagged"><Interior ss:Color="' + c.flaggedFill + '" ss:Pattern="Solid"/>'
+          + '<Alignment ss:WrapText="1" ss:Vertical="Top"/>'
+          + '<Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="' + c.flaggedAccent + '"/>'
+          + '<Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="' + c.flaggedAccent + '"/>'
+          + '<Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="' + c.flaggedAccent + '"/>'
+          + '<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="' + c.flaggedAccent + '"/></Borders></Style>'
         + '<Style ss:ID="sWeekend"><Interior ss:Color="' + c.weekendFill + '" ss:Pattern="Solid"/>'
           + '<Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.gridLine + '"/>'
           + '<Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="' + c.gridLine + '"/>'
@@ -1203,7 +1239,9 @@
           const sheetCol = c + 2; // col 1 = time label; day columns start at 2
           if (coveredUntil[sheetCol] >= rowIndex) { needsIndex = true; continue; }
           const block = colBlocks[c][blockPtr[c]++]; // guaranteed block.startRow === rowIndex
-          const styleId = { crowd: 'sCrowd', individual: 'sIndividual', weekend: 'sWeekend', blank: 'sBlank' }[block.type];
+          const styleId = (block.type === 'individual' && isFlaggedIndividualSlot(block.slot.slotId))
+            ? 'sIndividualFlagged'
+            : { crowd: 'sCrowd', individual: 'sIndividual', weekend: 'sWeekend', blank: 'sBlank' }[block.type];
           const text = block.type === 'crowd' ? crowdCellText(block.slot)
                      : block.type === 'individual' ? individualCellText(block.slot) : '';
           const mergeAttr = block.rowSpan > 1 ? ' ss:MergeDown="' + (block.rowSpan - 1) + '"' : '';

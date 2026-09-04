@@ -57,4 +57,10 @@ Notes
   update SLOTS_DEFINITION to match.
 - "Show cancelled" reveals bookings with a Cancelled date set, struck
   through, instead of hiding them.
+- FLAGGED_INDIVIDUAL_SLOTS (in dashboard.html, next to SLOTS_DEFINITION)
+  lists individual EEG sessions to highlight in Dark Orange on the
+  calendar and the Excel export. Those participants are also tagged
+  "(EEGO)" wherever they show up in a crowd-session roster (detail
+  panel, "Copy roster", and the Excel export). Edit that array to
+  change which sessions are flagged.
 - Nothing here writes to the workbook — it's read-only, view only.
