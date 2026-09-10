@@ -63,4 +63,19 @@ Notes
   "(EEGO)" wherever they show up in a crowd-session roster (detail
   panel, "Copy roster", and the Excel export). Edit that array to
   change which sessions are flagged.
-- Nothing here writes to the workbook — it's read-only, view only.
+- "Export to Excel" downloads the calendar view as a styled .xls.
+- "Attendance workbook" downloads a separate .xlsx: one sheet per crowd
+  session, "Attendance S1" to "Attendance S8" (S9 is left out), with every
+  current signup for that session pre-filled a row at a time, EEG
+  participants first. Only EEG participants get a Participant ID (001-032,
+  from their individual slot, with I01/I03 swapped to 003/001) and a
+  lanyard/hat number (1-4); the rest of each sheet is blank rows to fill
+  in by arrival order on the day. A "Session Log" sheet has one row per
+  session with the date, duration and planned N pre-filled (start/end
+  time left blank to fill on the day) and its "Signed in" / "Questionnaire
+  done" / "Consent done" / "Paid" cells as live formulas counting the
+  matching columns on that session's attendance sheet. Cancelled bookings
+  are always excluded, regardless of the "Show cancelled" toggle.
+- Nothing here writes to the bookings workbook on SharePoint — the
+  dashboard is read-only; both exports are generated locally in the
+  browser from whatever is currently loaded.

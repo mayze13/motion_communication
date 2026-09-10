@@ -250,6 +250,7 @@
       <span class="status-line" id="statusLine">Not loaded yet.</span>
       <label class="check"><input type="checkbox" id="showCancelled"> Show cancelled</label>
       <button class="btn" id="exportExcelBtn" type="button">Export to Excel</button>
+      <button class="btn" id="exportAttendanceBtn" type="button">Attendance workbook</button>
       <button class="btn btn-primary" id="refreshBtn" type="button">Refresh from Power Automate</button>
     </div>
   </header>
@@ -306,10 +307,22 @@
     // and in the Excel export these slots are drawn in Dark Orange; wherever
     // their participant also appears in a crowd-session roster, their name is
     // tagged "(EEGO)". Edit this list to change which sessions are flagged.
-    const FLAGGED_INDIVIDUAL_SLOTS = ['I13', 'I15', 'I17', 'I19'];
+    const FLAGGED_INDIVIDUAL_SLOTS = ['I14', 'I16', 'I17', 'I19'];
     const EEGO_TAG = '(EEGO)';
     function isFlaggedIndividualSlot(slotId) {
       return !!slotId && FLAGGED_INDIVIDUAL_SLOTS.indexOf(slotId) !== -1;
+    }
+
+    // Individual slot ID -> study Participant ID for the attendance workbook.
+    // I01..I32 map to "001".."032", except I01 and I03 are deliberately swapped:
+    // I01 is Participant 003, I03 is Participant 001. Only EEG participants get one.
+    const PARTICIPANT_ID_OVERRIDES = { I01: '003', I03: '001' };
+    function participantIdForIndividualSlot(indSlotId) {
+      const m = /^I(\d{1,2})$/.exec(indSlotId || '');
+      if (!m) return '';
+      const n = parseInt(m[1], 10);
+      if (n < 1 || n > 32) return '';
+      return PARTICIPANT_ID_OVERRIDES[indSlotId] || String(n).padStart(3, '0');
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -397,6 +410,7 @@
     const refreshBtn = $('refreshBtn');
     const showCancelled = $('showCancelled');
     const exportExcelBtn = $('exportExcelBtn');
+    const exportAttendanceBtn = $('exportAttendanceBtn');
     const overlay = $('overlay');
     const panel = $('panel');
     const searchInput = $('searchInput');
@@ -1319,6 +1333,124 @@
     }
 
     exportExcelBtn.addEventListener('click', downloadCalendarExport);
+
+    // ── Attendance workbook (.xlsx, via the vendored SheetJS) ────────────
+    // A separate, operational export from the calendar view above: one sheet
+    // per crowd session (S1–S8) that the coordinator prints and fills on the
+    // day — arrival, sign-in, consent, EEG lanyard/hat, questionnaire,
+    // withdrawal, payment — plus a Session Log sheet for the researcher
+    // checklist whose sign-in/consent/payment counts are live Excel formulas
+    // over those sheets. Regenerated from current signups on every download.
+    // Plain tables, no styling — SheetJS CE can't do fills/merges, and an
+    // attendance sheet doesn't need them.
+
+    const ATTENDANCE_SESSION_IDS = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8'];
+    const ATTENDANCE_COLUMNS = ['Session ID', 'Participant ID', 'First Name', 'Last Name', 'Type',
+      'Arrival time', 'Signed in', 'Questionnaire done', 'Consent signed', 'Consent ref', 'Lanyard',
+      'Hat ID', 'Withdrew', 'Payment (£)', 'Payment method', 'Payment confirmed', 'Notes'];
+    const SESSION_LOG_COLUMNS = ['Session ID', 'Date', 'Start time', 'End time', 'Duration (min)',
+      'Planned N', 'Signed in', 'Questionnaire done', 'Consent done', 'Paid',
+      'Briefing delivered', 'Safety brief', 'Overhead video started', 'Position tracking started',
+      'Sync marker recorded', 'Protocol followed', 'Files saved locally', 'Backed up to server',
+      'Session status', 'All checks complete', 'Issue logged', 'Notes'];
+    // Attendance-sheet column letters the Session Log formulas count over.
+    const ATT_COL_SIGNED_IN = XLSX.utils.encode_col(ATTENDANCE_COLUMNS.indexOf('Signed in'));
+    const ATT_COL_QUESTIONNAIRE = XLSX.utils.encode_col(ATTENDANCE_COLUMNS.indexOf('Questionnaire done'));
+    const ATT_COL_CONSENT = XLSX.utils.encode_col(ATTENDANCE_COLUMNS.indexOf('Consent signed'));
+    const ATT_COL_PAID = XLSX.utils.encode_col(ATTENDANCE_COLUMNS.indexOf('Payment confirmed'));
+    // Session Log column indices for the formula cells.
+    const LOG_COL_SIGNED_IN = SESSION_LOG_COLUMNS.indexOf('Signed in');
+    const LOG_COL_QUESTIONNAIRE = SESSION_LOG_COLUMNS.indexOf('Questionnaire done');
+    const LOG_COL_CONSENT = SESSION_LOG_COLUMNS.indexOf('Consent done');
+    const LOG_COL_PAID = SESSION_LOG_COLUMNS.indexOf('Paid');
+
+    const ATTENDANCE_MIN_ROWS = 40;   // pad every sheet to this many data rows for walk-ups
+    const ATTENDANCE_SPARE_ROWS = 5;  // …or this many past the current roster, whichever is more
+    const ATTENDANCE_MAX_EEG = 4;     // 2 C1 + 2 C2 by design; lanyards/hats 1–4
+
+    function downloadAttendanceWorkbook() {
+      // Attendance is about who is actually coming, so cancelled bookings are
+      // always excluded here regardless of the "Show cancelled" toggle.
+      const model = buildCalendarModel(state.bookings, false);
+      const crowdById = {};
+      model.crowd.forEach(s => { crowdById[s.slotId] = s; });
+
+      const warnings = [];
+      const wb = XLSX.utils.book_new();
+      const logRows = [SESSION_LOG_COLUMNS.slice()];
+      const logFormulaTargets = []; // { rowIndex, sheetName, lastDataRow }
+
+      ATTENDANCE_SESSION_IDS.forEach(sid => {
+        const slot = crowdById[sid];
+        const def = SLOTS_DEFINITION.crowd.find(s => s.slotId === sid);
+        const roster = sortParticipants(slot ? slot.bookings : []);
+
+        let eegN = 0;
+        const rows = roster.map(b => {
+          const eeg = !!b.individualSlotId;
+          if (eeg) {
+            eegN += 1;
+            if (eegN > ATTENDANCE_MAX_EEG) {
+              warnings.push(sid + ' has ' + eegN + ' EEG participants (expected ≤ ' + ATTENDANCE_MAX_EEG + ')');
+            }
+          }
+          // null (not '') for blank cells: SheetJS omits the cell entirely, so
+          // the Session Log's COUNTA formulas start at 0 rather than counting
+          // empty strings, while all-null padding rows still extend the sheet.
+          return [
+            sid,
+            eeg ? participantIdForIndividualSlot(b.individualSlotId) : null,
+            b.firstName,
+            b.lastName,
+            eeg ? 'EEG' : 'Crowd',
+            null, null, null, null, null,    // Arrival time … Consent ref
+            eeg ? eegN : null,               // Lanyard
+            eeg ? eegN : null,               // Hat ID
+            null, null, null, null, null     // Withdrew … Notes
+          ];
+        });
+
+        const totalRows = Math.max(ATTENDANCE_MIN_ROWS, roster.length + ATTENDANCE_SPARE_ROWS);
+        while (rows.length < totalRows) rows.push(ATTENDANCE_COLUMNS.map(() => null));
+
+        const ws = XLSX.utils.aoa_to_sheet([ATTENDANCE_COLUMNS.slice(), ...rows]);
+        ws['!cols'] = ATTENDANCE_COLUMNS.map(h => ({ wch: h === 'Notes' ? 30 : Math.max(9, h.length + 2) }));
+        const sheetName = 'Attendance ' + sid;
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+
+        // Start/End time are left blank for the researcher to fill in on the day.
+        const logRow = SESSION_LOG_COLUMNS.map(() => null);
+        logRow[SESSION_LOG_COLUMNS.indexOf('Session ID')] = sid;
+        logRow[SESSION_LOG_COLUMNS.indexOf('Date')] = def ? (def.label.split(',')[0] || '').trim() : null;
+        logRow[SESSION_LOG_COLUMNS.indexOf('Duration (min)')] = CROWD_DURATION_MIN;
+        logRow[SESSION_LOG_COLUMNS.indexOf('Planned N')] = roster.length;
+        logRows.push(logRow);
+        logFormulaTargets.push({ rowIndex: logRows.length - 1, sheetName: sheetName, lastDataRow: totalRows + 1 });
+      });
+
+      const logWs = XLSX.utils.aoa_to_sheet(logRows);
+      logFormulaTargets.forEach(t => {
+        const ref = "'" + t.sheetName + "'!";
+        const range = function (col) { return ref + col + '2:' + col + t.lastDataRow; };
+        logWs[XLSX.utils.encode_cell({ r: t.rowIndex, c: LOG_COL_SIGNED_IN })] =
+          { t: 'n', f: 'COUNTA(' + range(ATT_COL_SIGNED_IN) + ')', v: 0 };
+        logWs[XLSX.utils.encode_cell({ r: t.rowIndex, c: LOG_COL_QUESTIONNAIRE })] =
+          { t: 'n', f: 'COUNTA(' + range(ATT_COL_QUESTIONNAIRE) + ')', v: 0 };
+        logWs[XLSX.utils.encode_cell({ r: t.rowIndex, c: LOG_COL_CONSENT })] =
+          { t: 'n', f: 'COUNTA(' + range(ATT_COL_CONSENT) + ')', v: 0 };
+        logWs[XLSX.utils.encode_cell({ r: t.rowIndex, c: LOG_COL_PAID })] =
+          { t: 'n', f: 'COUNTA(' + range(ATT_COL_PAID) + ')', v: 0 };
+      });
+      logWs['!cols'] = SESSION_LOG_COLUMNS.map(h => ({ wch: Math.max(10, h.length + 2) }));
+      XLSX.utils.book_append_sheet(wb, logWs, 'Session Log');
+
+      XLSX.writeFile(wb, 'minds-in-motion-attendance-' + new Date().toISOString().slice(0, 10) + '.xlsx');
+
+      const base = 'Attendance workbook downloaded — ' + ATTENDANCE_SESSION_IDS.length + ' session sheets + Session Log.';
+      showBanner(warnings.length ? base + ' Check: ' + warnings.join('; ') + '.' : base, 'info');
+    }
+
+    exportAttendanceBtn.addEventListener('click', downloadAttendanceWorkbook);
 
     // ── Init ──────────────────────────────────────────────────────────────
     renderAll(); // show the empty schedule immediately
